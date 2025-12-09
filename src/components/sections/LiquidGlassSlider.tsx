@@ -140,8 +140,8 @@ export const LiquidGlassSlider = ({
       sx={{
         position: "relative",
         width: "100%",
-        height: { xs: "60vh", md: "75vh" },
-        minHeight: "500px",
+        height: { xs: "70vh", sm: "80vh", md: "85vh", lg: "92vh" },
+        minHeight: { xs: "480px", md: "560px" },
         overflow: "hidden",
         mb: 8,
       }}

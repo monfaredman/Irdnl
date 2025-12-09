@@ -6,12 +6,15 @@ import { PremiumLiquidGlassHeader } from "@/components/layout/PremiumLiquidGlass
 import { PremiumLiquidGlassFooter } from "@/components/layout/PremiumLiquidGlassFooter";
 
 /**
- * Liquid Glass Layout Wrapper
+ * Premium Liquid Glass Layout
  * - Apple-inspired frosted glass aesthetic
- * - Extreme minimalism
- * - Premium experience
+ * - Always-on premium header + footer
  */
-export function LiquidGlassLayoutWrapper({ children }: { children: React.ReactNode }) {
+export function PremiumLiquidGlassLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <ThemeProvider theme={liquidGlassTheme}>
       <CssBaseline />

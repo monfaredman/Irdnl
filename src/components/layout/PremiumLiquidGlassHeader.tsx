@@ -122,12 +122,18 @@ export function PremiumLiquidGlassHeader() {
       ? `linear-gradient(180deg, 
           ${glassColors.glass.mid} 0%, 
           ${glassColors.glass.base} 100%)`
-      : "transparent",
-    backdropFilter: scrolled ? `blur(${glassBlur.medium}px) saturate(180%)` : `blur(${glassBlur.light}px) saturate(120%)`,
+      : `linear-gradient(
+          to bottom,
+          rgba(10, 10, 10, 0.9) 0%,
+          rgba(10, 10, 10, 0.75) 30%,
+          rgba(10, 10, 10, 0.45) 65%,
+          rgba(10, 10, 10, 0) 100%
+        )`,
+    backdropFilter: scrolled ? `blur(${glassBlur.medium}px) saturate(180%)` : `blur(4px)`,
     WebkitBackdropFilter: scrolled ? `blur(${glassBlur.medium}px) saturate(180%)` : `blur(${glassBlur.light}px) saturate(120%)`,
     borderBottom: scrolled
       ? `1px solid ${glassColors.glass.border}`
-      : "1px solid transparent",
+      : "none",
     boxShadow: scrolled
       ? `inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
          0 4px 24px -2px rgba(0, 0, 0, 0.2)`
@@ -267,7 +273,7 @@ export function PremiumLiquidGlassHeader() {
         elevation={0}
         sx={{
           ...glassBaseStyle,
-          zIndex: theme.zIndex.drawer + 1,
+          zIndex: theme.zIndex.modal + 1,
         }}
       >
         <Container maxWidth="xl">
@@ -276,7 +282,7 @@ export function PremiumLiquidGlassHeader() {
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              minHeight: 72,
+              minHeight: 52,
               gap: 2,
             }}
           >
@@ -572,8 +578,6 @@ export function PremiumLiquidGlassHeader() {
         </Box>
       </Drawer>
 
-      {/* Spacer for fixed header */}
-      <Box sx={{ height: 72 }} />
     </>
   );
 }

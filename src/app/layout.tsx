@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/providers/language-provider";
-import { LiquidGlassLayoutWrapper } from "@/components/layout/LiquidGlassLayoutWrapper";
+import { PremiumLiquidGlassLayout } from "@/components/layout/PremiumLiquidGlassLayout";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,9 +57,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${vazirmatn.variable} antialiased`}
       >
         <LanguageProvider>
-          <LiquidGlassLayoutWrapper>
-            {children}
-          </LiquidGlassLayoutWrapper>
+          <PremiumLiquidGlassLayout>{children}</PremiumLiquidGlassLayout>
         </LanguageProvider>
       </body>
     </html>
