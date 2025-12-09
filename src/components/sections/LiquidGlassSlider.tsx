@@ -240,14 +240,14 @@ export const LiquidGlassSlider = ({
                   <Box
                     sx={{
                       p: { xs: 3, md: 4 },
-                      background: glassColors.glass.base,
+                      background: "rgba(10, 10, 10, 0.50)",
                       backdropFilter: `blur(${glassBlur.strong}px) saturate(180%)`,
                       WebkitBackdropFilter: `blur(${glassBlur.strong}px) saturate(180%)`,
                       border: `1px solid ${glassColors.glass.border}`,
                       borderRadius: glassBorderRadius.xxl,
                       boxShadow: `
-                        0 8px 32px rgba(0, 0, 0, 0.4),
-                        inset 0 1px 0 rgba(255, 255, 255, 0.1)
+                        0 8px 32px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 0 rgba(255, 255, 255, 0.15)
                       `,
                     }}
                   >
@@ -255,10 +255,9 @@ export const LiquidGlassSlider = ({
                       variant="h2"
                       sx={{
                         mb: 2,
-                        background: `linear-gradient(135deg, ${glassColors.text.primary} 0%, ${glassColors.text.secondary} 100%)`,
-                        WebkitBackgroundClip: "text",
-                        WebkitTextFillColor: "transparent",
-                        backgroundClip: "text",
+                        color: glassColors.text.primary,
+                        fontWeight: 700,
+                        textShadow: "0 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5)",
                       }}
                     >
                       {item.title}
@@ -268,11 +267,12 @@ export const LiquidGlassSlider = ({
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: glassColors.text.secondary,
+                        color: "rgba(255, 255, 255, 0.92)",
                         display: "-webkit-box",
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: "vertical",
                         overflow: "hidden",
+                        textShadow: "0 1px 4px rgba(0, 0, 0, 0.7)",
                       }}
                     >
                       {item.description || "Experience this amazing content on PersiaPlay."}
@@ -379,15 +379,16 @@ export const LiquidGlassSlider = ({
           bottom: 32,
           left: "50%",
           transform: "translateX(-50%)",
-          zIndex: 10,
+          zIndex: 20,
           display: "flex",
           gap: 1.5,
           px: 3,
           py: 1.5,
-          background: glassColors.glass.mid,
-          backdropFilter: `blur(${glassBlur.medium}px)`,
-          border: `1px solid ${glassColors.glass.border}`,
+          background: "rgba(10, 10, 10, 0.85)",
+          backdropFilter: `blur(${glassBlur.strong}px)`,
+          border: `1px solid rgba(255, 255, 255, 0.2)`,
           borderRadius: glassBorderRadius.pill,
+          boxShadow: "0 4px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1)",
         }}
       >
         {featuredItems.map((_, index) => (
@@ -400,13 +401,23 @@ export const LiquidGlassSlider = ({
             sx={{
               ...sliderStyles.dot,
               width: index === currentIndex ? 32 : 8,
+              height: 8,
+              borderRadius: glassBorderRadius.sm,
               background: index === currentIndex 
                 ? glassColors.persianGold
-                : glassColors.glass.border,
+                : "rgba(255, 255, 255, 0.4)",
+              border: index === currentIndex
+                ? `1px solid ${glassColors.persianGold}`
+                : "1px solid rgba(255, 255, 255, 0.3)",
+              transition: glassAnimations.transition.spring,
+              cursor: "pointer",
+              boxShadow: index === currentIndex
+                ? `0 0 12px ${glassColors.gold.glow}`
+                : "none",
               '&:hover': {
                 background: index === currentIndex 
                   ? glassColors.gold.light
-                  : glassColors.text.tertiary,
+                  : "rgba(255, 255, 255, 0.7)",
               },
             }}
           />
