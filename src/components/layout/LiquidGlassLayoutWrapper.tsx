@@ -2,7 +2,7 @@
 
 import { ThemeProvider, CssBaseline } from "@mui/material";
 import { liquidGlassTheme } from "@/theme/liquid-glass-theme";
-import { LiquidGlassHeader } from "@/components/layout/LiquidGlassHeader";
+import { PremiumLiquidGlassHeader } from "@/components/layout/PremiumLiquidGlassHeader";
 import { LiquidGlassFooter } from "@/components/layout/LiquidGlassFooter";
 
 /**
@@ -15,7 +15,7 @@ export function LiquidGlassLayoutWrapper({ children }: { children: React.ReactNo
   return (
     <ThemeProvider theme={liquidGlassTheme}>
       <CssBaseline />
-      <LiquidGlassHeader />
+      <PremiumLiquidGlassHeader />
       {children}
       <LiquidGlassFooter />
     </ThemeProvider>
