@@ -1,7 +1,8 @@
 "use client";
 
 import { Box } from "@mui/material";
-import { LiquidGlassHero } from "@/components/sections/LiquidGlassHero";
+import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
+import { LiquidGlassCarousel } from "@/components/sections/LiquidGlassCarousel";
 import { LiquidGlassGrid } from "@/components/sections/LiquidGlassGrid";
 import { movies, series } from "@/data/mockContent";
 import { useLanguage } from "@/providers/language-provider";
@@ -24,6 +25,9 @@ export default function Home() {
   const iranianMovies = movies.filter(m => m.origin === "iranian");
   const foreignSeries = series.filter(s => s.origin === "foreign");
   const iranianSeries = series.filter(s => s.origin === "iranian");
+  
+  // Combine and get featured items
+  const allContent = [...movies, ...series];
 
   return (
     <Box
@@ -31,20 +35,24 @@ export default function Home() {
         minHeight: '100vh',
       }}
     >
-      {/* Hero Section - Bold statement with maximum whitespace */}
-      <LiquidGlassHero />
+      {/* Premium Hero Slider - Featured/Popular Content */}
+      <LiquidGlassSlider 
+        items={allContent}
+        type="movie"
+        autoplayDelay={5000}
+      />
 
-      {/* Content Sections - Glass cards with spring animations */}
+      {/* Content Sections - Mix of Carousels and Grids */}
       
-      {/* Foreign Movies */}
-      <LiquidGlassGrid
+      {/* Foreign Movies - Horizontal Carousel */}
+      <LiquidGlassCarousel
         title={language === 'fa' ? 'فیلم‌های خارجی' : 'Foreign Movies'}
         items={foreignMovies}
         type="movie"
         viewAllHref="/movies?origin=foreign"
       />
 
-      {/* Foreign Series */}
+      {/* Foreign Series - Grid Layout */}
       <LiquidGlassGrid
         title={language === 'fa' ? 'سریال‌های خارجی' : 'Foreign Series'}
         items={foreignSeries}
@@ -52,15 +60,15 @@ export default function Home() {
         viewAllHref="/series?origin=foreign"
       />
 
-      {/* Iranian Movies */}
-      <LiquidGlassGrid
+      {/* Iranian Movies - Horizontal Carousel */}
+      <LiquidGlassCarousel
         title={language === 'fa' ? 'فیلم‌های ایرانی' : 'Iranian Movies'}
         items={iranianMovies}
         type="movie"
         viewAllHref="/movies?origin=iranian"
       />
 
-      {/* Iranian Series */}
+      {/* Iranian Series - Grid Layout */}
       <LiquidGlassGrid
         title={language === 'fa' ? 'سریال‌های ایرانی' : 'Iranian Series'}
         items={iranianSeries}
