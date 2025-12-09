@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <defs>
+    <linearGradient id="gradIsfahan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1d4ed8" />
+      <stop offset="100%" stop-color="#a855f7" />
+    </linearGradient>
+  </defs>
+  <rect width="600" height="900" fill="url(#gradIsfahan)" />
+  <text x="50%" y="50%" fill="#f8fafc" font-size="48" font-family="Arial" dominant-baseline="middle" text-anchor="middle">
+    Shadows of Isfahan
+  </text>
+</svg>

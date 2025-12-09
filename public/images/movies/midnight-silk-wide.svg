@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600">
+  <defs>
+    <linearGradient id="gradMidnight" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#020617" />
+      <stop offset="100%" stop-color="#0ea5e9" />
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="600" fill="url(#gradMidnight)" />
+  <text x="50%" y="50%" fill="#e2e8f0" font-size="64" font-family="Arial" dominant-baseline="middle" text-anchor="middle">
+    Midnight Silk
+  </text>
+</svg>
