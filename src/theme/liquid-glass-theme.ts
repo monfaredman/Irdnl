@@ -78,6 +78,7 @@ export const liquidGlassTheme = createTheme({
   },
   typography: {
     fontFamily: [
+      'var(--font-vazirmatn)', // Persian/Farsi font
       '-apple-system',
       'BlinkMacSystemFont',
       '"SF Pro Display"',

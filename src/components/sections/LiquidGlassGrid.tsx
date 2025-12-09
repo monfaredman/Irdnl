@@ -5,7 +5,13 @@ import Image from "next/image";
 import { Box, Typography, Grid, Container } from "@mui/material";
 import type { Movie, Series } from "@/types/media";
 import { useLanguage } from "@/providers/language-provider";
-import { liquidGlassSpacing, liquidGlassColors } from "@/theme/liquid-glass-theme";
+import {
+  glassColors,
+  glassStyles,
+  glassSpacing,
+  glassBorderRadius,
+  glassAnimations,
+} from "@/theme/glass-design-system";
 
 interface LiquidGlassGridProps {
   title: string;
@@ -31,7 +37,7 @@ export const LiquidGlassGrid = ({ title, items, type, viewAllHref }: LiquidGlass
     <Box
       component="section"
       sx={{
-        py: liquidGlassSpacing.xl / 8, // 64px
+        py: `${glassSpacing.xl}px`, // 64px
       }}
     >
       <Container maxWidth="xl">
@@ -40,14 +46,14 @@ export const LiquidGlassGrid = ({ title, items, type, viewAllHref }: LiquidGlass
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'baseline',
-            mb: liquidGlassSpacing.xl / 8, // 64px - more whitespace
+            mb: `${glassSpacing.lg}px`, // 32px
           }}
         >
           <Typography
             variant="h3"
             sx={{
               fontWeight: 600,
-              color: liquidGlassColors.white,
+              color: glassColors.text.primary,
             }}
           >
             {title}
@@ -57,18 +63,11 @@ export const LiquidGlassGrid = ({ title, items, type, viewAllHref }: LiquidGlass
               component={Link}
               href={viewAllHref}
               sx={{
-                color: liquidGlassColors.persianGold,
-                textDecoration: 'none',
-                fontSize: '15px',
-                fontWeight: 500,
+                ...glassStyles.link,
+                fontSize: '0.9375rem',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                '&:hover': {
-                  color: '#FBB040',
-                  transform: 'translateX(4px)',
-                },
               }}
             >
               {language === 'fa' ? 'مشاهده همه' : 'View All'}
@@ -96,23 +95,23 @@ export const LiquidGlassGrid = ({ title, items, type, viewAllHref }: LiquidGlass
                       position: 'relative',
                       width: '100%',
                       paddingBottom: '150%', // 2:3 aspect ratio
-                      borderRadius: '16px',
+                      borderRadius: glassBorderRadius.lg,
                       overflow: 'hidden',
-                      background: liquidGlassColors.glass.base,
+                      background: glassColors.glass.base,
                       backdropFilter: 'blur(20px) saturate(180%)',
                       WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-                      border: `1px solid ${liquidGlassColors.glass.border}`,
+                      border: `1px solid ${glassColors.glass.border}`,
                       boxShadow: `
                         0 8px 32px rgba(0, 0, 0, 0.4),
                         inset 0 1px 0 rgba(255, 255, 255, 0.1)
                       `,
-                      transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                      transition: glassAnimations.transition.spring,
                       '&:hover': {
-                        borderColor: 'rgba(255, 255, 255, 0.2)',
+                        borderColor: glassColors.glass.border,
                         boxShadow: `
                           0 12px 48px rgba(0, 0, 0, 0.5),
                           inset 0 1px 0 rgba(255, 255, 255, 0.15),
-                          0 0 0 1px rgba(245, 158, 11, 0.3)
+                          0 0 0 1px ${glassColors.gold.glow}
                         `,
                         transform: 'translateY(-8px) scale(1.02)',
                       },
@@ -148,9 +147,9 @@ export const LiquidGlassGrid = ({ title, items, type, viewAllHref }: LiquidGlass
                   <Typography
                     variant="body2"
                     sx={{
-                      mt: liquidGlassSpacing.sm / 8, // 16px
+                      mt: `${glassSpacing.sm}px`, // 16px
                       fontWeight: 500,
-                      color: liquidGlassColors.text.primary,
+                      color: glassColors.text.primary,
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       whiteSpace: 'nowrap',

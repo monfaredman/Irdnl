@@ -8,7 +8,14 @@ import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import type { Movie, Series } from "@/types/media";
-import { liquidGlassColors } from "@/theme/liquid-glass-theme";
+import { 
+  glassColors, 
+  glassBorderRadius, 
+  glassAnimations,
+  sliderStyles,
+  glassBlur
+} from "@/theme/glass-design-system";
+import { useLanguage } from "@/providers/language-provider";
 
 interface LiquidGlassSliderProps {
   items: (Movie | Series)[];
@@ -34,6 +41,10 @@ export const LiquidGlassSlider = ({
   type,
   autoplayDelay = 5000 
 }: LiquidGlassSliderProps) => {
+  const { language } = useLanguage();
+  const isRTL = language === "fa";
+  const PrevIcon = isRTL ? ArrowForwardIosIcon : ArrowBackIosNewIcon;
+  const NextIcon = isRTL ? ArrowBackIosNewIcon : ArrowForwardIosIcon;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [touchStart, setTouchStart] = useState(0);
@@ -77,15 +88,23 @@ export const LiquidGlassSlider = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") {
-        goToPrevious();
+        if (isRTL) {
+          goToNext();
+        } else {
+          goToPrevious();
+        }
       } else if (e.key === "ArrowRight") {
-        goToNext();
+        if (isRTL) {
+          goToPrevious();
+        } else {
+          goToNext();
+        }
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [goToPrevious, goToNext]);
+  }, [goToPrevious, goToNext, isRTL]);
 
   // Touch/swipe handlers
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -98,8 +117,8 @@ export const LiquidGlassSlider = ({
 
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
+
+    const distance = (touchStart - touchEnd) * (isRTL ? -1 : 1);
     const minSwipeDistance = 50;
 
     if (distance > minSwipeDistance) {
@@ -145,6 +164,8 @@ export const LiquidGlassSlider = ({
           const isPrev = index === (currentIndex - 1 + totalSlides) % totalSlides;
           const isNext = index === (currentIndex + 1) % totalSlides;
           const isVisible = isActive || isPrev || isNext;
+          const prevTranslate = isRTL ? "translateX(100%) scale(0.9)" : "translateX(-100%) scale(0.9)";
+          const nextTranslate = isRTL ? "translateX(-100%) scale(0.9)" : "translateX(100%) scale(0.9)";
 
           return (
             <Box
@@ -155,10 +176,10 @@ export const LiquidGlassSlider = ({
                 opacity: isActive ? 1 : 0,
                 transform: isActive 
                   ? "translateX(0) scale(1)" 
-                  : isPrev 
-                  ? "translateX(-100%) scale(0.9)"
+                  : isPrev
+                  ? prevTranslate
                   : isNext
-                  ? "translateX(100%) scale(0.9)"
+                  ? nextTranslate
                   : "translateX(0) scale(0.9)",
                 transition: "all 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)",
                 pointerEvents: isActive ? "auto" : "none",
@@ -183,7 +204,7 @@ export const LiquidGlassSlider = ({
                 }}
               >
                 <Image
-                  src={item.poster}
+                  src={item.backdrop || item.poster}
                   alt={item.title}
                   fill
                   style={{
@@ -219,11 +240,11 @@ export const LiquidGlassSlider = ({
                   <Box
                     sx={{
                       p: { xs: 3, md: 4 },
-                      background: liquidGlassColors.glass.base,
-                      backdropFilter: "blur(20px) saturate(180%)",
-                      WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                      border: `1px solid ${liquidGlassColors.glass.border}`,
-                      borderRadius: "24px",
+                      background: glassColors.glass.base,
+                      backdropFilter: `blur(${glassBlur.strong}px) saturate(180%)`,
+                      WebkitBackdropFilter: `blur(${glassBlur.strong}px) saturate(180%)`,
+                      border: `1px solid ${glassColors.glass.border}`,
+                      borderRadius: glassBorderRadius.xxl,
                       boxShadow: `
                         0 8px 32px rgba(0, 0, 0, 0.4),
                         inset 0 1px 0 rgba(255, 255, 255, 0.1)
@@ -234,7 +255,7 @@ export const LiquidGlassSlider = ({
                       variant="h2"
                       sx={{
                         mb: 2,
-                        background: `linear-gradient(135deg, ${liquidGlassColors.white} 0%, ${liquidGlassColors.text.secondary} 100%)`,
+                        background: `linear-gradient(135deg, ${glassColors.text.primary} 0%, ${glassColors.text.secondary} 100%)`,
                         WebkitBackgroundClip: "text",
                         WebkitTextFillColor: "transparent",
                         backgroundClip: "text",
@@ -247,7 +268,7 @@ export const LiquidGlassSlider = ({
                       variant="body1"
                       sx={{
                         mb: 3,
-                        color: liquidGlassColors.text.secondary,
+                        color: glassColors.text.secondary,
                         display: "-webkit-box",
                         WebkitLineClamp: 3,
                         WebkitBoxOrient: "vertical",
@@ -267,20 +288,20 @@ export const LiquidGlassSlider = ({
                         gap: 1,
                         px: 4,
                         py: 2,
-                        background: liquidGlassColors.persianGold,
-                        color: liquidGlassColors.deepMidnight,
+                        background: glassColors.persianGold,
+                        color: glassColors.deepMidnight,
                         fontSize: "17px",
                         fontWeight: 600,
-                        borderRadius: "16px",
+                        borderRadius: glassBorderRadius.lg,
                         textDecoration: "none",
                         border: `1px solid rgba(255, 255, 255, 0.1)`,
                         boxShadow: `
-                          0 8px 32px rgba(245, 158, 11, 0.3),
+                          0 8px 32px ${glassColors.gold.glow},
                           inset 0 1px 0 rgba(255, 255, 255, 0.2)
                         `,
-                        transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                        transition: glassAnimations.transition.spring,
                         '&:hover': {
-                          background: "#FBB040",
+                          background: glassColors.gold.light,
                           boxShadow: `
                             0 12px 48px rgba(245, 158, 11, 0.4),
                             inset 0 1px 0 rgba(255, 255, 255, 0.3)
@@ -305,54 +326,50 @@ export const LiquidGlassSlider = ({
         onClick={goToPrevious}
         aria-label="Previous slide"
         sx={{
+          ...sliderStyles.arrow,
           position: "absolute",
-          left: { xs: 16, md: 32 },
+          ...(isRTL
+            ? { right: { xs: 16, md: 32 } }
+            : { left: { xs: 16, md: 32 } }),
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 10,
           width: { xs: 48, md: 56 },
           height: { xs: 48, md: 56 },
-          background: liquidGlassColors.glass.mid,
-          backdropFilter: "blur(20px)",
-          border: `1px solid ${liquidGlassColors.glass.border}`,
-          color: liquidGlassColors.white,
-          transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           opacity: isHovering ? 1 : 0.5,
           '&:hover': {
-            background: liquidGlassColors.glass.strong,
+            background: glassColors.glass.strong,
             transform: "translateY(-50%) scale(1.1)",
-            borderColor: liquidGlassColors.persianGold,
+            borderColor: glassColors.persianGold,
           },
         }}
       >
-        <ArrowBackIosNewIcon />
+        <PrevIcon />
       </IconButton>
 
       <IconButton
         onClick={goToNext}
         aria-label="Next slide"
         sx={{
+          ...sliderStyles.arrow,
           position: "absolute",
-          right: { xs: 16, md: 32 },
+          ...(isRTL
+            ? { left: { xs: 16, md: 32 } }
+            : { right: { xs: 16, md: 32 } }),
           top: "50%",
           transform: "translateY(-50%)",
           zIndex: 10,
           width: { xs: 48, md: 56 },
           height: { xs: 48, md: 56 },
-          background: liquidGlassColors.glass.mid,
-          backdropFilter: "blur(20px)",
-          border: `1px solid ${liquidGlassColors.glass.border}`,
-          color: liquidGlassColors.white,
-          transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
           opacity: isHovering ? 1 : 0.5,
           '&:hover': {
-            background: liquidGlassColors.glass.strong,
+            background: glassColors.glass.strong,
             transform: "translateY(-50%) scale(1.1)",
-            borderColor: liquidGlassColors.persianGold,
+            borderColor: glassColors.persianGold,
           },
         }}
       >
-        <ArrowForwardIosIcon />
+        <NextIcon />
       </IconButton>
 
       {/* Dot Indicators */}
@@ -367,10 +384,10 @@ export const LiquidGlassSlider = ({
           gap: 1.5,
           px: 3,
           py: 1.5,
-          background: liquidGlassColors.glass.mid,
-          backdropFilter: "blur(20px)",
-          border: `1px solid ${liquidGlassColors.glass.border}`,
-          borderRadius: "24px",
+          background: glassColors.glass.mid,
+          backdropFilter: `blur(${glassBlur.medium}px)`,
+          border: `1px solid ${glassColors.glass.border}`,
+          borderRadius: glassBorderRadius.pill,
         }}
       >
         {featuredItems.map((_, index) => (
@@ -381,19 +398,15 @@ export const LiquidGlassSlider = ({
             aria-label={`Go to slide ${index + 1}`}
             aria-current={index === currentIndex ? "true" : "false"}
             sx={{
+              ...sliderStyles.dot,
               width: index === currentIndex ? 32 : 8,
-              height: 8,
-              borderRadius: "4px",
-              border: "none",
               background: index === currentIndex 
-                ? liquidGlassColors.persianGold
-                : liquidGlassColors.glass.border,
-              cursor: "pointer",
-              transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                ? glassColors.persianGold
+                : glassColors.glass.border,
               '&:hover': {
                 background: index === currentIndex 
-                  ? "#FBB040"
-                  : liquidGlassColors.text.tertiary,
+                  ? glassColors.gold.light
+                  : glassColors.text.tertiary,
               },
             }}
           />

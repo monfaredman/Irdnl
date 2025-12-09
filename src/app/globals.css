@@ -10,3 +10,14 @@
 html {
   scroll-behavior: smooth;
 }
+
+/* RTL Support for Persian Content */
+[dir="rtl"] {
+  font-family: var(--font-vazirmatn), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+}
+
+/* Improve Persian text rendering */
+[lang="fa"] {
+  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
+  text-rendering: optimizeLegibility;
+}

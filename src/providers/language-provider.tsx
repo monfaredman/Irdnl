@@ -60,6 +60,15 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     }
   }, []);
 
+  // Update document direction and lang attribute when language changes
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      const htmlElement = document.documentElement;
+      htmlElement.setAttribute("lang", language);
+      htmlElement.setAttribute("dir", language === "fa" ? "rtl" : "ltr");
+    }
+  }, [language]);
+
   const updateLanguage = (code: LanguageCode) => {
     setLanguage(code);
     if (typeof window !== "undefined") {

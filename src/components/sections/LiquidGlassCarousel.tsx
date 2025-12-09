@@ -7,7 +7,15 @@ import { Box, IconButton, Typography } from "@mui/material";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import type { Movie, Series } from "@/types/media";
-import { liquidGlassColors } from "@/theme/liquid-glass-theme";
+import { useLanguage } from "@/providers/language-provider";
+import {
+  glassColors,
+  glassStyles,
+  glassSpacing,
+  glassBorderRadius,
+  glassAnimations,
+  sliderStyles,
+} from "@/theme/glass-design-system";
 
 interface LiquidGlassCarouselProps {
   title: string;
@@ -29,6 +37,10 @@ export const LiquidGlassCarousel = ({
   type,
   viewAllHref 
 }: LiquidGlassCarouselProps) => {
+  const { language } = useLanguage();
+  const isRTL = language === "fa";
+  const PrevIcon = isRTL ? ArrowForwardIosIcon : ArrowBackIosNewIcon;
+  const NextIcon = isRTL ? ArrowBackIosNewIcon : ArrowForwardIosIcon;
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showLeftArrow, setShowLeftArrow] = useState(false);
   const [showRightArrow, setShowRightArrow] = useState(true);
@@ -62,7 +74,7 @@ export const LiquidGlassCarousel = ({
       component="section"
       sx={{
         position: "relative",
-        py: 8,
+        py: `${glassSpacing.xl}px`,
       }}
     >
       {/* Header */}
@@ -72,14 +84,14 @@ export const LiquidGlassCarousel = ({
           justifyContent: "space-between",
           alignItems: "center",
           px: { xs: 2, md: 4 },
-          mb: 4,
+          mb: `${glassSpacing.lg}px`,
         }}
       >
         <Typography
           variant="h3"
           sx={{
             fontWeight: 600,
-            color: liquidGlassColors.white,
+            color: glassColors.text.primary,
           }}
         >
           {title}
@@ -90,18 +102,11 @@ export const LiquidGlassCarousel = ({
             component={Link}
             href={viewAllHref}
             sx={{
-              color: liquidGlassColors.persianGold,
-              textDecoration: "none",
-              fontSize: "15px",
-              fontWeight: 500,
+              ...glassStyles.link,
+              fontSize: "0.9375rem",
               display: "flex",
               alignItems: "center",
               gap: "4px",
-              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-              '&:hover': {
-                color: "#FBB040",
-                transform: "translateX(4px)",
-              },
             }}
           >
             View All
@@ -146,23 +151,23 @@ export const LiquidGlassCarousel = ({
                     position: "relative",
                     width: "100%",
                     paddingBottom: "150%",
-                    borderRadius: "16px",
+                    borderRadius: glassBorderRadius.lg,
                     overflow: "hidden",
-                    background: liquidGlassColors.glass.base,
+                    background: glassColors.glass.base,
                     backdropFilter: "blur(20px) saturate(180%)",
                     WebkitBackdropFilter: "blur(20px) saturate(180%)",
-                    border: `1px solid ${liquidGlassColors.glass.border}`,
+                    border: `1px solid ${glassColors.glass.border}`,
                     boxShadow: `
                       0 8px 32px rgba(0, 0, 0, 0.4),
                       inset 0 1px 0 rgba(255, 255, 255, 0.1)
                     `,
-                    transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                    transition: glassAnimations.transition.spring,
                     '&:hover': {
-                      borderColor: "rgba(255, 255, 255, 0.2)",
+                      borderColor: glassColors.glass.border,
                       boxShadow: `
                         0 12px 48px rgba(0, 0, 0, 0.5),
                         inset 0 1px 0 rgba(255, 255, 255, 0.15),
-                        0 0 0 1px rgba(245, 158, 11, 0.3)
+                        0 0 0 1px ${glassColors.gold.glow}
                       `,
                       transform: "translateY(-8px) scale(1.03)",
                     },
@@ -196,9 +201,9 @@ export const LiquidGlassCarousel = ({
                 <Typography
                   variant="body2"
                   sx={{
-                    mt: 2,
+                    mt: `${glassSpacing.sm}px`,
                     fontWeight: 500,
-                    color: liquidGlassColors.text.primary,
+                    color: glassColors.text.primary,
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                     whiteSpace: "nowrap",
@@ -214,57 +219,45 @@ export const LiquidGlassCarousel = ({
         {/* Navigation Arrows */}
         {showLeftArrow && (
           <IconButton
-            onClick={() => scroll('left')}
+            onClick={() => scroll(isRTL ? 'right' : 'left')}
             sx={{
+              ...sliderStyles.arrow,
               position: "absolute",
               left: { xs: -8, md: -16 },
               top: "50%",
               transform: "translateY(-50%)",
               zIndex: 2,
-              width: 48,
-              height: 48,
-              background: liquidGlassColors.glass.strong,
-              backdropFilter: "blur(20px)",
-              border: `1px solid ${liquidGlassColors.glass.border}`,
-              color: liquidGlassColors.white,
-              transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
               display: { xs: "none", md: "flex" },
               '&:hover': {
-                background: liquidGlassColors.persianGold,
-                color: liquidGlassColors.deepMidnight,
+                background: `linear-gradient(135deg, ${glassColors.persianGold}, ${glassColors.gold.light})`,
+                color: glassColors.deepMidnight,
                 transform: "translateY(-50%) scale(1.1)",
               },
             }}
           >
-            <ArrowBackIosNewIcon />
+            <PrevIcon />
           </IconButton>
         )}
 
         {showRightArrow && (
           <IconButton
-            onClick={() => scroll('right')}
+            onClick={() => scroll(isRTL ? 'left' : 'right')}
             sx={{
+              ...sliderStyles.arrow,
               position: "absolute",
               right: { xs: -8, md: -16 },
               top: "50%",
               transform: "translateY(-50%)",
               zIndex: 2,
-              width: 48,
-              height: 48,
-              background: liquidGlassColors.glass.strong,
-              backdropFilter: "blur(20px)",
-              border: `1px solid ${liquidGlassColors.glass.border}`,
-              color: liquidGlassColors.white,
-              transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
               display: { xs: "none", md: "flex" },
               '&:hover': {
-                background: liquidGlassColors.persianGold,
-                color: liquidGlassColors.deepMidnight,
+                background: `linear-gradient(135deg, ${glassColors.persianGold}, ${glassColors.gold.light})`,
+                color: glassColors.deepMidnight,
                 transform: "translateY(-50%) scale(1.1)",
               },
             }}
           >
-            <ArrowForwardIosIcon />
+            <NextIcon />
           </IconButton>
         )}
       </Box>

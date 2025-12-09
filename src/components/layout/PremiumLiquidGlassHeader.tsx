@@ -32,7 +32,13 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/providers/language-provider";
-import { liquidGlassColors } from "@/theme/liquid-glass-theme";
+import { 
+  glassColors, 
+  glassSpacing, 
+  glassBorderRadius, 
+  glassAnimations,
+  glassBlur
+} from "@/theme/glass-design-system";
 
 interface NavItem {
   label: string;
@@ -114,38 +120,38 @@ export function PremiumLiquidGlassHeader() {
   const glassBaseStyle = {
     background: scrolled
       ? `linear-gradient(180deg, 
-          ${liquidGlassColors.glass.mid} 0%, 
-          ${liquidGlassColors.glass.base} 100%)`
+          ${glassColors.glass.mid} 0%, 
+          ${glassColors.glass.base} 100%)`
       : "transparent",
-    backdropFilter: scrolled ? "blur(20px) saturate(180%)" : "blur(8px) saturate(120%)",
-    WebkitBackdropFilter: scrolled ? "blur(20px) saturate(180%)" : "blur(8px) saturate(120%)",
+    backdropFilter: scrolled ? `blur(${glassBlur.medium}px) saturate(180%)` : `blur(${glassBlur.light}px) saturate(120%)`,
+    WebkitBackdropFilter: scrolled ? `blur(${glassBlur.medium}px) saturate(180%)` : `blur(${glassBlur.light}px) saturate(120%)`,
     borderBottom: scrolled
-      ? `1px solid ${liquidGlassColors.glass.border}`
+      ? `1px solid ${glassColors.glass.border}`
       : "1px solid transparent",
     boxShadow: scrolled
       ? `inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
          0 4px 24px -2px rgba(0, 0, 0, 0.2)`
       : "none",
-    transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    transition: glassAnimations.transition.spring,
   };
 
   const pillButtonStyle = (isActive: boolean) => ({
     px: 3,
     py: 1,
-    borderRadius: "24px",
+    borderRadius: glassBorderRadius.pill,
     position: "relative",
     overflow: "hidden",
-    color: isActive ? liquidGlassColors.persianGold : "#FFFFFF",
+    color: isActive ? glassColors.persianGold : glassColors.text.primary,
     fontSize: "0.875rem",
     fontWeight: 500,
     textTransform: "none" as const,
     background: isActive
-      ? `linear-gradient(135deg, ${liquidGlassColors.persianGold}20, ${liquidGlassColors.persianGold}10)`
+      ? `linear-gradient(135deg, ${glassColors.persianGold}20, ${glassColors.persianGold}10)`
       : "transparent",
     border: isActive
-      ? `1px solid ${liquidGlassColors.persianGold}40`
+      ? `1px solid ${glassColors.persianGold}40`
       : "1px solid transparent",
-    transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    transition: glassAnimations.transition.smooth,
     "&::before": {
       content: '""',
       position: "absolute",
@@ -155,15 +161,15 @@ export function PremiumLiquidGlassHeader() {
       height: "100%",
       background: `linear-gradient(90deg, 
         transparent, 
-        ${liquidGlassColors.glass.strong}, 
+        ${glassColors.glass.strong}, 
         transparent)`,
-      transition: "left 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
+      transition: glassAnimations.transition.smooth,
     },
     "&:hover": {
       background: `linear-gradient(135deg, 
-        ${liquidGlassColors.glass.strong}, 
-        ${liquidGlassColors.glass.mid})`,
-      border: `1px solid ${liquidGlassColors.glass.border}`,
+        ${glassColors.glass.strong}, 
+        ${glassColors.glass.mid})`,
+      border: `1px solid ${glassColors.glass.border}`,
       transform: "translateY(-2px)",
       boxShadow: `0 8px 16px -4px rgba(0, 0, 0, 0.3),
                   inset 0 1px 0 0 rgba(255, 255, 255, 0.1)`,
@@ -181,16 +187,16 @@ export function PremiumLiquidGlassHeader() {
     alignItems: "center",
     width: searchExpanded ? { xs: "200px", sm: "300px" } : "40px",
     height: "40px",
-    borderRadius: "20px",
+    borderRadius: glassBorderRadius.pill,
     background: searchExpanded
-      ? `linear-gradient(135deg, ${liquidGlassColors.glass.strong}, ${liquidGlassColors.glass.mid})`
+      ? `linear-gradient(135deg, ${glassColors.glass.strong}, ${glassColors.glass.mid})`
       : "transparent",
     border: searchExpanded
-      ? `1px solid ${liquidGlassColors.glass.border}`
+      ? `1px solid ${glassColors.glass.border}`
       : "1px solid transparent",
-    backdropFilter: searchExpanded ? "blur(20px) saturate(180%)" : "none",
-    WebkitBackdropFilter: searchExpanded ? "blur(20px) saturate(180%)" : "none",
-    transition: "all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    backdropFilter: searchExpanded ? `blur(${glassBlur.medium}px) saturate(180%)` : "none",
+    WebkitBackdropFilter: searchExpanded ? `blur(${glassBlur.medium}px) saturate(180%)` : "none",
+    transition: glassAnimations.transition.spring,
     overflow: "hidden",
     boxShadow: searchExpanded
       ? `0 8px 24px -4px rgba(0, 0, 0, 0.3),
@@ -201,15 +207,15 @@ export function PremiumLiquidGlassHeader() {
   const avatarStyle = {
     width: 40,
     height: 40,
-    border: `2px solid ${liquidGlassColors.glass.border}`,
+    border: `2px solid ${glassColors.glass.border}`,
     boxShadow: `0 4px 16px -2px rgba(0, 0, 0, 0.3),
                 inset 0 1px 0 0 rgba(255, 255, 255, 0.2)`,
     cursor: "pointer",
-    transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+    transition: glassAnimations.transition.smooth,
     "&:hover": {
       transform: "scale(1.1)",
-      border: `2px solid ${liquidGlassColors.persianGold}`,
-      boxShadow: `0 8px 24px -4px ${liquidGlassColors.persianGold}40,
+      border: `2px solid ${glassColors.persianGold}`,
+      boxShadow: `0 8px 24px -4px ${glassColors.gold.glow},
                   inset 0 1px 0 0 rgba(255, 255, 255, 0.3)`,
     },
   };
@@ -217,23 +223,23 @@ export function PremiumLiquidGlassHeader() {
   const menuStyle = {
     "& .MuiPaper-root": {
       mt: 1,
-      borderRadius: "16px",
+      borderRadius: glassBorderRadius.lg,
       background: `linear-gradient(180deg, 
-        ${liquidGlassColors.glass.strong}, 
-        ${liquidGlassColors.glass.mid})`,
-      backdropFilter: "blur(20px) saturate(180%)",
-      WebkitBackdropFilter: "blur(20px) saturate(180%)",
-      border: `1px solid ${liquidGlassColors.glass.border}`,
+        ${glassColors.glass.strong}, 
+        ${glassColors.glass.mid})`,
+      backdropFilter: `blur(${glassBlur.medium}px) saturate(180%)`,
+      WebkitBackdropFilter: `blur(${glassBlur.medium}px) saturate(180%)`,
+      border: `1px solid ${glassColors.glass.border}`,
       boxShadow: `0 16px 48px -8px rgba(0, 0, 0, 0.4),
                   inset 0 1px 0 0 rgba(255, 255, 255, 0.1)`,
       "& .MuiMenuItem-root": {
-        color: "#FFFFFF",
-        borderRadius: "8px",
+        color: glassColors.text.primary,
+        borderRadius: glassBorderRadius.sm,
         mx: 1,
         my: 0.5,
-        transition: "all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        transition: glassAnimations.transition.springFast,
         "&:hover": {
-          background: liquidGlassColors.glass.strong,
+          background: glassColors.glass.strong,
           transform: "translateX(4px)",
         },
       },
@@ -244,11 +250,11 @@ export function PremiumLiquidGlassHeader() {
     "& .MuiDrawer-paper": {
       width: 280,
       background: `linear-gradient(180deg, 
-        ${liquidGlassColors.deepMidnight}F2, 
-        ${liquidGlassColors.deepMidnight}E6)`,
-      backdropFilter: "blur(40px) saturate(180%)",
-      WebkitBackdropFilter: "blur(40px) saturate(180%)",
-      borderRight: `1px solid ${liquidGlassColors.glass.border}`,
+        ${glassColors.deepMidnight}F2, 
+        ${glassColors.deepMidnight}E6)`,
+      backdropFilter: `blur(${glassBlur.strong}px) saturate(180%)`,
+      WebkitBackdropFilter: `blur(${glassBlur.strong}px) saturate(180%)`,
+      borderRight: `1px solid ${glassColors.glass.border}`,
       boxShadow: `4px 0 32px -4px rgba(0, 0, 0, 0.5),
                   inset -1px 0 0 0 rgba(255, 255, 255, 0.05)`,
     },
@@ -282,7 +288,7 @@ export function PremiumLiquidGlassHeader() {
                   alignItems: "center",
                   gap: 1,
                   cursor: "pointer",
-                  transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                  transition: glassAnimations.transition.smooth,
                   "&:hover": {
                     transform: "translateY(-2px)",
                   },
@@ -292,19 +298,19 @@ export function PremiumLiquidGlassHeader() {
                   sx={{
                   width: 40,
                   height: 40,
-                  borderRadius: "12px",
+                  borderRadius: glassBorderRadius.md,
                   background: `linear-gradient(135deg, 
-                    ${liquidGlassColors.persianGold}40, 
-                    ${liquidGlassColors.persianGold}20)`,
-                  backdropFilter: "blur(10px)",
-                  border: `1px solid ${liquidGlassColors.persianGold}60`,
+                    ${glassColors.persianGold}40, 
+                    ${glassColors.persianGold}20)`,
+                  backdropFilter: `blur(${glassBlur.light}px)`,
+                  border: `1px solid ${glassColors.persianGold}60`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontWeight: 700,
                   fontSize: "1.25rem",
-                  color: liquidGlassColors.persianGold,
-                  boxShadow: `0 4px 16px -2px ${liquidGlassColors.persianGold}30,
+                  color: glassColors.persianGold,
+                  boxShadow: `0 4px 16px -2px ${glassColors.gold.glow},
                               inset 0 1px 0 0 rgba(255, 255, 255, 0.2)`,
                   }}
                 >
@@ -464,19 +470,19 @@ export function PremiumLiquidGlassHeader() {
               gap: 2,
               p: 2,
               mb: 2,
-              borderRadius: "16px",
-              background: liquidGlassColors.glass.base,
-              border: `1px solid ${liquidGlassColors.glass.border}`,
+              borderRadius: glassBorderRadius.lg,
+              background: glassColors.glass.base,
+              border: `1px solid ${glassColors.glass.border}`,
             }}
           >
             <Avatar sx={{ width: 48, height: 48 }}>
               <AccountCircle />
             </Avatar>
             <Box>
-              <Box sx={{ color: "#FFFFFF", fontWeight: 600, fontSize: "1rem" }}>
+              <Box sx={{ color: glassColors.text.primary, fontWeight: 600, fontSize: "1rem" }}>
                 {language === "fa" ? "کاربر" : "User"}
               </Box>
-              <Box sx={{ color: "rgba(255, 255, 255, 0.6)", fontSize: "0.875rem" }}>
+              <Box sx={{ color: glassColors.text.tertiary, fontSize: "0.875rem" }}>
                 user@example.com
               </Box>
             </Box>
@@ -497,17 +503,17 @@ export function PremiumLiquidGlassHeader() {
                   >
                     <ListItemButton
                       sx={{
-                      borderRadius: "12px",
+                      borderRadius: glassBorderRadius.md,
                       mb: 1,
                       background: isActive
-                        ? `linear-gradient(135deg, ${liquidGlassColors.persianGold}30, ${liquidGlassColors.persianGold}20)`
+                        ? `linear-gradient(135deg, ${glassColors.persianGold}30, ${glassColors.persianGold}20)`
                         : "transparent",
                       border: isActive
-                        ? `1px solid ${liquidGlassColors.persianGold}40`
+                        ? `1px solid ${glassColors.persianGold}40`
                         : "1px solid transparent",
-                      transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                      transition: glassAnimations.transition.smooth,
                       "&:hover": {
-                        background: liquidGlassColors.glass.strong,
+                        background: glassColors.glass.strong,
                         transform: "translateX(-4px)",
                       },
                       }}
@@ -515,8 +521,8 @@ export function PremiumLiquidGlassHeader() {
                       <Box
                         sx={{
                           color: isActive
-                            ? liquidGlassColors.persianGold
-                            : "rgba(255, 255, 255, 0.7)",
+                            ? glassColors.persianGold
+                            : glassColors.text.secondary,
                           mr: 2,
                           display: "flex",
                         }}
@@ -543,9 +549,9 @@ export function PremiumLiquidGlassHeader() {
           <Box sx={{ mt: 4 }}>
             <ListItemButton
               sx={{
-                borderRadius: "12px",
-                border: `1px solid ${liquidGlassColors.glass.border}`,
-                transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
+                borderRadius: glassBorderRadius.md,
+                border: `1px solid ${glassColors.glass.border}`,
+                transition: glassAnimations.transition.smooth,
                 "&:hover": {
                   background: "rgba(239, 68, 68, 0.1)",
                   borderColor: "rgba(239, 68, 68, 0.3)",
