@@ -6,12 +6,15 @@ export type Genre =
   | "comedy"
   | "romance"
   | "thriller"
+  | "mystery"
+  | "horror"
   | "sci-fi"
   | "fantasy"
   | "animation"
   | "documentary"
   | "adventure"
-  | "historical";
+  | "historical"
+  | "family";
 
 export type LanguageCode = "fa" | "en";
 

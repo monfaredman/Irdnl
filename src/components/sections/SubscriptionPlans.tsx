@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Box, Button, Card, CardContent, Grid, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Button, Card, Stack, Typography, useTheme } from "@mui/material";
 import { subscriptionPlans, coupons } from "@/data/mockContent";
 import { formatCurrency } from "@/lib/formatters";
 import { zarinpalCheckout } from "@/lib/integrations";
@@ -79,20 +79,26 @@ export const SubscriptionPlans = () => {
           </Button>
         ))}
       </Stack>
-      <Grid container spacing={3}>
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', md: 'repeat(3, 1fr)' },
+          gap: 3,
+        }}
+      >
         {subscriptionPlans.map((plan) => (
-          <Grid item xs={12} md={4} key={plan.id}>
-            <Card
-              sx={{
-                ...(plan.featured ? {
-                  ...glassStrongStyle,
-                  borderColor: `${theme.palette.primary.light}80`,
-                  boxShadow: `0 0 40px rgba(0, 212, 255, 0.4)`,
-                } : glassStyle),
-                position: 'relative',
-                overflow: 'hidden',
-                borderRadius: 4,
-                p: 3,
+          <Card
+            key={plan.id}
+            sx={{
+              ...(plan.featured ? {
+                ...glassStrongStyle,
+                borderColor: `${theme.palette.primary.light}80`,
+                boxShadow: `0 0 40px rgba(0, 212, 255, 0.4)`,
+              } : glassStyle),
+              position: 'relative',
+              overflow: 'hidden',
+              borderRadius: 4,
+              p: 3,
                 transition: 'all 0.4s',
                 '&:hover': {
                   transform: 'scale(1.02)',
@@ -218,9 +224,8 @@ export const SubscriptionPlans = () => {
                 </Button>
               </Stack>
             </Card>
-          </Grid>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 };

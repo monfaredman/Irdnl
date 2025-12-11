@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
-import { Box, Container, Grid, Stack, Typography } from "@mui/material";
+"use client";
+
+import { Box, Container, Stack, Typography } from "@mui/material";
 import { series } from "@/data/mockContent";
 import { MediaCard } from "@/components/media/MediaCard";
-
-export const metadata: Metadata = {
-  title: "Series | PersiaPlay",
-};
 
 export default function SeriesPage() {
   return (
@@ -29,13 +26,21 @@ export default function SeriesPage() {
             Follow episodic adventures with seamless season switching and playback memory.
           </Typography>
         </Box>
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              xl: 'repeat(3, 1fr)',
+            },
+            gap: 3,
+          }}
+        >
           {series.map((entry) => (
-            <Grid item xs={12} sm={6} xl={4} key={entry.id}>
-              <MediaCard item={entry} type="series" />
-            </Grid>
+            <MediaCard key={entry.id} item={entry} type="series" />
           ))}
-        </Grid>
+        </Box>
       </Stack>
     </Container>
   );

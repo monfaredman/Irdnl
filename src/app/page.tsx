@@ -2,8 +2,9 @@
 
 import { Box, CircularProgress, Alert } from "@mui/material";
 import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
-import { LiquidGlassCarousel } from "@/components/sections/LiquidGlassCarousel";
-import { LiquidGlassGrid } from "@/components/sections/LiquidGlassGrid";
+import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
+import { OffersSection } from "@/components/sections/OffersSection";
+import { FiltersSection } from "@/components/sections/FiltersSection";
 import { useLanguage } from "@/providers/language-provider";
 import { 
   useTMDBPopularMovies, 
@@ -35,7 +36,6 @@ export default function Home() {
 
   // Filter content by origin (Iranian vs Foreign)
   const foreignMovies = popularMovies?.filter(m => m.origin === "foreign") || [];
-  const iranianMovies = trendingMovies?.filter(m => m.origin === "iranian") || [];
   const foreignSeries = popularSeries?.filter(s => s.origin === "foreign") || [];
   const iranianSeries = popularSeries?.filter(s => s.origin === "iranian") || [];
 
@@ -70,45 +70,61 @@ export default function Home() {
         />
       )}
 
-      {/* Content Sections - Mix of Carousels and Grids */}
-      
-      {/* Foreign Movies - Horizontal Carousel */}
-      {foreignMovies.length > 0 && (
-        <LiquidGlassCarousel
-          title={language === 'fa' ? 'فیلم‌های خارجی' : 'Foreign Movies'}
-          items={foreignMovies}
+      {/* Offers Section - 8 cards with chips (no header) */}
+      {combinedContent && combinedContent.length > 0 && (
+        <OffersSection items={combinedContent} />
+      )}
+
+      {/* Filters Section */}
+      <FiltersSection />
+
+      {/* New Movie Carousel - فیلم جدید */}
+      {trendingMovies && trendingMovies.length > 0 && (
+        <EmblaCarousel
+          title={language === 'fa' ? 'فیلم جدید' : 'New Movies'}
+          items={trendingMovies}
           type="movie"
-          viewAllHref="/movies?origin=foreign"
+          viewAllHref="/movies?sort=new"
         />
       )}
 
-      {/* Foreign Series - Grid Layout */}
+      {/* Foreign Series Carousel - سریال خارجی */}
       {foreignSeries.length > 0 && (
-        <LiquidGlassGrid
-          title={language === 'fa' ? 'سریال‌های خارجی' : 'Foreign Series'}
+        <EmblaCarousel
+          title={language === 'fa' ? 'سریال خارجی' : 'Foreign Series'}
           items={foreignSeries}
           type="series"
           viewAllHref="/series?origin=foreign"
         />
       )}
 
-      {/* Iranian Movies - Horizontal Carousel */}
-      {iranianMovies.length > 0 && (
-        <LiquidGlassCarousel
-          title={language === 'fa' ? 'فیلم‌های ایرانی' : 'Iranian Movies'}
-          items={iranianMovies}
-          type="movie"
-          viewAllHref="/movies?origin=iranian"
-        />
-      )}
-
-      {/* Iranian Series - Grid Layout */}
+      {/* New Iranian Series - سریال ایرانی جدید */}
       {iranianSeries.length > 0 && (
-        <LiquidGlassGrid
-          title={language === 'fa' ? 'سریال‌های ایرانی' : 'Iranian Series'}
+        <EmblaCarousel
+          title={language === 'fa' ? 'سریال ایرانی جدید' : 'New Iranian Series'}
           items={iranianSeries}
           type="series"
           viewAllHref="/series?origin=iranian"
+        />
+      )}
+
+      {/* Persian Dubbed - دوبله فارسی جدید */}
+      {foreignMovies.length > 0 && (
+        <EmblaCarousel
+          title={language === 'fa' ? 'دوبله فارسی جدید' : 'New Persian Dubbed'}
+          items={foreignMovies.slice(0, 8)}
+          type="movie"
+          viewAllHref="/movies?dubbed=true"
+        />
+      )}
+
+      {/* Animation Carousel - انیمیشن */}
+      {popularMovies && popularMovies.length > 0 && (
+        <EmblaCarousel
+          title={language === 'fa' ? 'انیمیشن' : 'Animation'}
+          items={popularMovies.slice(0, 8)}
+          type="movie"
+          viewAllHref="/genres?type=animation"
         />
       )}
 

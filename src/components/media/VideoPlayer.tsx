@@ -57,10 +57,16 @@ export const VideoPlayer = ({ mediaId, poster, sources, subtitles, episodeId, du
     });
 
     const progressHandler = () => {
-      const currentTime = player.currentTime();
+      const currentTime = player.currentTime() ?? 0;
       const total = (duration ?? player.duration()) ?? 0;
       if (!total) return;
-      updateProgress({ mediaId, episodeId, progress: currentTime, duration: total });
+      updateProgress({ 
+        mediaId, 
+        episodeId, 
+        progress: currentTime, 
+        duration: total,
+        updatedAt: Date.now()
+      });
     };
 
     player.on("timeupdate", progressHandler);
@@ -69,7 +75,7 @@ export const VideoPlayer = ({ mediaId, poster, sources, subtitles, episodeId, du
       player.off("timeupdate", progressHandler);
       player.dispose();
     };
-  }, [duration, episodeId, mediaId, orderedSources, subtitles, updateProgress]);
+  }, [duration, episodeId, mediaId, orderedSources, subtitles, updateProgress, poster]);
 
   return (
     <div data-vjs-player>

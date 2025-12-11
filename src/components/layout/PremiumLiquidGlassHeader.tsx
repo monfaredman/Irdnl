@@ -34,7 +34,6 @@ import { usePathname } from "next/navigation";
 import { useLanguage } from "@/providers/language-provider";
 import { 
   glassColors, 
-  glassSpacing, 
   glassBorderRadius, 
   glassAnimations,
   glassBlur
@@ -45,13 +44,84 @@ interface NavItem {
   labelFa: string;
   href: string;
   icon?: React.ReactNode;
+  submenu?: SubMenuItem[];
+}
+
+interface SubMenuItem {
+  label: string;
+  labelFa: string;
+  href: string;
 }
 
 const navItems: NavItem[] = [
-  { label: "Movies", labelFa: "فیلم‌ها", href: "/movies", icon: <Movie /> },
-  { label: "Series", labelFa: "سریال‌ها", href: "/series", icon: <Tv /> },
-  { label: "Genres", labelFa: "ژانرها", href: "/genres", icon: <Category /> },
-  { label: "Account", labelFa: "حساب کاربری", href: "/account", icon: <Person /> },
+  { 
+    label: "Foreign Movies", 
+    labelFa: "فیلم خارجی", 
+    href: "/movies?origin=foreign", 
+    icon: <Movie />,
+    submenu: [
+      { label: "Action", labelFa: "اکشن", href: "/movies?genre=action" },
+      { label: "Drama", labelFa: "درام", href: "/movies?genre=drama" },
+      { label: "Comedy", labelFa: "کمدی", href: "/movies?genre=comedy" },
+      { label: "Thriller", labelFa: "هیجان‌انگیز", href: "/movies?genre=thriller" },
+      { label: "Horror", labelFa: "ترسناک", href: "/movies?genre=horror" },
+      { label: "Sci-Fi", labelFa: "علمی‌تخیلی", href: "/movies?genre=scifi" },
+    ]
+  },
+  { 
+    label: "Iranian Movies", 
+    labelFa: "فیلم ایرانی", 
+    href: "/movies?origin=iranian", 
+    icon: <Movie /> 
+  },
+  { 
+    label: "Series", 
+    labelFa: "سریال", 
+    href: "/series", 
+    icon: <Tv />,
+    submenu: [
+      { label: "Foreign Series", labelFa: "سریال خارجی", href: "/series?origin=foreign" },
+      { label: "Iranian Series", labelFa: "سریال ایرانی", href: "/series?origin=iranian" },
+      { label: "Documentaries", labelFa: "مستند", href: "/series?type=documentary" },
+      { label: "Mini-Series", labelFa: "مینی‌سریال", href: "/series?type=mini" },
+    ]
+  },
+  { 
+    label: "Animation", 
+    labelFa: "انیمیشن", 
+    href: "/genres?type=animation", 
+    icon: <Category /> 
+  },
+  { 
+    label: "Persian Dubbed", 
+    labelFa: "دوبله فارسی", 
+    href: "/movies?dubbed=true", 
+    icon: <Movie /> 
+  },
+  { 
+    label: "Anime", 
+    labelFa: "انیمه", 
+    href: "/genres?type=anime", 
+    icon: <Tv /> 
+  },
+  { 
+    label: "Other", 
+    labelFa: "سایر", 
+    href: "/genres", 
+    icon: <Category />,
+    submenu: [
+      { label: "Top Rated", labelFa: "برترین‌ها", href: "/movies?sort=rating" },
+      { label: "New Releases", labelFa: "جدیدترین‌ها", href: "/movies?sort=new" },
+      { label: "Coming Soon", labelFa: "به‌زودی", href: "/movies?status=coming-soon" },
+      { label: "Collections", labelFa: "مجموعه‌ها", href: "/collections" },
+    ]
+  },
+  { 
+    label: "Account", 
+    labelFa: "حساب کاربری", 
+    href: "/account", 
+    icon: <Person /> 
+  },
 ];
 
 export function PremiumLiquidGlassHeader() {
@@ -66,6 +136,7 @@ export function PremiumLiquidGlassHeader() {
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [submenuAnchor, setSubmenuAnchor] = useState<{ [key: string]: HTMLElement | null }>({});
   
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -114,6 +185,14 @@ export function PremiumLiquidGlassHeader() {
 
   const handleMobileToggle = () => {
     setMobileOpen(!mobileOpen);
+  };
+
+  const handleSubmenuOpen = (event: React.MouseEvent<HTMLElement>, itemHref: string) => {
+    setSubmenuAnchor({ ...submenuAnchor, [itemHref]: event.currentTarget });
+  };
+
+  const handleSubmenuClose = (itemHref: string) => {
+    setSubmenuAnchor({ ...submenuAnchor, [itemHref]: null });
   };
 
   // Glass styles
@@ -231,21 +310,21 @@ export function PremiumLiquidGlassHeader() {
       mt: 1,
       borderRadius: glassBorderRadius.lg,
       background: `linear-gradient(180deg, 
-        ${glassColors.glass.strong}, 
-        ${glassColors.glass.mid})`,
-      backdropFilter: `blur(${glassBlur.medium}px) saturate(180%)`,
-      WebkitBackdropFilter: `blur(${glassBlur.medium}px) saturate(180%)`,
+        ${glassColors.deepMidnight}F1, 
+        ${glassColors.deepMidnight}E1)`,
+      backdropFilter: `blur(${glassBlur.strong}px) saturate(180%)`,
+      WebkitBackdropFilter: `blur(${glassBlur.strong}px) saturate(180%)`,
       border: `1px solid ${glassColors.glass.border}`,
-      boxShadow: `0 16px 48px -8px rgba(0, 0, 0, 0.4),
-                  inset 0 1px 0 0 rgba(255, 255, 255, 0.1)`,
+      boxShadow: `0 16px 48px -8px rgba(0, 0, 0, 0.6),
+                  inset 0 1px 0 0 rgba(255, 255, 255, 0.05)`,
       "& .MuiMenuItem-root": {
-        color: glassColors.text.primary,
+        color: glassColors.text.secondary,
         borderRadius: glassBorderRadius.sm,
         mx: 1,
         my: 0.5,
         transition: glassAnimations.transition.springFast,
         "&:hover": {
-          background: glassColors.glass.strong,
+          background: glassColors.deepMidnight,
           transform: "translateX(4px)",
         },
       },
@@ -347,23 +426,51 @@ export function PremiumLiquidGlassHeader() {
                   justifyContent: "center",
                 }}
               >
-                {navItems.slice(0, 3).map((item) => {
+                {navItems.slice(0, 7).map((item) => {
                   const isActive = pathname === item.href;
                   const label = language === "fa" ? item.labelFa : item.label;
 
                   return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      style={{ textDecoration: "none" }}
-                    >
-                      <Box
-                        component="button"
-                        sx={pillButtonStyle(isActive)}
+                    <Box key={item.href} sx={{ position: "relative" }}>
+                      <Link
+                        href={item.href}
+                        style={{ textDecoration: "none" }}
+                        onMouseEnter={(e) => item.submenu && handleSubmenuOpen(e, item.href)}
                       >
-                        {label}
-                      </Box>
-                    </Link>
+                        <Box
+                          component="button"
+                          sx={pillButtonStyle(isActive)}
+                        >
+                          {label}
+                        </Box>
+                      </Link>
+                      
+                      {/* Submenu */}
+                      {item.submenu && (
+                        <Menu
+                          anchorEl={submenuAnchor[item.href]}
+                          open={Boolean(submenuAnchor[item.href])}
+                          onClose={() => handleSubmenuClose(item.href)}
+                          MenuListProps={{
+                            onMouseLeave: () => handleSubmenuClose(item.href),
+                          }}
+                          sx={menuStyle}
+                          transformOrigin={{ horizontal: "center", vertical: "top" }}
+                          anchorOrigin={{ horizontal: "center", vertical: "bottom" }}
+                        >
+                          {item.submenu.map((subItem) => (
+                            <MenuItem
+                              key={subItem.href}
+                              onClick={() => handleSubmenuClose(item.href)}
+                              component={Link}
+                              href={subItem.href}
+                            >
+                              {language === "fa" ? subItem.labelFa : subItem.label}
+                            </MenuItem>
+                          ))}
+                        </Menu>
+                      )}
+                    </Box>
                   );
                 })}
               </Box>
@@ -404,6 +511,7 @@ export function PremiumLiquidGlassHeader() {
                     "&:hover": {
                       transform: "rotate(90deg)",
                     },
+                    margin:'-0.5rem'
                   }}
                 >
                   {searchExpanded ? <CloseIcon /> : <SearchIcon />}

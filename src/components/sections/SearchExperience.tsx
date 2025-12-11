@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Box, Card, FormControl, Grid, InputAdornment, MenuItem, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
+import { Box, Card, FormControl, InputAdornment, MenuItem, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { searchContent } from "@/lib/content";
 import { MediaCard } from "@/components/media/MediaCard";
@@ -172,13 +172,17 @@ export const SearchExperience = () => {
             Movies
           </Typography>
           {results.movies.length ? (
-            <Grid container spacing={3}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+                gap: 3,
+              }}
+            >
               {results.movies.map((movie) => (
-                <Grid item xs={12} sm={6} md={4} key={movie.id}>
-                  <MediaCard item={movie} type="movie" />
-                </Grid>
+                <MediaCard key={movie.id} item={movie} type="movie" />
               ))}
-            </Grid>
+            </Box>
           ) : (
             <Card
               sx={{
@@ -189,7 +193,7 @@ export const SearchExperience = () => {
               }}
             >
               <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                No movies match "{query}".
+                No movies match &ldquo;{query}&rdquo;.
               </Typography>
             </Card>
           )}
@@ -199,13 +203,17 @@ export const SearchExperience = () => {
             Series
           </Typography>
           {results.series.length ? (
-            <Grid container spacing={3}>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)', md: 'repeat(3, 1fr)' },
+                gap: 3,
+              }}
+            >
               {results.series.map((entry) => (
-                <Grid item xs={12} sm={6} md={4} key={entry.id}>
-                  <MediaCard item={entry} type="series" />
-                </Grid>
+                <MediaCard key={entry.id} item={entry} type="series" />
               ))}
-            </Grid>
+            </Box>
           ) : (
             <Card
               sx={{
@@ -216,7 +224,7 @@ export const SearchExperience = () => {
               }}
             >
               <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                No series match "{query}".
+                No series match &ldquo;{query}&rdquo;.
               </Typography>
             </Card>
           )}

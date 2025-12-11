@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Box, Card, CardContent, Chip, Grid, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Card, Chip, Stack, Typography, useTheme } from "@mui/material";
 import { useContentStore } from "@/hooks/useContentStore";
 import { QualitySelector } from "@/components/interactive/QualitySelector";
 import { SubtitleSelector } from "@/components/interactive/SubtitleSelector";
@@ -47,42 +47,47 @@ export const AccountOverview = () => {
           Watchlist
         </Typography>
         {watchlist.length ? (
-          <Grid container spacing={1.5}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+              gap: 1.5,
+            }}
+          >
             {watchlist.map((item) => (
-              <Grid item xs={12} sm={6} key={item.id}>
-                <Card
-                  component={Link}
-                  href={`/${item.type === "movie" ? "movies" : "series"}/${item.slug}`}
-                  sx={{
-                    ...glassSubtleStyle,
-                    borderRadius: 3,
-                    px: 2,
-                    py: 1.5,
-                    textDecoration: 'none',
-                    transition: 'all 0.3s',
-                    '&:hover': {
-                      ...glassStyle,
-                      transform: 'scale(1.02)',
-                      '& .title': {
-                        color: theme.palette.primary.light,
-                      },
+              <Card
+                key={item.id}
+                component={Link}
+                href={`/${item.type === "movie" ? "movies" : "series"}/${item.slug}`}
+                sx={{
+                  ...glassSubtleStyle,
+                  borderRadius: 3,
+                  px: 2,
+                  py: 1.5,
+                  textDecoration: 'none',
+                  transition: 'all 0.3s',
+                  '&:hover': {
+                    ...glassStyle,
+                    transform: 'scale(1.02)',
+                    '& .title': {
+                      color: theme.palette.primary.light,
                     },
+                  },
+                }}
+              >
+                <Typography
+                  className="title"
+                  variant="body2"
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    transition: 'color 0.3s',
                   }}
                 >
-                  <Typography
-                    className="title"
-                    variant="body2"
-                    sx={{
-                      color: 'rgba(255, 255, 255, 0.8)',
-                      transition: 'color 0.3s',
-                    }}
-                  >
-                    {item.title}
-                  </Typography>
-                </Card>
-              </Grid>
+                  {item.title}
+                </Typography>
+              </Card>
             ))}
-          </Grid>
+          </Box>
         ) : (
           <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.6)' }}>
             Save a title to curate your personal list.

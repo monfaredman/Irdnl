@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
-import { Box, Container, Grid, Stack, Typography } from "@mui/material";
+"use client";
+
+import { Box, Container, Stack, Typography } from "@mui/material";
 import { movies } from "@/data/mockContent";
 import { MediaCard } from "@/components/media/MediaCard";
-
-export const metadata: Metadata = {
-  title: "Movies | PersiaPlay",
-};
 
 export default function MoviesPage() {
   return (
@@ -29,13 +26,21 @@ export default function MoviesPage() {
             Browse high-quality Persian cinema with DRM-ready streaming and instant downloads.
           </Typography>
         </Box>
-        <Grid container spacing={3}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              xl: 'repeat(3, 1fr)',
+            },
+            gap: 3,
+          }}
+        >
           {movies.map((movie) => (
-            <Grid item xs={12} sm={6} xl={4} key={movie.id}>
-              <MediaCard item={movie} type="movie" />
-            </Grid>
+            <MediaCard key={movie.id} item={movie} type="movie" />
           ))}
-        </Grid>
+        </Box>
       </Stack>
     </Container>
   );

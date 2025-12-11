@@ -1,10 +1,8 @@
-import type { Metadata } from "next";
-import { Box, Button, Card, CardContent, Container, Grid, Link, Stack, Typography, useTheme } from "@mui/material";
-import { popularGenres } from "@/data/mockContent";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Genres | PersiaPlay",
-};
+import { Box, Button, Card, Container, Stack, Typography, useTheme } from "@mui/material";
+import Link from "next/link";
+import { popularGenres } from "@/data/mockContent";
 
 export default function GenresPage() {
   const theme = useTheme();
@@ -38,50 +36,59 @@ export default function GenresPage() {
             Jump into curated categories handpicked for Persian audiences.
           </Typography>
         </Box>
-        <Grid container spacing={2}>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: '1fr',
+              sm: 'repeat(2, 1fr)',
+              lg: 'repeat(3, 1fr)',
+            },
+            gap: 2,
+          }}
+        >
           {popularGenres.map((genre) => (
-            <Grid item xs={12} sm={6} lg={4} key={genre.id}>
-              <Card
-                sx={{
-                  ...glassStyle,
-                  borderRadius: 4,
-                  p: 3,
-                  height: '100%',
-                  transition: 'all 0.4s',
-                  '&:hover': {
-                    transform: 'scale(1.02)',
-                    borderColor: theme.palette.primary.light,
-                    boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 0 60px rgba(0, 212, 255, 0.3)`,
-                  },
-                }}
-              >
-                <Stack spacing={2}>
-                  <Typography variant="h5" sx={{ fontWeight: 600, color: '#fff' }}>
-                    {genre.label}
-                  </Typography>
-                  <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                    High quality {genre.label} titles updated weekly.
-                  </Typography>
-                  <Button
-                    component={Link}
-                    href={genre.href}
-                    sx={{
-                      mt: 2,
-                      alignSelf: 'flex-start',
-                      color: theme.palette.primary.light,
-                      textTransform: 'none',
-                      '&:hover': {
-                        color: theme.palette.primary.main,
-                      },
-                    }}
-                  >
-                    View titles ↗
-                  </Button>
-                </Stack>
-              </Card>
-            </Grid>
+            <Card
+              key={genre.id}
+              sx={{
+                ...glassStyle,
+                borderRadius: 4,
+                p: 3,
+                height: '100%',
+                transition: 'all 0.4s',
+                '&:hover': {
+                  transform: 'scale(1.02)',
+                  borderColor: theme.palette.primary.light,
+                  boxShadow: `0 8px 32px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.15), 0 0 60px rgba(0, 212, 255, 0.3)`,
+                },
+              }}
+            >
+              <Stack spacing={2}>
+                <Typography variant="h5" sx={{ fontWeight: 600, color: '#fff' }}>
+                  {genre.label}
+                </Typography>
+                <Typography variant="body2" sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+                  High quality {genre.label} titles updated weekly.
+                </Typography>
+                <Button
+                  component={Link}
+                  href={genre.href}
+                  sx={{
+                    mt: 2,
+                    alignSelf: 'flex-start',
+                    color: theme.palette.primary.light,
+                    textTransform: 'none',
+                    '&:hover': {
+                      color: theme.palette.primary.main,
+                    },
+                  }}
+                >
+                  View titles ↗
+                </Button>
+              </Stack>
+            </Card>
           ))}
-        </Grid>
+        </Box>
       </Stack>
     </Container>
   );

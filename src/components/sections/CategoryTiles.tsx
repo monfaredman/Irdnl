@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Box, Card, CardContent, Grid, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Card, Stack, Typography, useTheme } from "@mui/material";
 import { popularGenres } from "@/data/mockContent";
 
 export const CategoryTiles = () => {
@@ -67,12 +67,18 @@ export const CategoryTiles = () => {
           </Typography>
         </Link>
       </Stack>
-      <Grid container spacing={2}>
-        {popularGenres.map((genre, index) => (
-          <Grid item xs={12} sm={6} key={genre.id}>
-            <Card
-              component={Link}
-              href={genre.href}
+      <Box
+        sx={{
+          display: 'grid',
+          gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+          gap: 2,
+        }}
+      >
+        {popularGenres.map((genre) => (
+          <Card
+            key={genre.id}
+            component={Link}
+            href={genre.href}
               sx={{
                 ...glassStyle,
                 position: 'relative',
@@ -127,9 +133,8 @@ export const CategoryTiles = () => {
                 {genre.label}
               </Typography>
             </Card>
-          </Grid>
         ))}
-      </Grid>
+      </Box>
     </Box>
   );
 };
