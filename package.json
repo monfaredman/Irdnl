@@ -16,6 +16,8 @@
     "@mui/material": "^7.3.6",
     "@types/video.js": "^7.3.58",
     "clsx": "^2.1.1",
+    "embla-carousel-autoplay": "^8.6.0",
+    "embla-carousel-fade": "^8.6.0",
     "embla-carousel-react": "^8.5.2",
     "immer": "^11.0.1",
     "lucide-react": "^0.556.0",

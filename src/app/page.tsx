@@ -3,6 +3,7 @@
 import { Box, CircularProgress, Alert } from "@mui/material";
 import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
 import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
+import { BannerCarousel } from "@/components/sections/BannerCarousel";
 import { GridOffersSection } from "@/components/sections/GridOffersSection";
 import { FiltersSection } from "@/components/sections/FiltersSection";
 import { useLanguage } from "@/providers/language-provider";
@@ -88,6 +89,15 @@ export default function Home() {
         />
       )}
 
+      {/* Banner 1 - Featured Content */}
+      {popularMovies && popularMovies.length > 0 && (
+        <BannerCarousel
+          items={popularMovies.slice(5, 10)}
+          height={324}
+          autoplayDelay={6000}
+        />
+      )}
+
       {/* Foreign Series Carousel - سریال خارجی */}
       {foreignSeries.length > 0 && (
         <EmblaCarousel
@@ -105,6 +115,15 @@ export default function Home() {
           items={iranianSeries}
           type="series"
           viewAllHref="/series?origin=iranian"
+        />
+      )}
+
+      {/* Banner 2 - Series Highlights */}
+      {popularSeries && popularSeries.length > 0 && (
+        <BannerCarousel
+          items={popularSeries.slice(3, 8)}
+          height={324}
+          autoplayDelay={7000}
         />
       )}
 
