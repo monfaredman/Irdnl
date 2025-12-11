@@ -111,10 +111,11 @@ const navItems: NavItem[] = [
     href: "/genres", 
     icon: <Category />,
     submenu: [
-      { label: "Top Rated", labelFa: "برترین‌ها", href: "/movies?sort=rating" },
+      { label: "Top 250", labelFa: "۲۵۰ برتر", href: "/top-250" },
       { label: "New Releases", labelFa: "جدیدترین‌ها", href: "/movies?sort=new" },
-      { label: "Coming Soon", labelFa: "به‌زودی", href: "/movies?status=coming-soon" },
+      { label: "Coming Soon", labelFa: "به‌زودی", href: "/coming-soon" },
       { label: "Collections", labelFa: "مجموعه‌ها", href: "/collections" },
+      { label: "Kids Zone", labelFa: "کودکان", href: "/kids" },
     ]
   },
   { 
