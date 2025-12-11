@@ -3,7 +3,7 @@
 import { Box, CircularProgress, Alert } from "@mui/material";
 import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
 import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
-import { OffersSection } from "@/components/sections/OffersSection";
+import { GridOffersSection } from "@/components/sections/GridOffersSection";
 import { FiltersSection } from "@/components/sections/FiltersSection";
 import { useLanguage } from "@/providers/language-provider";
 import { 
@@ -70,9 +70,9 @@ export default function Home() {
         />
       )}
 
-      {/* Offers Section - 8 cards with chips (no header) */}
+      {/* Offers Section - 11 draggable cards with varying sizes */}
       {combinedContent && combinedContent.length > 0 && (
-        <OffersSection items={combinedContent} />
+        <GridOffersSection items={combinedContent} />
       )}
 
       {/* Filters Section */}

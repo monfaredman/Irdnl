@@ -28,6 +28,7 @@ import {
   Category,
   Person,
   Logout,
+  KeyboardArrowDown,
 } from "@mui/icons-material";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -431,7 +432,11 @@ export function PremiumLiquidGlassHeader() {
                   const label = language === "fa" ? item.labelFa : item.label;
 
                   return (
-                    <Box key={item.href} sx={{ position: "relative" }}>
+                    <Box 
+                      key={item.href} 
+                      sx={{ position: "relative" }}
+                      onMouseLeave={() => item.submenu && handleSubmenuClose(item.href)}
+                    >
                       <Link
                         href={item.href}
                         style={{ textDecoration: "none" }}
@@ -439,9 +444,23 @@ export function PremiumLiquidGlassHeader() {
                       >
                         <Box
                           component="button"
-                          sx={pillButtonStyle(isActive)}
+                          sx={{
+                            ...pillButtonStyle(isActive),
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
                         >
                           {label}
+                          {item.submenu && (
+                            <KeyboardArrowDown 
+                              sx={{ 
+                                fontSize: "1rem",
+                                transition: glassAnimations.transition.smooth,
+                                transform: Boolean(submenuAnchor[item.href]) ? "rotate(180deg)" : "rotate(0deg)",
+                              }} 
+                            />
+                          )}
                         </Box>
                       </Link>
                       
