@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Content, ContentType } from '../content/entities/content.entity';
+import { Content, ContentType, ContentStatus } from '../content/entities/content.entity';
 import { Series } from '../content/entities/series.entity';
 import { Season } from '../content/entities/season.entity';
 import { Episode } from '../content/entities/episode.entity';
@@ -34,7 +34,7 @@ export class AdminService {
   async createContent(createContentDto: CreateContentDto): Promise<Content> {
     const content = this.contentRepository.create({
       ...createContentDto,
-      status: createContentDto.status || 'draft',
+      status: createContentDto.status ?? ContentStatus.DRAFT,
     });
     const savedContent = await this.contentRepository.save(content);
 
@@ -49,10 +49,7 @@ export class AdminService {
     return savedContent;
   }
 
-  async updateContent(
-    id: string,
-    updateContentDto: UpdateContentDto,
-  ): Promise<Content> {
+  async updateContent(id: string, updateContentDto: UpdateContentDto): Promise<Content> {
     const content = await this.contentRepository.findOne({ where: { id } });
     if (!content) {
       throw new NotFoundException(`Content with ID ${id} not found`);
@@ -117,10 +114,7 @@ export class AdminService {
     return savedAsset;
   }
 
-  async markTranscoded(
-    assetId: string,
-    markTranscodedDto: any,
-  ): Promise<VideoAsset> {
+  async markTranscoded(assetId: string, markTranscodedDto: any): Promise<VideoAsset> {
     const asset = await this.videoAssetRepository.findOne({
       where: { id: assetId },
     });

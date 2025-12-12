@@ -90,6 +90,14 @@ docker-compose up -d postgres redis
 npm run migration:run
 ```
 
+If you see `permission denied for schema public`, grant your database role ownership of the target database/schema:
+
+```bash
+psql -h localhost -U postgres -f scripts/grant-db-access.sql
+```
+
+Update the host/user/password flags if you're running PostgreSQL elsewhere. After the script succeeds, re-run the migration command.
+
 5. Seed the database:
 ```bash
 npm run seed

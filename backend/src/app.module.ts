@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CacheModule } from '@nestjs/cache-manager';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { CacheModule, CacheModuleOptions, CacheStore } from '@nestjs/cache-manager';
+import { ThrottlerModule, ThrottlerModuleOptions } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
-import * as redisStore from 'cache-manager-redis-store';
+import { redisStore } from 'cache-manager-redis-store';
 import { TypeOrmConfigService } from './config/typeorm.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -29,24 +29,35 @@ import { HealthModule } from './modules/health/health.module';
     CacheModule.registerAsync({
       isGlobal: true,
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => {
+      useFactory: async (configService: ConfigService): Promise<CacheModuleOptions> => {
         const redisHost = configService.get<string>('REDIS_HOST', 'localhost');
         const redisPort = configService.get<number>('REDIS_PORT', 6379);
+        const ttl = configService.get<number>('CACHE_TTL', 60);
+
+        const store = (await redisStore({
+          socket: {
+            host: redisHost,
+            port: redisPort,
+          },
+          ttl,
+        })) as unknown as CacheStore;
+
         return {
-          store: redisStore,
-          host: redisHost,
-          port: redisPort,
-          ttl: 60, // default TTL
+          store,
+          ttl,
         };
       },
       inject: [ConfigService],
     }),
     ThrottlerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        ttl: configService.get<number>('THROTTLE_TTL', 60),
-        limit: configService.get<number>('THROTTLE_LIMIT', 10),
-      }),
+      useFactory: async (configService: ConfigService): Promise<ThrottlerModuleOptions> => [
+        {
+          name: 'global',
+          ttl: configService.get<number>('THROTTLE_TTL', 60),
+          limit: configService.get<number>('THROTTLE_LIMIT', 10),
+        },
+      ],
       inject: [ConfigService],
     }),
     ScheduleModule.forRoot(),
