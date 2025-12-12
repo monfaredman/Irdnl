@@ -1,0 +1,116 @@
+/**
+ * Content API
+ * 
+ * API methods for fetching content from the backend
+ */
+
+import { apiClient } from './client';
+import type { Movie, Series } from '@/types/media';
+
+export interface ContentListResponse {
+  items: (Movie | Series)[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface ContentQueryParams {
+  type?: 'movie' | 'series';
+  genre?: string;
+  q?: string;
+  page?: number;
+  limit?: number;
+}
+
+export const contentApi = {
+  /**
+   * Get list of content with pagination and filters
+   */
+  async getContent(params?: ContentQueryParams): Promise<ContentListResponse> {
+    return apiClient.get<ContentListResponse>('/content', params);
+  },
+
+  /**
+   * Get content by ID
+   */
+  async getContentById(id: string): Promise<Movie | Series> {
+    return apiClient.get<Movie | Series>(`/content/${id}`);
+  },
+
+  /**
+   * Get trending content
+   */
+  async getTrending(limit?: number): Promise<(Movie | Series)[]> {
+    return apiClient.get<(Movie | Series)[]>('/content/trending', limit ? { limit } : undefined);
+  },
+
+  /**
+   * Get episodes for a series
+   */
+  async getEpisodes(contentId: string): Promise<unknown[]> {
+    return apiClient.get<unknown[]>(`/content/${contentId}/episodes`);
+  },
+
+  /**
+   * Get streaming info for content
+   */
+  async getStreamInfo(contentId: string): Promise<Array<{ quality: string; hls_url: string; signed: boolean }>> {
+    return apiClient.get<Array<{ quality: string; hls_url: string; signed: boolean }>>(`/content/${contentId}/stream`);
+  },
+
+  /**
+   * Get popular movies from TMDB (via backend)
+   */
+  async getPopularMovies(language: 'en' | 'fa' = 'en', page: number = 1): Promise<Movie[]> {
+    const response = await apiClient.get<ContentListResponse>('/content/tmdb/popular/movies', {
+      language,
+      page,
+    });
+    return response.items as Movie[];
+  },
+
+  /**
+   * Get trending movies from TMDB (via backend)
+   */
+  async getTrendingMovies(language: 'en' | 'fa' = 'en'): Promise<Movie[]> {
+    const response = await apiClient.get<ContentListResponse>('/content/tmdb/trending/movies', {
+      language,
+    });
+    return response.items as Movie[];
+  },
+
+  /**
+   * Get popular TV shows from TMDB (via backend)
+   */
+  async getPopularTVShows(language: 'en' | 'fa' = 'en', page: number = 1): Promise<Series[]> {
+    const response = await apiClient.get<ContentListResponse>('/content/tmdb/popular/tv', {
+      language,
+      page,
+    });
+    return response.items as Series[];
+  },
+
+  /**
+   * Search movies from TMDB (via backend)
+   */
+  async searchMovies(query: string, language: 'en' | 'fa' = 'en'): Promise<Movie[]> {
+    const response = await apiClient.get<ContentListResponse>('/content/tmdb/search/movies', {
+      q: query,
+      language,
+    });
+    return response.items as Movie[];
+  },
+
+  /**
+   * Search TV shows from TMDB (via backend)
+   */
+  async searchTVShows(query: string, language: 'en' | 'fa' = 'en'): Promise<Series[]> {
+    const response = await apiClient.get<ContentListResponse>('/content/tmdb/search/tv', {
+      q: query,
+      language,
+    });
+    return response.items as Series[];
+  },
+};
+

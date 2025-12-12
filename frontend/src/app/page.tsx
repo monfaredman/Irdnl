@@ -8,11 +8,11 @@ import { GridOffersSection } from "@/components/sections/GridOffersSection";
 import { FiltersSection } from "@/components/sections/FiltersSection";
 import { useLanguage } from "@/providers/language-provider";
 import { 
-  useTMDBPopularMovies, 
-  useTMDBTrendingMovies,
-  useTMDBPopularTVShows,
-  useTMDBCombinedContent 
-} from "@/hooks/useTMDB";
+  useBackendPopularMovies, 
+  useBackendTrendingMovies,
+  useBackendPopularTVShows,
+  useBackendCombinedContent 
+} from "@/hooks/useBackendContent";
 
 /**
  * Apple-Inspired Liquid Glass Homepage
@@ -24,16 +24,16 @@ import {
  * - Content-first experience
  * - Premium, sophisticated feel
  * 
- * Data Source: TMDB API (The Movie Database)
+ * Data Source: Backend API (integrated with TMDB)
  */
 export default function Home() {
   const { language } = useLanguage();
 
-  // Fetch real data from TMDB API
-  const { data: combinedContent, loading: loadingCombined } = useTMDBCombinedContent({ language });
-  const { data: popularMovies, loading: loadingMovies } = useTMDBPopularMovies({ language });
-  const { data: trendingMovies, loading: loadingTrending } = useTMDBTrendingMovies({ language });
-  const { data: popularSeries, loading: loadingSeries } = useTMDBPopularTVShows({ language });
+  // Fetch real data from backend API (which integrates with TMDB)
+  const { data: combinedContent, loading: loadingCombined } = useBackendCombinedContent({ language });
+  const { data: popularMovies, loading: loadingMovies } = useBackendPopularMovies({ language });
+  const { data: trendingMovies, loading: loadingTrending } = useBackendTrendingMovies({ language });
+  const { data: popularSeries, loading: loadingSeries } = useBackendPopularTVShows({ language });
 
   // Filter content by origin (Iranian vs Foreign)
   const foreignMovies = popularMovies?.filter(m => m.origin === "foreign") || [];
@@ -152,8 +152,8 @@ export default function Home() {
         <Box sx={{ p: 8, textAlign: 'center' }}>
           <Alert severity="info" sx={{ maxWidth: 600, mx: 'auto' }}>
             {language === 'fa' 
-              ? 'در حال بارگذاری محتوا از TMDB...' 
-              : 'Loading content from TMDB...'}
+              ? 'در حال بارگذاری محتوا...' 
+              : 'Loading content...'}
           </Alert>
         </Box>
       )}
