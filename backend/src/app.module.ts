@@ -36,18 +36,25 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
         const redisPort = configService.get<number>('REDIS_PORT', 6379);
         const ttl = configService.get<number>('CACHE_TTL', 60);
 
-        const store = (await redisStore({
-          socket: {
-            host: redisHost,
-            port: redisPort,
-          },
-          ttl,
-        })) as unknown as CacheStore;
+        try {
+          const store = (await redisStore({
+            socket: {
+              host: redisHost,
+              port: redisPort,
+            },
+            ttl,
+          })) as unknown as CacheStore;
 
-        return {
-          store,
-          ttl,
-        };
+          return {
+            store,
+            ttl,
+          };
+        } catch (error) {
+          console.warn('Redis connection failed, falling back to in-memory cache:', error.message);
+          return {
+            ttl,
+          };
+        }
       },
       inject: [ConfigService],
     }),

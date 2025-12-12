@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import { Content } from '../content/entities/content.entity';
-import { Subscription } from '../users/entities/subscription.entity';
+import { Content, ContentStatus } from '../content/entities/content.entity';
+import { Subscription, SubscriptionStatus } from '../users/entities/subscription.entity';
 import { WatchHistory } from '../watch-history/entities/watch-history.entity';
 import { VideoAsset } from '../video-assets/entities/video-asset.entity';
 
@@ -36,9 +36,9 @@ export class AnalyticsService {
       this.userRepository.count(),
       this.userRepository.count({ where: { isActive: true } }),
       this.contentRepository.count(),
-      this.contentRepository.count({ where: { status: 'published' } }),
+      this.contentRepository.count({ where: { status: ContentStatus.PUBLISHED } }),
       this.subscriptionRepository.count(),
-      this.subscriptionRepository.count({ where: { status: 'active' } }),
+      this.subscriptionRepository.count({ where: { status: SubscriptionStatus.ACTIVE } }),
       this.watchHistoryRepository.count(),
       this.getTotalBandwidth(),
     ]);
@@ -49,11 +49,11 @@ export class AnalyticsService {
 
     const dailyActiveUsers = await this.watchHistoryRepository
       .createQueryBuilder('wh')
-      .select("DATE(wh.created_at)", "date")
-      .addSelect("COUNT(DISTINCT wh.user_id)", "count")
-      .where("wh.created_at >= :date", { date: thirtyDaysAgo })
-      .groupBy("DATE(wh.created_at)")
-      .orderBy("DATE(wh.created_at)", "DESC")
+      .select('DATE(wh.created_at)', 'date')
+      .addSelect('COUNT(DISTINCT wh.user_id)', 'count')
+      .where('wh.created_at >= :date', { date: thirtyDaysAgo })
+      .groupBy('DATE(wh.created_at)')
+      .orderBy('DATE(wh.created_at)', 'DESC')
       .getRawMany();
 
     // Top performing content
@@ -67,9 +67,8 @@ export class AnalyticsService {
       .getRawMany();
 
     const contentIds = topContent.map((item) => item.contentId);
-    const contentDetails = contentIds.length > 0
-      ? await this.contentRepository.findBy({ id: contentIds as any })
-      : [];
+    const contentDetails =
+      contentIds.length > 0 ? await this.contentRepository.findBy({ id: contentIds as any }) : [];
 
     const topPerformingContent = topContent.map((item) => {
       const content = contentDetails.find((c) => c.id === item.contentId);
@@ -106,6 +105,9 @@ export class AnalyticsService {
         total: totalBandwidth,
         unit: 'GB',
       },
+      watchHistory: {
+        totalEntries: totalWatchHistory,
+      },
       growth: monthlyGrowth,
     };
   }
@@ -126,7 +128,7 @@ export class AnalyticsService {
 
     const userGrowth = await this.userRepository
       .createQueryBuilder('user')
-      .select("TO_CHAR(user.created_at, 'YYYY-MM')", "month")
+      .select("TO_CHAR(user.created_at, 'YYYY-MM')", 'month')
       .addSelect('COUNT(*)', 'count')
       .where('user.created_at >= :date', { date: sixMonthsAgo })
       .groupBy("TO_CHAR(user.created_at, 'YYYY-MM')")
@@ -135,7 +137,7 @@ export class AnalyticsService {
 
     const contentGrowth = await this.contentRepository
       .createQueryBuilder('content')
-      .select("TO_CHAR(content.created_at, 'YYYY-MM')", "month")
+      .select("TO_CHAR(content.created_at, 'YYYY-MM')", 'month')
       .addSelect('COUNT(*)', 'count')
       .where('content.created_at >= :date', { date: sixMonthsAgo })
       .groupBy("TO_CHAR(content.created_at, 'YYYY-MM')")
@@ -151,7 +153,7 @@ export class AnalyticsService {
   private async getSubscriptionRevenue(): Promise<number> {
     // Mock revenue calculation - replace with actual payment integration
     const activeSubs = await this.subscriptionRepository.find({
-      where: { status: 'active' },
+      where: { status: SubscriptionStatus.ACTIVE },
     });
 
     // Assuming average subscription price of $9.99/month

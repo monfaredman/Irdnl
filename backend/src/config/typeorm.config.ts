@@ -63,7 +63,7 @@ export const buildTypeOrmOptions = (config: ConfigLike): DataSourceOptions => {
       entities: ENTITIES,
       synchronize: isDevelopment,
       migrations: ['dist/migrations/*.js'],
-      migrationsRun: true,
+      migrationsRun: false,
       logging: isDevelopment,
     } satisfies DataSourceOptions;
   }
@@ -80,7 +80,7 @@ export const buildTypeOrmOptions = (config: ConfigLike): DataSourceOptions => {
     database: config.get<string>('DB_DATABASE', 'irdnl_db'),
     entities: ENTITIES,
     synchronize: false,
-    migrations: ['src/migrations/*.ts'],
+    migrations: isDevelopment ? [] : ['dist/migrations/*.js'],
     migrationsRun: false,
     logging: isDevelopment,
   } satisfies DataSourceOptions;
