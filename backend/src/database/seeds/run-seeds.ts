@@ -1,21 +1,21 @@
 import { DataSource } from 'typeorm';
-import { TypeOrmConfigService } from '../../config/typeorm.config';
 import { ConfigService } from '@nestjs/config';
+import { buildTypeOrmOptions } from '../../config/typeorm.config';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from '../../modules/users/entities/user.entity';
 import { Content, ContentType, ContentStatus } from '../../modules/content/entities/content.entity';
 import { Series } from '../../modules/content/entities/series.entity';
 import { Season } from '../../modules/content/entities/season.entity';
 import { Episode } from '../../modules/content/entities/episode.entity';
-import { VideoAsset, VideoAssetStatus } from '../../modules/video-assets/entities/video-asset.entity';
+import {
+  VideoAsset,
+  VideoAssetStatus,
+} from '../../modules/video-assets/entities/video-asset.entity';
 import { Subscription, SubscriptionStatus } from '../../modules/users/entities/subscription.entity';
 
 async function runSeeds() {
-  const configService = new ConfigService({
-    envFilePath: ['.env.local', '.env'],
-  });
-  const typeOrmConfig = new TypeOrmConfigService(configService);
-  const dataSource = new DataSource(typeOrmConfig.createTypeOrmOptions());
+  const configService = new ConfigService();
+  const dataSource = new DataSource(buildTypeOrmOptions(configService));
 
   try {
     await dataSource.initialize();
