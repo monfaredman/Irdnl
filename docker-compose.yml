@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: persiaplay-postgres
+    environment:
+      POSTGRES_USER: persiaplay
+      POSTGRES_PASSWORD: persiaplay123
+      POSTGRES_DB: persiaplay_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U persiaplay"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: persiaplay-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: persiaplay-backend
+    ports:
+      - "3001:3001"
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://persiaplay:persiaplay123@postgres:5432/persiaplay_db
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USERNAME: persiaplay
+      DB_PASSWORD: persiaplay123
+      DB_DATABASE: persiaplay_db
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-jwt-secret-key-min-32-characters-long
+      JWT_EXPIRES_IN: 15m
+      JWT_REFRESH_SECRET: dev-refresh-secret-key-min-32-characters-long
+      JWT_REFRESH_EXPIRES_IN: 7d
+      STORAGE_TYPE: local
+      STORAGE_LOCAL_PATH: /app/storage
+      SIGNED_URL_SECRET: dev-signed-url-secret-min-32-characters
+      SIGNED_URL_TTL: 3600
+    volumes:
+      - ./backend:/app
+      - ./backend/storage:/app/storage
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: npm run start:dev
+
+volumes:
+  postgres_data:
+  redis_data:
+
