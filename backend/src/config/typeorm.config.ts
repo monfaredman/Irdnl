@@ -13,6 +13,7 @@ import { WatchHistory } from '../modules/watch-history/entities/watch-history.en
 import { Subscription } from '../modules/users/entities/subscription.entity';
 import { Job } from '../modules/jobs/entities/job.entity';
 import { Watchlist } from '../modules/watchlist/entities/watchlist.entity';
+import { Notification } from '../modules/notifications/entities/notification.entity';
 
 loadEnvConfig();
 loadEnvConfig({ path: '.env.local', override: true });
@@ -28,6 +29,7 @@ const ENTITIES = [
   Subscription,
   Job,
   Watchlist,
+  Notification,
 ];
 
 type ConfigLike = {

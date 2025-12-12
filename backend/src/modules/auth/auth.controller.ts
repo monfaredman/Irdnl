@@ -6,7 +6,7 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -54,6 +54,44 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
   async logout(@CurrentUser() user: User) {
     return this.authService.logout(user.id);
+  }
+
+  @Post('admin/login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin login' })
+  @ApiResponse({ status: 200, description: 'Admin login successful' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 403, description: 'Not an admin account' })
+  async adminLogin(@Body() loginDto: LoginDto) {
+    return this.authService.adminLogin(loginDto);
+  }
+
+  @Post('admin/refresh')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Admin refresh token' })
+  @ApiResponse({ status: 200, description: 'Token refreshed' })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  async adminRefresh(@Body() refreshDto: RefreshDto) {
+    return this.authService.adminRefresh(refreshDto.refresh_token);
+  }
+
+  @Post('admin/reset')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request admin password reset' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          example: 'admin@example.com',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Password reset email sent' })
+  async adminResetPassword(@Body('email') email: string) {
+    return this.authService.requestPasswordReset(email, true);
   }
 }
 

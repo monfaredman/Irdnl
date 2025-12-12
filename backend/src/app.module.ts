@@ -15,6 +15,8 @@ import { WatchHistoryModule } from './modules/watch-history/watch-history.module
 import { WatchlistModule } from './modules/watchlist/watchlist.module';
 import { JobsModule } from './modules/jobs/jobs.module';
 import { HealthModule } from './modules/health/health.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -70,6 +72,8 @@ import { HealthModule } from './modules/health/health.module';
     WatchlistModule,
     JobsModule,
     HealthModule,
+    NotificationsModule,
+    AnalyticsModule,
   ],
 })
 export class AppModule {}

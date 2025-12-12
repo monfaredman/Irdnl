@@ -38,54 +38,64 @@ Production-ready NestJS backend for PersiaPlay streaming platform.
 ### Using Docker Compose (Recommended)
 
 1. Clone the repository and navigate to the backend directory:
+
 ```bash
 cd backend
 ```
 
 2. Copy environment variables:
+
 ```bash
 cp .env.example .env
 ```
 
 3. Start services:
+
 ```bash
 docker-compose up -d
 ```
 
 4. Run migrations:
+
 ```bash
 docker-compose exec backend npm run migration:run
 ```
 
 5. Seed the database:
+
 ```bash
 docker-compose exec backend npm run seed
 ```
 
 6. Access the API:
+
 - API: http://localhost:3001/api
 - Swagger: http://localhost:3001/api
 
 ### Manual Setup
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
 
 2. Set up environment variables (see `.env.example`):
+
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
 3. Start PostgreSQL and Redis:
+
 ```bash
 # Using Docker
 docker-compose up -d postgres redis
 ```
 
 4. Run migrations:
+
 ```bash
 npm run migration:run
 ```
@@ -94,16 +104,21 @@ If you see `permission denied for schema public`, grant your database role owner
 
 ```bash
 psql -h localhost -U postgres -f scripts/grant-db-access.sql
+or
+psql -d postgres -f scripts/grant-db-access.sql
+
 ```
 
 Update the host/user/password flags if you're running PostgreSQL elsewhere. After the script succeeds, re-run the migration command.
 
 5. Seed the database:
+
 ```bash
 npm run seed
 ```
 
 6. Start the development server:
+
 ```bash
 npm run start:dev
 ```
@@ -214,6 +229,7 @@ npm run seed
 ```
 
 This creates:
+
 - Admin user: `admin@persiaplay.local` / `Passw0rd!`
 - Regular users: `user1@example.com` / `password123`, `user2@example.com` / `password123`
 - 5 published movies
@@ -340,4 +356,3 @@ npm run start:prod
 ## License
 
 Private - PersiaPlay Platform
-
