@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { AuthForm } from "@/components/sections/AuthForm";
 
 export const metadata: Metadata = {
-  title: "Login | PersiaPlay",
-  description: "Secure OTP login for PersiaPlay accounts.",
+  title: "Login | irdnl",
+  description: "Secure OTP login for irdnl accounts.",
 };
 
 export default function LoginPage() {

@@ -9,7 +9,7 @@ This project now includes a **complete minimal design system** following strict 
 ## 📁 File Structure
 
 ```
-PersiaPlay/
+irdnl/
 ├── src/
 │   ├── theme/
 │   │   ├── theme.ts                  # Original vibrant theme

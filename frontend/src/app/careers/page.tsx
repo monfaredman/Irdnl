@@ -19,7 +19,7 @@ const translations = {
   en: {
     title: "Careers",
     subtitle: "Join our team and shape the future of streaming",
-    whyJoin: "Why Join PersiaPlay?",
+    whyJoin: "Why Join irdnl?",
     benefits: {
       growth: {
         title: "Career Growth",

@@ -3,8 +3,8 @@ import { Box, Container, Stack, Typography } from "@mui/material";
 import { SearchExperience } from "@/components/sections/SearchExperience";
 
 export const metadata: Metadata = {
-  title: "Search | PersiaPlay",
-  description: "Search across PersiaPlay's Persian movies and series catalog with filters for genre and year.",
+  title: "Search | irdnl",
+  description: "Search across irdnl's Persian movies and series catalog with filters for genre and year.",
 };
 
 export default function SearchPage() {

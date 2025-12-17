@@ -1,7 +1,7 @@
 /**
  * LIQUID GLASS DESIGN SYSTEM
  * 
- * Centralized design tokens and reusable styles for PersiaPlay
+ * Centralized design tokens and reusable styles for irdnl
  * Apple-inspired frosted glass aesthetic with Persian cultural elements
  * 
  * Usage:

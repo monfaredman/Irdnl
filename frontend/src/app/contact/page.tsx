@@ -61,10 +61,10 @@ const translations = {
 };
 
 const socialLinks = [
-  { icon: TelegramIcon, label: "Telegram", href: "https://t.me/persiaplay", color: "#0088CC" },
-  { icon: InstagramIcon, label: "Instagram", href: "https://instagram.com/persiaplay", color: "#E4405F" },
-  { icon: TwitterIcon, label: "Twitter", href: "https://twitter.com/persiaplay", color: "#1DA1F2" },
-  { icon: EmailIcon, label: "support@persiaplay.tv", href: "mailto:support@persiaplay.tv", color: glassColors.persianGold },
+  { icon: TelegramIcon, label: "Telegram", href: "https://t.me/irdnl", color: "#0088CC" },
+  { icon: InstagramIcon, label: "Instagram", href: "https://instagram.com/irdnl", color: "#E4405F" },
+  { icon: TwitterIcon, label: "Twitter", href: "https://twitter.com/irdnl", color: "#1DA1F2" },
+  { icon: EmailIcon, label: "support@irdnl.tv", href: "mailto:support@irdnl.tv", color: glassColors.persianGold },
 ];
 
 export default function ContactPage() {
@@ -284,7 +284,7 @@ export default function ContactPage() {
                 {t.supportText}
               </Typography>
               <Typography sx={{ color: glassColors.text.secondary, mt: 1 }}>
-                support@persiaplay.tv
+                support@irdnl.tv
               </Typography>
             </Box>
             <Box>
@@ -295,7 +295,7 @@ export default function ContactPage() {
                 {t.businessText}
               </Typography>
               <Typography sx={{ color: glassColors.text.secondary, mt: 1 }}>
-                business@persiaplay.tv
+                business@irdnl.tv
               </Typography>
             </Box>
           </Box>

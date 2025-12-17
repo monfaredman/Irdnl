@@ -1,6 +1,6 @@
 # Remaining Issues & Future Enhancements
 
-This document lists all remaining items and future enhancements for the PersiaPlay backend MVP.
+This document lists all remaining items and future enhancements for the irdnl backend MVP.
 
 ## 🔴 High Priority
 

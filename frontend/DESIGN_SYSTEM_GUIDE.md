@@ -1,6 +1,6 @@
 # 🎨 Liquid Glass Design System
 
-## Complete Design System Documentation for PersiaPlay
+## Complete Design System Documentation for irdnl
 
 ---
 
@@ -22,7 +22,7 @@
 
 ## 📖 **Overview**
 
-The Liquid Glass Design System is a comprehensive, reusable design language for PersiaPlay. It provides:
+The Liquid Glass Design System is a comprehensive, reusable design language for irdnl. It provides:
 
 - **Consistent glass morphism** effects across all components
 - **Persian cultural elements** integrated seamlessly
@@ -635,7 +635,7 @@ function HeroSection() {
       {/* Content */}
       <Container>
         <Typography sx={{ color: glassColors.text.primary }}>
-          Welcome to PersiaPlay
+          Welcome to irdnl
         </Typography>
       </Container>
     </Box>
@@ -809,4 +809,4 @@ glassColors.glass.border      // Borders
 
 **Version:** 1.0.0  
 **Last Updated:** December 9, 2025  
-**Maintained by:** PersiaPlay Design Team
+**Maintained by:** irdnl Design Team

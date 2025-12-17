@@ -198,10 +198,14 @@ export const PersianHero = () => {
               </Button>
               <Button
                 component={Link}
-                href="/movie-party"
+                // Disabled: route doesn't exist yet (would 404)
+                href="#"
+                onClick={(e) => e.preventDefault()}
                 variant="outlined"
                 startIcon={<GroupIcon />}
                 sx={{
+                  pointerEvents: "none",
+                  opacity: 0.6,
                   borderRadius: 2,
                   px: 4,
                   py: 1.5,

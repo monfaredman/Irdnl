@@ -3,24 +3,24 @@ version: '3.8'
 services:
   postgres:
     image: postgres:15-alpine
-    container_name: persiaplay-postgres
+    container_name: irdnl-postgres
     environment:
-      POSTGRES_USER: persiaplay
-      POSTGRES_PASSWORD: persiaplay123
-      POSTGRES_DB: persiaplay_db
+      POSTGRES_USER: irdnl
+      POSTGRES_PASSWORD: irdnl123
+      POSTGRES_DB: irdnl_db
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U persiaplay"]
+      test: ["CMD-SHELL", "pg_isready -U irdnl"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: persiaplay-redis
+    container_name: irdnl-redis
     ports:
       - "6379:6379"
     volumes:
@@ -35,18 +35,18 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: persiaplay-backend
+    container_name: irdnl-backend
     ports:
       - "3001:3001"
     environment:
       NODE_ENV: development
       PORT: 3001
-      DATABASE_URL: postgresql://persiaplay:persiaplay123@postgres:5432/persiaplay_db
+      DATABASE_URL: postgresql://irdnl:irdnl123@postgres:5432/irdnl_db
       DB_HOST: postgres
       DB_PORT: 5432
-      DB_USERNAME: persiaplay
-      DB_PASSWORD: persiaplay123
-      DB_DATABASE: persiaplay_db
+      DB_USERNAME: irdnl
+      DB_PASSWORD: irdnl123
+      DB_DATABASE: irdnl_db
       REDIS_HOST: redis
       REDIS_PORT: 6379
       REDIS_URL: redis://redis:6379

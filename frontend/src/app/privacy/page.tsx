@@ -53,7 +53,7 @@ const translations = {
       },
       {
         title: "10. Contact Us",
-        content: "For privacy-related questions or to exercise your rights, contact our Data Protection Officer at privacy@persiaplay.tv or through our Contact page.",
+        content: "For privacy-related questions or to exercise your rights, contact our Data Protection Officer at privacy@irdnl.tv or through our Contact page.",
       },
     ],
   },
@@ -100,7 +100,7 @@ const translations = {
       },
       {
         title: "۱۰. تماس با ما",
-        content: "برای سوالات مربوط به حریم خصوصی یا اعمال حقوق خود، با مسئول حفاظت از داده‌های ما در privacy@persiaplay.tv یا از طریق صفحه تماس با ما ارتباط برقرار کنید.",
+        content: "برای سوالات مربوط به حریم خصوصی یا اعمال حقوق خود، با مسئول حفاظت از داده‌های ما در privacy@irdnl.tv یا از طریق صفحه تماس با ما ارتباط برقرار کنید.",
       },
     ],
   },

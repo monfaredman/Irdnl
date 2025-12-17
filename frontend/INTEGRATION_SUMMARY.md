@@ -2,7 +2,7 @@
 
 ## ✅ Implementation Complete
 
-Both Persian font integration and TMDB API gateway have been successfully implemented in PersiaPlay.
+Both Persian font integration and TMDB API gateway have been successfully implemented in irdnl.
 
 ---
 
@@ -125,7 +125,7 @@ function MoviesPage() {
 ## 📁 File Structure
 
 ```
-PersiaPlay/
+irdnl/
 ├── .env.local ← Your API keys (DO NOT COMMIT)
 ├── .env.local.example ← Template for others
 ├── FONT_INTEGRATION_GUIDE.md ← Font documentation

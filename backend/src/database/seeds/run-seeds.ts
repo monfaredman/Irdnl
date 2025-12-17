@@ -40,10 +40,10 @@ async function runSeeds() {
 
     // Create admin user
     const adminPasswordHash = await bcrypt.hash('Passw0rd!', 10);
-    let admin = await userRepository.findOne({ where: { email: 'admin@persiaplay.local' } });
+    let admin = await userRepository.findOne({ where: { email: 'admin@irdnl.local' } });
     if (!admin) {
       admin = userRepository.create({
-        email: 'admin@persiaplay.local',
+        email: 'admin@irdnl.local',
         passwordHash: adminPasswordHash,
         name: 'Admin User',
         role: UserRole.ADMIN,
@@ -135,7 +135,7 @@ async function runSeeds() {
           type: ContentType.MOVIE,
           status: ContentStatus.PUBLISHED,
           licenseInfo: {
-            distributor: 'PersiaPlay Studios',
+            distributor: 'irdnl Studios',
             licenseDate: new Date().toISOString(),
           },
         });
@@ -160,7 +160,7 @@ async function runSeeds() {
         rating: 8.7,
         status: ContentStatus.PUBLISHED,
         licenseInfo: {
-          distributor: 'PersiaPlay Studios',
+          distributor: 'irdnl Studios',
           licenseDate: new Date().toISOString(),
         },
       });
@@ -229,7 +229,7 @@ async function runSeeds() {
 
     console.log('\n✅ Seed data created successfully!');
     console.log('\nLogin credentials:');
-    console.log('Admin: admin@persiaplay.local / Passw0rd!');
+    console.log('Admin: admin@irdnl.local / Passw0rd!');
     console.log('User 1: user1@example.com / password123');
     console.log('User 2: user2@example.com / password123');
 

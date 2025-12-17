@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines the architecture decisions and future enhancements for the PersiaPlay backend.
+This document outlines the architecture decisions and future enhancements for the irdnl backend.
 
 ## Current Architecture
 

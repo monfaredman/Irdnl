@@ -1,8 +1,8 @@
-# 🎨 PersiaPlay Minimal Design Redesign
+# 🎨 irdnl Minimal Design Redesign
 
 ## ✨ Complete Minimal Design System Implementation
 
-This redesign transforms PersiaPlay into a **strict minimalist** streaming platform following professional design principles. The entire design system is production-ready and fully documented.
+This redesign transforms irdnl into a **strict minimalist** streaming platform following professional design principles. The entire design system is production-ready and fully documented.
 
 ---
 
@@ -177,7 +177,7 @@ Generous spacing:
 ## 📁 File Structure
 
 ```
-PersiaPlay/
+irdnl/
 ├── Documentation (7 files)
 │   ├── README.md                           ← This file
 │   ├── MINIMAL_IMPLEMENTATION.md           ← Setup guide

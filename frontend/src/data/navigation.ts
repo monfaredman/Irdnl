@@ -20,8 +20,8 @@ export const FOOTER_LINKS = {
     { label: "Privacy", href: "/legal/privacy" },
   ],
   contact: [
-    { label: "Contact", href: "mailto:hello@persiaplay.tv" },
-    { label: "Telegram", href: "https://t.me/persiaplay" },
+    { label: "Contact", href: "mailto:hello@irdnl.tv" },
+    { label: "Telegram", href: "https://t.me/irdnl" },
   ],
   categories: [
     { label: "Drama", href: "/genres/drama" },
@@ -29,7 +29,7 @@ export const FOOTER_LINKS = {
     { label: "Comedy", href: "/genres/comedy" },
   ],
   social: [
-    { label: "Instagram", href: "https://instagram.com/persiaplay" },
-    { label: "YouTube", href: "https://youtube.com/persiaplay" },
+    { label: "Instagram", href: "https://instagram.com/irdnl" },
+    { label: "YouTube", href: "https://youtube.com/irdnl" },
   ],
 };

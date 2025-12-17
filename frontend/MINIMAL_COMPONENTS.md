@@ -109,7 +109,7 @@ HOME    MOVIES    SERIES
 ┌──────────────────────────────────────────────────────────┐
 │                        80px height                        │
 │                                                          │
-│  PersiaPlay    HOME  MOVIES  SERIES  GENRES   [SIGN IN] │
+│  irdnl    HOME  MOVIES  SERIES  GENRES   [SIGN IN] │
 │     ↑            ↑                               ↑       │
 │   Logo       Navigation                        CTA      │
 │   24px/600   16px/400                       Contained   │
@@ -137,7 +137,7 @@ HOME    MOVIES    SERIES
 │                                                          │
 │         64px spacing                                     │
 │                                                          │
-│  PersiaPlay        Legal           Contact              │ ← 20px/600
+│  irdnl        Legal           Contact              │ ← 20px/600
 │  Online streaming  Terms           Email                │ ← 14px/400
 │  platform          Privacy         Telegram             │
 │                    DMCA                                  │
@@ -147,7 +147,7 @@ HOME    MOVIES    SERIES
 │              1px solid #E5E5E5 divider                   │
 │         16px spacing                                     │
 │                                                          │
-│          © 2025 PersiaPlay. All rights reserved.        │ ← 14px/400
+│          © 2025 irdnl. All rights reserved.        │ ← 14px/400
 │                                                          │
 │         16px spacing                                     │
 └──────────────────────────────────────────────────────────┘

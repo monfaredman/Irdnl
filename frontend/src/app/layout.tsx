@@ -22,9 +22,9 @@ const vazirmatn = Vazirmatn({
 });
 
 export const metadata: Metadata = {
-  title: "PersiaPlay | Cinema Redefined",
+  title: "IrDnl | Cinema Redefined",
   description:
-    "Experience movies and series like never before with PersiaPlay's premium liquid glass interface.",
+    "Experience movies and series like never before with IrDnl's premium liquid glass interface.",
   keywords: [
     "Persian streaming",
     "Iranian series",
@@ -32,11 +32,11 @@ export const metadata: Metadata = {
     "premium streaming",
     "liquid glass design",
   ],
-  metadataBase: new URL("https://persiaplay.example"),
+  metadataBase: new URL("https://irdnl.example"),
   openGraph: {
-    title: "PersiaPlay - Cinema Redefined",
+    title: "IrDnl - Cinema Redefined",
     description: "Premium streaming experience with liquid glass design.",
-    siteName: "PersiaPlay",
+    siteName: "IrDnl",
     type: "website",
   },
 };

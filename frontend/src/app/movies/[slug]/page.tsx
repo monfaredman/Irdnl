@@ -10,9 +10,9 @@ interface MoviePageProps {
 export async function generateMetadata({ params }: MoviePageProps): Promise<Metadata> {
   const { slug } = params;
   const movie = getMovieBySlug(slug);
-  if (!movie) return { title: "Movie not found | PersiaPlay" };
+  if (!movie) return { title: "Movie not found | irdnl" };
   return {
-    title: `${movie.title} | PersiaPlay`,
+    title: `${movie.title} | irdnl`,
     description: movie.description,
   };
 }

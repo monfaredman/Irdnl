@@ -17,11 +17,11 @@ const translations = {
     sections: [
       {
         title: "1. Acceptance of Terms",
-        content: "By accessing and using PersiaPlay, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.",
+        content: "By accessing and using irdnl, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our services.",
       },
       {
         title: "2. Description of Service",
-        content: "PersiaPlay provides a streaming service that allows subscribers to access movies, TV shows, and other content over the internet. The content available may vary by geographic location and is subject to change.",
+        content: "irdnl provides a streaming service that allows subscribers to access movies, TV shows, and other content over the internet. The content available may vary by geographic location and is subject to change.",
       },
       {
         title: "3. Account Registration",
@@ -33,7 +33,7 @@ const translations = {
       },
       {
         title: "5. Content Usage",
-        content: "Content on PersiaPlay is for personal, non-commercial use only. You may not copy, reproduce, distribute, or create derivative works from our content without express written permission.",
+        content: "Content on irdnl is for personal, non-commercial use only. You may not copy, reproduce, distribute, or create derivative works from our content without express written permission.",
       },
       {
         title: "6. User Conduct",
@@ -41,7 +41,7 @@ const translations = {
       },
       {
         title: "7. Intellectual Property",
-        content: "All content, trademarks, and intellectual property on PersiaPlay are owned by us or our licensors. You do not acquire any ownership rights by using our services.",
+        content: "All content, trademarks, and intellectual property on irdnl are owned by us or our licensors. You do not acquire any ownership rights by using our services.",
       },
       {
         title: "8. Termination",
@@ -49,7 +49,7 @@ const translations = {
       },
       {
         title: "9. Limitation of Liability",
-        content: "PersiaPlay is provided 'as is' without warranties. We are not liable for any indirect, incidental, or consequential damages arising from your use of our services.",
+        content: "irdnl is provided 'as is' without warranties. We are not liable for any indirect, incidental, or consequential damages arising from your use of our services.",
       },
       {
         title: "10. Changes to Terms",

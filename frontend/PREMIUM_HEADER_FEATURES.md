@@ -37,7 +37,7 @@
 - Letter "P" in bold Persian Gold
 - Hover: Translatey(-2px) lift effect
 
-**Desktop:** Shows "PersiaPlay" text (hidden on mobile)
+**Desktop:** Shows "irdnl" text (hidden on mobile)
 
 ---
 

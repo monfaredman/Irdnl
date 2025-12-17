@@ -33,6 +33,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLanguage } from "@/providers/language-provider";
+import { routes } from "@/lib/routes";
 import { 
   glassColors, 
   glassBorderRadius, 
@@ -173,7 +174,7 @@ export function PremiumLiquidGlassHeader() {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+      window.location.href = `${routes.search}?q=${encodeURIComponent(searchQuery)}`;
     }
   };
 
@@ -412,7 +413,7 @@ export function PremiumLiquidGlassHeader() {
                     letterSpacing: "-0.02em",
                   }}
                 >
-                  PersiaPlay
+                  irdnl
                 </Box>
               </Box>
             </Link>

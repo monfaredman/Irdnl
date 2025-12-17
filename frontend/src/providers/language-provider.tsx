@@ -53,7 +53,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const stored = window.localStorage.getItem("persiaplay-language") as LanguageCode | null;
+      const stored = window.localStorage.getItem("irdnl-language") as LanguageCode | null;
       if (stored) {
         setLanguage(stored);
       }
@@ -72,7 +72,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   const updateLanguage = (code: LanguageCode) => {
     setLanguage(code);
     if (typeof window !== "undefined") {
-      window.localStorage.setItem("persiaplay-language", code);
+      window.localStorage.setItem("irdnl-language", code);
     }
   };
 

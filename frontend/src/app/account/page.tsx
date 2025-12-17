@@ -5,8 +5,8 @@ import { BillingHistory } from "@/components/sections/BillingHistory";
 import { SubscriptionPlans } from "@/components/sections/SubscriptionPlans";
 
 export const metadata: Metadata = {
-  title: "Account | PersiaPlay",
-  description: "Manage PersiaPlay profiles, billing, and device preferences.",
+  title: "Account | irdnl",
+  description: "Manage irdnl profiles, billing, and device preferences.",
 };
 
 export default function AccountPage() {

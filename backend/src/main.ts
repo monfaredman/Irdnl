@@ -33,8 +33,8 @@ async function bootstrap() {
 
   // Swagger/OpenAPI
   const config = new DocumentBuilder()
-    .setTitle('PersiaPlay API')
-    .setDescription('PersiaPlay streaming platform API documentation')
+    .setTitle('irdnl API')
+    .setDescription('irdnl streaming platform API documentation')
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('auth', 'Authentication endpoints')
@@ -47,7 +47,7 @@ async function bootstrap() {
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document, {
-    customSiteTitle: 'PersiaPlay API Docs',
+    customSiteTitle: 'irdnl API Docs',
   });
 
   await app.listen(port);

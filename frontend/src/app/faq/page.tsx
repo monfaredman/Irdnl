@@ -127,8 +127,8 @@ const faqData = [
       {
         q: "How do I report a problem?",
         qFa: "چگونه مشکل را گزارش کنم؟",
-        a: "Use the Contact Us page or email support@persiaplay.tv. Include your device type and a description of the issue.",
-        aFa: "از صفحه تماس با ما استفاده کنید یا به support@persiaplay.tv ایمیل بزنید. نوع دستگاه و شرح مشکل را ذکر کنید.",
+        a: "Use the Contact Us page or email support@irdnl.tv. Include your device type and a description of the issue.",
+        aFa: "از صفحه تماس با ما استفاده کنید یا به support@irdnl.tv ایمیل بزنید. نوع دستگاه و شرح مشکل را ذکر کنید.",
       },
       {
         q: "What internet speed do I need?",

@@ -33,7 +33,7 @@ const translations = {
     contact: {
       title: "Media Contact",
       description: "For press inquiries, please contact our media team",
-      email: "press@persiaplay.com",
+      email: "press@irdnl.com",
       phone: "+98 21 1234 5678",
     },
   },
@@ -55,7 +55,7 @@ const translations = {
     contact: {
       title: "تماس رسانه‌ای",
       description: "برای سوالات مطبوعاتی، با تیم رسانه ما تماس بگیرید",
-      email: "press@persiaplay.com",
+      email: "press@irdnl.com",
       phone: "۰۲۱-۱۲۳۴۵۶۷۸",
     },
   },
@@ -64,7 +64,7 @@ const translations = {
 const newsItems = [
   {
     id: 1,
-    title: "PersiaPlay Reaches 10 Million Subscribers",
+    title: "irdnl Reaches 10 Million Subscribers",
     titleFa: "پرشیاپلی به ۱۰ میلیون مشترک رسید",
     excerpt: "A major milestone for the leading Persian streaming platform",
     excerptFa: "دستاورد بزرگ برای پیشرو پلتفرم استریمینگ فارسی",
@@ -121,7 +121,7 @@ const newsItems = [
     id: 6,
     title: "Expansion to New Markets",
     titleFa: "گسترش به بازارهای جدید",
-    excerpt: "PersiaPlay now available in 20+ countries",
+    excerpt: "irdnl now available in 20+ countries",
     excerptFa: "پرشیاپلی اکنون در بیش از ۲۰ کشور در دسترس است",
     date: "2024-12-01",
     dateFa: "۱۴۰۳/۰۹/۱۱",

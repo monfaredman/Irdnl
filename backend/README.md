@@ -1,6 +1,6 @@
-# PersiaPlay Backend API
+# irdnl Backend API
 
-Production-ready NestJS backend for PersiaPlay streaming platform.
+Production-ready NestJS backend for irdnl streaming platform.
 
 ## Features
 
@@ -230,7 +230,7 @@ npm run seed
 
 This creates:
 
-- Admin user: `admin@persiaplay.local` / `Passw0rd!`
+- Admin user: `admin@irdnl.local` / `Passw0rd!`
 - Regular users: `user1@example.com` / `password123`, `user2@example.com` / `password123`
 - 5 published movies
 - 1 series with 2 seasons and 3 episodes each
@@ -282,7 +282,7 @@ curl -X POST http://localhost:3001/api/auth/register \
 curl -X POST http://localhost:3001/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "admin@persiaplay.local",
+    "email": "admin@irdnl.local",
     "password": "Passw0rd!"
   }'
 ```
@@ -355,4 +355,4 @@ npm run start:prod
 
 ## License
 
-Private - PersiaPlay Platform
+Private - irdnl Platform

@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useLanguage } from "@/providers/language-provider";
 import { liquidGlassColors } from "@/theme/liquid-glass-theme";
+import { routes } from "@/lib/routes";
 
 interface FooterLink {
   label: string;
@@ -29,36 +30,36 @@ const footerSections: FooterSection[] = [
     title: "Content",
     titleFa: "محتوا",
     links: [
-      { label: "Movies", labelFa: "فیلم‌ها", href: "/movies" },
-      { label: "Series", labelFa: "سریال‌ها", href: "/series" },
-      { label: "Genres", labelFa: "ژانرها", href: "/genres" },
+      { label: "Movies", labelFa: "فیلم‌ها", href: routes.movies },
+      { label: "Series", labelFa: "سریال‌ها", href: routes.series },
+      { label: "Genres", labelFa: "ژانرها", href: routes.genres },
     ],
   },
   {
     title: "Support",
     titleFa: "پشتیبانی",
     links: [
-      { label: "Help Center", labelFa: "مرکز راهنما", href: "/help" },
-      { label: "Contact", labelFa: "تماس", href: "/contact" },
-      { label: "FAQ", labelFa: "سوالات متداول", href: "/faq" },
+      { label: "Help Center", labelFa: "مرکز راهنما", href: routes.help },
+      { label: "Contact", labelFa: "تماس", href: routes.contact },
+      { label: "FAQ", labelFa: "سوالات متداول", href: routes.faq },
     ],
   },
   {
     title: "Company",
     titleFa: "شرکت",
     links: [
-      { label: "About Us", labelFa: "درباره ما", href: "/about" },
-      { label: "Careers", labelFa: "فرصت‌های شغلی", href: "/careers" },
-      { label: "Press", labelFa: "اخبار", href: "/press" },
+      { label: "About Us", labelFa: "درباره ما", href: routes.about },
+      { label: "Careers", labelFa: "فرصت‌های شغلی", href: routes.careers },
+      { label: "Press", labelFa: "اخبار", href: routes.press },
     ],
   },
   {
     title: "Legal",
     titleFa: "قانونی",
     links: [
-      { label: "Privacy", labelFa: "حریم خصوصی", href: "/privacy" },
-      { label: "Terms", labelFa: "شرایط استفاده", href: "/terms" },
-      { label: "Cookies", labelFa: "کوکی‌ها", href: "/cookies" },
+      { label: "Privacy", labelFa: "حریم خصوصی", href: routes.privacy },
+      { label: "Terms", labelFa: "شرایط استفاده", href: routes.terms },
+      { label: "Cookies", labelFa: "کوکی‌ها", href: routes.cookies },
     ],
   },
 ];
@@ -294,7 +295,7 @@ export function PremiumLiquidGlassFooter() {
                       fontFamily: language === "fa" ? "Vazirmatn" : "inherit",
                     }}
                   >
-                    {language === "fa" ? "پرشیاپلی" : "PersiaPlay"}
+                    {language === "fa" ? "پرشیاپلی" : "irdnl"}
                   </Typography>
                   <Typography
                     sx={{
@@ -410,7 +411,7 @@ export function PremiumLiquidGlassFooter() {
           >
             {language === "fa"
               ? `© ${new Date().getFullYear()} پرشیاپلی. تمام حقوق محفوظ است.`
-              : `© ${new Date().getFullYear()} PersiaPlay. All rights reserved.`}
+              : `© ${new Date().getFullYear()} irdnl. All rights reserved.`}
           </Typography>
 
           <Box

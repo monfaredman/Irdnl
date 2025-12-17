@@ -19,26 +19,26 @@ const subtitleTracks: SubtitleTrack[] = [
     id: "sub-fa",
     language: "fa",
     label: "فارسی",
-    url: "https://cdn.persiaplay.test/subs/sample-fa.vtt",
+    url: "https://cdn.irdnl.test/subs/sample-fa.vtt",
   },
   {
     id: "sub-en",
     language: "en",
     label: "English",
-    url: "https://cdn.persiaplay.test/subs/sample-en.vtt",
+    url: "https://cdn.irdnl.test/subs/sample-en.vtt",
   },
 ];
 
 const streamSources: StreamSource[] = [
   {
     quality: "1080p",
-    url: "https://cdn.persiaplay.test/streams/sample-1080.m3u8",
+    url: "https://cdn.irdnl.test/streams/sample-1080.m3u8",
     format: "HLS",
     drm: "widevine",
   },
   {
     quality: "720p",
-    url: "https://cdn.persiaplay.test/streams/sample-720.mpd",
+    url: "https://cdn.irdnl.test/streams/sample-720.mpd",
     format: "DASH",
   },
 ];
@@ -47,13 +47,13 @@ const downloadLinks: DownloadLink[] = [
   {
     quality: "1080p",
     size: "2.4 GB",
-    url: "https://cdn.persiaplay.test/downloads/movie-1080.mp4",
+    url: "https://cdn.irdnl.test/downloads/movie-1080.mp4",
     premium: true,
   },
   {
     quality: "720p",
     size: "1.2 GB",
-    url: "https://cdn.persiaplay.test/downloads/movie-720.mp4",
+    url: "https://cdn.irdnl.test/downloads/movie-720.mp4",
   },
 ];
 

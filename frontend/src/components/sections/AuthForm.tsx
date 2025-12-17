@@ -18,11 +18,11 @@ export const AuthForm = ({ mode }: AuthFormProps) => {
     if (mode === "register") {
       await sendTransactionalEmail({
         to: email,
-        subject: "Welcome to PersiaPlay",
+        subject: "Welcome to irdnl",
         html: "<p>Confirm your account</p>",
       });
     } else {
-      await sendOtp({ phone, message: "Your PersiaPlay OTP is 493201" });
+      await sendOtp({ phone, message: "Your irdnl OTP is 493201" });
     }
     setStatus("Check your inbox or phone to continue");
   };

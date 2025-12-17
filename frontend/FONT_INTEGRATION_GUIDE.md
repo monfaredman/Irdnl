@@ -2,7 +2,7 @@
 
 ## ✅ Implementation Complete
 
-Vazirmatn font has been successfully integrated into PersiaPlay for proper Persian/Farsi text rendering.
+Vazirmatn font has been successfully integrated into irdnl for proper Persian/Farsi text rendering.
 
 ---
 

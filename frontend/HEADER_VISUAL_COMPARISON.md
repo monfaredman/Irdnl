@@ -315,7 +315,7 @@ Mobile Drawer:
 ### **Desktop (≥960px)**
 ```
 ┌────────────────────────────────────────────────────┐
-│ [🔷 PersiaPlay]  ┏Movies┓ ┏Series┓ ┏Genres┓  [🔍→] [⭕] │
+│ [🔷 irdnl]  ┏Movies┓ ┏Series┓ ┏Genres┓  [🔍→] [⭕] │
 └────────────────────────────────────────────────────┘
    Full Logo        Nav Pills          Search  Avatar
 ```
@@ -323,7 +323,7 @@ Mobile Drawer:
 ### **Tablet (600-959px)**
 ```
 ┌─────────────────────────────────────────┐
-│ [🔷 PersiaPlay]    [🔍→] [⭕] [☰]      │
+│ [🔷 irdnl]    [🔍→] [⭕] [☰]      │
 └─────────────────────────────────────────┘
    Full Logo         Actions  Hamburger
 ```
@@ -374,7 +374,7 @@ Mobile Drawer:
 ```tsx
 <Box>
   <Typography variant="h6">
-    PersiaPlay
+    irdnl
   </Typography>
 </Box>
 ```
@@ -404,7 +404,7 @@ Mobile Drawer:
     letterSpacing: '-0.02em',
     display: { xs: 'none', sm: 'block' }
   }}>
-    PersiaPlay
+    irdnl
   </Typography>
 </Box>
 ```
@@ -530,4 +530,4 @@ Mobile Drawer:
 
 ---
 
-**Result:** A premium, Apple-inspired liquid glass header that elevates the entire PersiaPlay brand! 🎉✨
+**Result:** A premium, Apple-inspired liquid glass header that elevates the entire irdnl brand! 🎉✨

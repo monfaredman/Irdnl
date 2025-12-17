@@ -66,14 +66,14 @@
 ├────────────────────────────────────────────────────────────┤ 1px border
 │ FOOTER (64px padding)                                     │
 │                                                            │
-│ PersiaPlay         Legal          Contact                 │
+│ irdnl         Legal          Contact                 │
 │ Online streaming   Terms          Email                   │
 │                    Privacy        Telegram                │
 │                    DMCA                                    │
 │                                                            │
 │              32px spacing ↕                               │
 ├────────────────────────────────────────────────────────────┤ 1px border
-│              © 2025 PersiaPlay                            │ 14px center
+│              © 2025 irdnl                            │ 14px center
 └────────────────────────────────────────────────────────────┘
 ```
 

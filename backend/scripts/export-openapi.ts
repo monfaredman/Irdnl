@@ -7,8 +7,8 @@ async function exportOpenAPI() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('PersiaPlay API')
-    .setDescription('PersiaPlay streaming platform API documentation')
+    .setTitle('irdnl API')
+    .setDescription('irdnl streaming platform API documentation')
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('auth', 'Authentication endpoints')

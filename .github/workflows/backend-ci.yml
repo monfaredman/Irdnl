@@ -18,9 +18,9 @@ jobs:
       postgres:
         image: postgres:15-alpine
         env:
-          POSTGRES_USER: persiaplay
-          POSTGRES_PASSWORD: persiaplay123
-          POSTGRES_DB: persiaplay_test
+          POSTGRES_USER: irdnl
+          POSTGRES_PASSWORD: irdnl123
+          POSTGRES_DB: irdnl_test
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -60,7 +60,7 @@ jobs:
       - name: Run tests
         working-directory: ./backend
         env:
-          DATABASE_URL: postgresql://persiaplay:persiaplay123@localhost:5432/persiaplay_test
+          DATABASE_URL: postgresql://irdnl:irdnl123@localhost:5432/irdnl_test
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test-jwt-secret-key-min-32-characters-long
           JWT_REFRESH_SECRET: test-refresh-secret-key-min-32-characters
@@ -70,7 +70,7 @@ jobs:
       - name: Run E2E tests
         working-directory: ./backend
         env:
-          DATABASE_URL: postgresql://persiaplay:persiaplay123@localhost:5432/persiaplay_test
+          DATABASE_URL: postgresql://irdnl:irdnl123@localhost:5432/irdnl_test
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test-jwt-secret-key-min-32-characters-long
           JWT_REFRESH_SECRET: test-refresh-secret-key-min-32-characters
@@ -80,7 +80,7 @@ jobs:
       - name: Generate coverage report
         working-directory: ./backend
         env:
-          DATABASE_URL: postgresql://persiaplay:persiaplay123@localhost:5432/persiaplay_test
+          DATABASE_URL: postgresql://irdnl:irdnl123@localhost:5432/irdnl_test
           REDIS_URL: redis://localhost:6379
           JWT_SECRET: test-jwt-secret-key-min-32-characters-long
           JWT_REFRESH_SECRET: test-refresh-secret-key-min-32-characters

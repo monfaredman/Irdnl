@@ -10,9 +10,9 @@ interface SeriesPageProps {
 export async function generateMetadata({ params }: SeriesPageProps): Promise<Metadata> {
   const { slug } = params;
   const series = getSeriesBySlug(slug);
-  if (!series) return { title: "Series not found | PersiaPlay" };
+  if (!series) return { title: "Series not found | irdnl" };
   return {
-    title: `${series.title} | PersiaPlay`,
+    title: `${series.title} | irdnl`,
     description: series.description,
   };
 }

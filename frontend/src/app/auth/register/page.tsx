@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { AuthForm } from "@/components/sections/AuthForm";
 
 export const metadata: Metadata = {
-  title: "Register | PersiaPlay",
-  description: "Create a PersiaPlay account with secure email verification.",
+  title: "Register | irdnl",
+  description: "Create a irdnl account with secure email verification.",
 };
 
 export default function RegisterPage() {

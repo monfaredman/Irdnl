@@ -40,7 +40,7 @@ export const BannerAd = ({ placement }: BannerAdProps) => {
           color: theme.palette.primary.light,
         }}
       >
-        PersiaPlay Ad — {placement}
+        irdnl Ad — {placement}
       </Typography>
     </Box>
   );

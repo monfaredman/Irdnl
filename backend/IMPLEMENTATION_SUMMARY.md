@@ -1,4 +1,4 @@
-# PersiaPlay Backend Implementation Summary
+# irdnl Backend Implementation Summary
 
 ## ✅ Completed Features
 
@@ -95,7 +95,7 @@
 
 ### 13. Database Seeding
 - ✅ Seed script with sample data:
-  - Admin user (admin@persiaplay.local / Passw0rd!)
+  - Admin user (admin@irdnl.local / Passw0rd!)
   - 2 regular users
   - 5 published movies
   - 1 series with 2 seasons, 3 episodes each
