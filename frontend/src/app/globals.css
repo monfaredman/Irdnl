@@ -3,21 +3,37 @@
 
 /* Keep only essential global styles */
 * {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 html {
-  scroll-behavior: smooth;
+	scroll-behavior: smooth;
+}
+
+/* PremiumLiquidGlass CSS variables (used by premium pages/components) */
+:root {
+	--premium-gradient: linear-gradient(
+		135deg,
+		rgba(245, 158, 11, 0.55),
+		rgba(245, 158, 11, 0.12)
+	);
+	--glass-bg: rgba(255, 255, 255, 0.05);
+	--glass-border: rgba(255, 255, 255, 0.12);
 }
 
 /* RTL Support for Persian Content */
 [dir="rtl"] {
-  font-family: var(--font-vazirmatn), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+	font-family:
+		var(--font-vazirmatn), -apple-system, BlinkMacSystemFont, "SF Pro Display",
+		sans-serif;
 }
 
 /* Improve Persian text rendering */
 [lang="fa"] {
-  font-feature-settings: "kern" 1, "liga" 1, "calt" 1;
-  text-rendering: optimizeLegibility;
+	font-feature-settings:
+		"kern" 1,
+		"liga" 1,
+		"calt" 1;
+	text-rendering: optimizeLegibility;
 }

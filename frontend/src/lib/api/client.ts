@@ -1,104 +1,116 @@
 /**
  * Backend API Client
- * 
+ *
  * Type-safe client for communicating with the NestJS backend API
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL =
+	process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+
+type QueryParamPrimitive = string | number | boolean | null | undefined;
+
+export type QueryParams = Record<string, QueryParamPrimitive>;
 
 interface RequestOptions extends RequestInit {
-  params?: Record<string, string | number | boolean>;
+	params?: object;
 }
 
 class ApiClient {
-  private baseUrl: string;
+	private baseUrl: string;
 
-  constructor(baseUrl: string) {
-    this.baseUrl = baseUrl;
-  }
+	constructor(baseUrl: string) {
+		this.baseUrl = baseUrl;
+	}
 
-  private buildUrl(endpoint: string, params?: Record<string, string | number | boolean>): string {
-    const url = new URL(`${this.baseUrl}${endpoint}`);
-    
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.set(key, String(value));
-        }
-      });
-    }
+	private buildUrl(endpoint: string, params?: object): string {
+		const url = new URL(`${this.baseUrl}${endpoint}`);
 
-    return url.toString();
-  }
+		if (params) {
+			Object.entries(params as Record<string, unknown>).forEach(
+				([key, value]) => {
+					if (value === undefined || value === null) return;
+					// Only serialize primitives cleanly.
+					if (
+						typeof value === "string" ||
+						typeof value === "number" ||
+						typeof value === "boolean"
+					) {
+						url.searchParams.set(key, String(value));
+					}
+				},
+			);
+		}
 
-  private async request<T>(
-    endpoint: string,
-    options: RequestOptions = {}
-  ): Promise<T> {
-    const { params, ...fetchOptions } = options;
-    const url = this.buildUrl(endpoint, params);
+		return url.toString();
+	}
 
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-      ...fetchOptions.headers,
-    };
+	private async request<T>(
+		endpoint: string,
+		options: RequestOptions = {},
+	): Promise<T> {
+		const { params, ...fetchOptions } = options;
+		const url = this.buildUrl(endpoint, params);
 
-    // Add auth token if available
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
-    }
+		const headers = new Headers(fetchOptions.headers);
+		if (!headers.has("Content-Type")) {
+			headers.set("Content-Type", "application/json");
+		}
 
-    try {
-      const response = await fetch(url, {
-        ...fetchOptions,
-        headers,
-        credentials: 'include',
-      });
+		// Add auth token if available
+		if (typeof window !== "undefined") {
+			const token = localStorage.getItem("access_token");
+			if (token) {
+				headers.set("Authorization", `Bearer ${token}`);
+			}
+		}
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({
-          message: response.statusText,
-          status: response.status,
-        }));
-        throw new Error(error.message || `API error: ${response.status}`);
-      }
+		try {
+			const response = await fetch(url, {
+				...fetchOptions,
+				headers,
+				credentials: "include",
+			});
 
-      return await response.json();
-    } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Network error occurred');
-    }
-  }
+			if (!response.ok) {
+				const error = await response.json().catch(() => ({
+					message: response.statusText,
+					status: response.status,
+				}));
+				throw new Error(error.message || `API error: ${response.status}`);
+			}
 
-  async get<T>(endpoint: string, params?: Record<string, string | number | boolean>): Promise<T> {
-    return this.request<T>(endpoint, { method: 'GET', params });
-  }
+			return await response.json();
+		} catch (error) {
+			if (error instanceof Error) {
+				throw error;
+			}
+			throw new Error("Network error occurred");
+		}
+	}
 
-  async post<T>(endpoint: string, data?: unknown, params?: Record<string, string | number | boolean>): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'POST',
-      body: data ? JSON.stringify(data) : undefined,
-      params,
-    });
-  }
+	async get<T>(endpoint: string, params?: object): Promise<T> {
+		return this.request<T>(endpoint, { method: "GET", params });
+	}
 
-  async put<T>(endpoint: string, data?: unknown, params?: Record<string, string | number | boolean>): Promise<T> {
-    return this.request<T>(endpoint, {
-      method: 'PUT',
-      body: data ? JSON.stringify(data) : undefined,
-      params,
-    });
-  }
+	async post<T>(endpoint: string, data?: unknown, params?: object): Promise<T> {
+		return this.request<T>(endpoint, {
+			method: "POST",
+			body: data ? JSON.stringify(data) : undefined,
+			params,
+		});
+	}
 
-  async delete<T>(endpoint: string, params?: Record<string, string | number | boolean>): Promise<T> {
-    return this.request<T>(endpoint, { method: 'DELETE', params });
-  }
+	async put<T>(endpoint: string, data?: unknown, params?: object): Promise<T> {
+		return this.request<T>(endpoint, {
+			method: "PUT",
+			body: data ? JSON.stringify(data) : undefined,
+			params,
+		});
+	}
+
+	async delete<T>(endpoint: string, params?: object): Promise<T> {
+		return this.request<T>(endpoint, { method: "DELETE", params });
+	}
 }
 
 export const apiClient = new ApiClient(API_BASE_URL);
-

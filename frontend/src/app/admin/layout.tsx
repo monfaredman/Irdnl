@@ -1,21 +1,20 @@
-'use client';
+"use client";
 
-import { AdminLayout } from '@/components/admin/AdminLayout';
-import { usePathname } from 'next/navigation';
+import { usePathname } from "next/navigation";
+import { AdminLayout } from "@/components/admin/AdminLayout";
 
 export default function AdminLayoutWrapper({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-  const isLoginPage = pathname === '/admin/login';
+	const pathname = usePathname();
+	const isLoginPage = pathname === "/admin/login";
 
-  // Login page should render without the admin sidebar
-  if (isLoginPage) {
-    return <>{children}</>;
-  }
+	// Login page should render without the admin sidebar
+	if (isLoginPage) {
+		return <>{children}</>;
+	}
 
-  return <AdminLayout>{children}</AdminLayout>;
+	return <AdminLayout>{children}</AdminLayout>;
 }
-

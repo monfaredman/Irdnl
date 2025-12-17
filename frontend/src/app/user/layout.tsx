@@ -1,9 +1,9 @@
 import { UserLayout } from "@/components/layout/UserLayout";
 
 export default function UserRootLayout({
-  children,
+	children,
 }: {
-  children: React.ReactNode;
+	children: React.ReactNode;
 }) {
-  return <UserLayout>{children}</UserLayout>;
+	return <UserLayout>{children}</UserLayout>;
 }
