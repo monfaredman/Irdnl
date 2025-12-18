@@ -1,8 +1,9 @@
 "use client";
 
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import StarIcon from "@mui/icons-material/Star";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 import { Box, Chip, Typography } from "@mui/material";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -22,30 +23,51 @@ interface GridOffersSectionProps {
 
 type ChipType = "dubbed" | "free" | "subtitle";
 
-interface GridCell {
+// Fixed layout configuration for 7 items
+// Grid dimensions based on requirements:
+// - 688 × 374 pixels: 1 item (large horizontal) - colSpan: 2, rowSpan: 2
+// - 335 × 178 pixels: 4 items (small) - colSpan: 1, rowSpan: 1
+// - 688 × 178 pixels: 1 item (medium horizontal) - colSpan: 2, rowSpan: 1
+// - 335 × 374 pixels: 1 item (poster type) - colSpan: 1, rowSpan: 2
+
+interface GridItemConfig {
 	id: number;
-	itemIndex: number;
 	colSpan: number;
 	rowSpan: number;
+	gridColumn: string;
+	gridRow: string;
+	width: number;
+	height: number;
+	type: "large" | "small" | "medium" | "poster";
 }
 
-const STORAGE_KEY = "gridOffersLayoutV3";
-const TOTAL_COLS = 4;
-const ITEM_COUNT = 11;
+const ITEM_COUNT = 7;
 
-// Initial layout with varied sizes
-const createInitialLayout = (): GridCell[] => [
-	{ id: 0, itemIndex: 0, colSpan: 2, rowSpan: 2 },
-	{ id: 1, itemIndex: 1, colSpan: 1, rowSpan: 1 },
-	{ id: 2, itemIndex: 2, colSpan: 1, rowSpan: 2 },
-	{ id: 3, itemIndex: 3, colSpan: 1, rowSpan: 1 },
-	{ id: 4, itemIndex: 4, colSpan: 1, rowSpan: 1 },
-	{ id: 5, itemIndex: 5, colSpan: 2, rowSpan: 1 },
-	{ id: 6, itemIndex: 6, colSpan: 1, rowSpan: 1 },
-	{ id: 7, itemIndex: 7, colSpan: 1, rowSpan: 2 },
-	{ id: 8, itemIndex: 8, colSpan: 2, rowSpan: 2 },
-	{ id: 9, itemIndex: 9, colSpan: 1, rowSpan: 1 },
-	{ id: 10, itemIndex: 10, colSpan: 1, rowSpan: 1 },
+// Define a key for storing layout in localStorage
+const STORAGE_KEY = "grid_offers_layout";
+
+// Fixed grid layout configuration
+// Layout pattern:
+// Row 1-2: [Large 688x374] [Small 335x178] [Poster 335x374]
+// Row 2:   [continued]     [Small 335x178] [continued]
+// Row 3:   [Medium 688x178]               [Small 335x178] [Small 335x178]
+const TOTAL_COLS = 4; // Define the total number of columns in the grid
+
+const GRID_CONFIG: GridItemConfig[] = [
+	// Large horizontal (688 × 374) - Position: top-left
+	{ id: 0, colSpan: 2, rowSpan: 2, gridColumn: "1 / span 2", gridRow: "1 / span 2", width: 688, height: 374, type: "large" },
+	// Small (335 × 178) - Position: top-middle
+	{ id: 1, colSpan: 1, rowSpan: 1, gridColumn: "3 / span 1", gridRow: "1 / span 1", width: 335, height: 178, type: "small" },
+	// Poster type (335 × 374) - Position: top-right
+	{ id: 2, colSpan: 1, rowSpan: 2, gridColumn: "4 / span 1", gridRow: "1 / span 2", width: 335, height: 374, type: "poster" },
+	// Small (335 × 178) - Position: middle-middle
+	{ id: 3, colSpan: 1, rowSpan: 1, gridColumn: "3 / span 1", gridRow: "2 / span 1", width: 335, height: 178, type: "small" },
+	// Medium horizontal (688 × 178) - Position: bottom-left
+	{ id: 4, colSpan: 2, rowSpan: 1, gridColumn: "1 / span 2", gridRow: "3 / span 1", width: 688, height: 178, type: "medium" },
+	// Small (335 × 178) - Position: bottom-middle
+	{ id: 5, colSpan: 1, rowSpan: 1, gridColumn: "3 / span 1", gridRow: "3 / span 1", width: 335, height: 178, type: "small" },
+	// Small (335 × 178) - Position: bottom-right
+	{ id: 6, colSpan: 1, rowSpan: 1, gridColumn: "4 / span 1", gridRow: "3 / span 1", width: 335, height: 178, type: "small" },
 ];
 
 const getChipLabel = (type: ChipType, language: string): string => {
@@ -98,7 +120,12 @@ export const GridOffersSection = ({ items }: GridOffersSectionProps) => {
 				// Ignore parse errors
 			}
 		}
-		return createInitialLayout();
+		return GRID_CONFIG.map((config, index) => ({
+			id: config.id,
+			colSpan: config.colSpan,
+			rowSpan: config.rowSpan,
+			itemIndex: index,
+		}));
 	});
 
 	// Persist layout changes
