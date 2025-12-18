@@ -7,6 +7,7 @@ import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
 import { FiltersSection } from "@/components/sections/FiltersSection";
 import { IOSWidgetGridSection } from "@/components/sections/IOSWidgetGridSection";
 import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
+import { MainPageSkeleton } from "@/components/layout/SkeletonLoader";
 import {
 	useBackendFilteredContent,
 	useBackendCombinedContent,
@@ -94,20 +95,9 @@ export default function Home() {
 	const iranianSeries =
 		popularSeries?.filter((s) => s.origin === "iranian") || [];
 
-	// Loading state
+	// Loading state - Show beautiful skeleton instead of spinner
 	if (loadingCombined || loadingMovies || loadingTrending || loadingSeries) {
-		return (
-			<Box
-				sx={{
-					minHeight: "100vh",
-					display: "flex",
-					alignItems: "center",
-					justifyContent: "center",
-				}}
-			>
-				<CircularProgress sx={{ color: "#F59E0B" }} size={60} />
-			</Box>
-		);
+		return <MainPageSkeleton />;
 	}
 
 	return (

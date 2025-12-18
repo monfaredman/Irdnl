@@ -106,6 +106,16 @@ html {
 	}
 }
 
+/* Shimmer Translate (for skeleton loader) */
+@keyframes shimmerTranslate {
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
+}
+
 /* Fade Up for Section Entrance */
 @keyframes fadeUp {
 	from {
@@ -127,6 +137,42 @@ html {
 	to {
 		opacity: 1;
 		transform: scale(1);
+	}
+}
+
+/* Skeleton Pulse Animation */
+@keyframes skeletonPulse {
+	0%,
+	100% {
+		opacity: 0.6;
+		background-color: rgba(255, 255, 255, 0.05);
+	}
+	50% {
+		opacity: 1;
+		background-color: rgba(255, 255, 255, 0.08);
+	}
+}
+
+/* Skeleton Wave Animation (for staggered loading) */
+@keyframes skeletonWave {
+	0% {
+		opacity: 0;
+		transform: translateY(20px) scale(0.95);
+	}
+	100% {
+		opacity: 1;
+		transform: translateY(0) scale(1);
+	}
+}
+
+/* Random Glow Effect for Skeleton Cards */
+@keyframes randomGlow {
+	0%,
+	100% {
+		box-shadow: 0 0 10px rgba(245, 158, 11, 0);
+	}
+	50% {
+		box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
 	}
 }
 
@@ -167,6 +213,54 @@ html {
 	);
 	background-size: 1000px 100%;
 	animation: shimmer 2s infinite;
+}
+
+/* Skeleton Loading Classes */
+.skeleton-shimmer {
+	position: relative;
+	overflow: hidden;
+}
+
+.skeleton-shimmer::after {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: -100%;
+	width: 100%;
+	height: 100%;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(255, 255, 255, 0.1),
+		transparent
+	);
+	animation: shimmerTranslate 2s infinite;
+}
+
+/* Staggered Delays for Skeleton Elements */
+.skeleton-delay-1 {
+	animation-delay: 0.1s;
+}
+.skeleton-delay-2 {
+	animation-delay: 0.2s;
+}
+.skeleton-delay-3 {
+	animation-delay: 0.3s;
+}
+.skeleton-delay-4 {
+	animation-delay: 0.4s;
+}
+.skeleton-delay-5 {
+	animation-delay: 0.5s;
+}
+.skeleton-delay-6 {
+	animation-delay: 0.6s;
+}
+.skeleton-delay-7 {
+	animation-delay: 0.7s;
+}
+.skeleton-delay-8 {
+	animation-delay: 0.8s;
 }
 
 /* Smooth Scroll for Galleries */
