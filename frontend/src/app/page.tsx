@@ -4,7 +4,7 @@ import { Alert, Box, CircularProgress } from "@mui/material";
 import { BannerCarousel } from "@/components/sections/BannerCarousel";
 import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
 import { FiltersSection } from "@/components/sections/FiltersSection";
-import { GridOffersSection } from "@/components/sections/GridOffersSection";
+import { IOSWidgetGridSection } from "@/components/sections/IOSWidgetGridSection";
 import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
 import {
 	useBackendCombinedContent,
@@ -78,9 +78,9 @@ export default function Home() {
 				/>
 			)}
 
-			{/* Offers Section - 11 draggable cards with varying sizes */}
+			{/* iOS-Style Widget Grid - Drag & Drop */}
 			{combinedContent && combinedContent.length > 0 && (
-				<GridOffersSection items={combinedContent} />
+				<IOSWidgetGridSection items={combinedContent} />
 			)}
 
 			{/* Filters Section */}

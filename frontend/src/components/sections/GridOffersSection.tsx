@@ -41,6 +41,13 @@ interface GridItemConfig {
 	type: "large" | "small" | "medium" | "poster";
 }
 
+interface GridCell {
+	id: number;
+	colSpan: number;
+	rowSpan: number;
+	itemIndex: number;
+}
+
 const ITEM_COUNT = 7;
 
 // Define a key for storing layout in localStorage
