@@ -37,3 +37,151 @@ html {
 		"calt" 1;
 	text-rendering: optimizeLegibility;
 }
+
+/* ============================================================================ */
+/* CINEMATIC ITEM PAGE ANIMATIONS */
+/* ============================================================================ */
+
+/* Liquid Ripple Effect for Play Button */
+@keyframes liquidRipple {
+	0% {
+		transform: scale(0);
+		opacity: 0.8;
+	}
+	50% {
+		opacity: 0.4;
+	}
+	100% {
+		transform: scale(2.5);
+		opacity: 0;
+	}
+}
+
+/* Shine Sweep Animation */
+@keyframes shineSweep {
+	0% {
+		transform: translateX(-100%) skewX(-15deg);
+		opacity: 0;
+	}
+	50% {
+		opacity: 0.5;
+	}
+	100% {
+		transform: translateX(100%) skewX(-15deg);
+		opacity: 0;
+	}
+}
+
+/* Glow Pulse for Ratings */
+@keyframes glowPulse {
+	0%,
+	100% {
+		opacity: 0.6;
+		filter: blur(10px);
+	}
+	50% {
+		opacity: 1;
+		filter: blur(15px);
+	}
+}
+
+/* Float Animation for Glass Panels */
+@keyframes floatPanel {
+	0%,
+	100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-10px);
+	}
+}
+
+/* Shimmer for Loading Images */
+@keyframes shimmer {
+	0% {
+		background-position: -1000px 0;
+	}
+	100% {
+		background-position: 1000px 0;
+	}
+}
+
+/* Fade Up for Section Entrance */
+@keyframes fadeUp {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Scale In for Images */
+@keyframes scaleIn {
+	from {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+/* Utility Classes for Cinematic Effects */
+.cinematic-entrance {
+	animation: fadeUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.glass-float {
+	animation: floatPanel 6s ease-in-out infinite;
+}
+
+.liquid-shine {
+	position: relative;
+	overflow: hidden;
+}
+
+.liquid-shine::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(255, 255, 255, 0.3),
+		transparent
+	);
+	animation: shineSweep 3s ease-in-out infinite;
+}
+
+/* Image Loading State */
+.image-loading {
+	background: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0.02) 0%,
+		rgba(255, 255, 255, 0.08) 50%,
+		rgba(255, 255, 255, 0.02) 100%
+	);
+	background-size: 1000px 100%;
+	animation: shimmer 2s infinite;
+}
+
+/* Smooth Scroll for Galleries */
+.smooth-scroll {
+	scroll-behavior: smooth;
+	-webkit-overflow-scrolling: touch;
+}
+
+/* Hide Scrollbar but Keep Functionality (for certain components) */
+.hide-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+
