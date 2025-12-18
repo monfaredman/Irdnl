@@ -7,9 +7,12 @@ type NavLink = {
 
 export const NAV_LINKS: NavLink[] = [
 	{ href: "/", translationKey: "home" },
-	{ href: "/movies", translationKey: "movies" },
+	{ href: "/movies/foreign", translationKey: "foreignMovies" },
+	{ href: "/movies/iranian", translationKey: "iranianMovies" },
 	{ href: "/series", translationKey: "series" },
-	{ href: "/genres", translationKey: "genres" },
+	{ href: "/animation", translationKey: "animation" },
+	{ href: "/anime", translationKey: "anime" },
+	{ href: "/category", translationKey: "category" },
 	{ href: "/search", translationKey: "search" },
 ];
 
@@ -24,9 +27,10 @@ export const FOOTER_LINKS = {
 		{ label: "Telegram", href: "https://t.me/irdnl" },
 	],
 	categories: [
-		{ label: "Drama", href: "/genres/drama" },
-		{ label: "Thriller", href: "/genres/thriller" },
-		{ label: "Comedy", href: "/genres/comedy" },
+		{ label: "Foreign Movies", href: "/movies/foreign" },
+		{ label: "Iranian Movies", href: "/movies/iranian" },
+		{ label: "Animation", href: "/animation" },
+		{ label: "Anime", href: "/anime" },
 	],
 	social: [
 		{ label: "Instagram", href: "https://instagram.com/irdnl" },

@@ -36,9 +36,22 @@ const footerSections: FooterSection[] = [
 		title: "Content",
 		titleFa: "محتوا",
 		links: [
-			{ label: "Movies", labelFa: "فیلم‌ها", href: routes.movies },
-			{ label: "Series", labelFa: "سریال‌ها", href: routes.series },
-			{ label: "Genres", labelFa: "ژانرها", href: routes.genres },
+			{ label: "Foreign Movies", labelFa: "فیلم خارجی", href: "/movies/foreign" },
+			{ label: "Iranian Movies", labelFa: "فیلم ایرانی", href: "/movies/iranian" },
+			{ label: "Foreign Series", labelFa: "سریال خارجی", href: "/series/foreign" },
+			{ label: "Iranian Series", labelFa: "سریال ایرانی", href: "/series/iranian" },
+			{ label: "Animation", labelFa: "انیمیشن", href: "/animation" },
+			{ label: "Anime", labelFa: "انیمه", href: "/anime" },
+		],
+	},
+	{
+		title: "Categories",
+		titleFa: "دسته‌بندی",
+		links: [
+			{ label: "Coming Soon", labelFa: "به‌زودی", href: "/category/coming-soon" },
+			{ label: "Collections", labelFa: "مجموعه‌ها", href: "/category/collections" },
+			{ label: "Kids Zone", labelFa: "کودکان", href: "/category/kids" },
+			{ label: "Dubbed", labelFa: "دوبله", href: "/dubbed" },
 		],
 	},
 	{

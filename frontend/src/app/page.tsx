@@ -165,7 +165,7 @@ export default function Home() {
 					title={language === "fa" ? "فیلم جدید" : "New Movies"}
 					items={trendingMovies}
 					type="movie"
-					viewAllHref="/movies?sort=new"
+					viewAllHref="/movies/foreign"
 				/>
 			)}
 
@@ -184,7 +184,7 @@ export default function Home() {
 					title={language === "fa" ? "سریال خارجی" : "Foreign Series"}
 					items={foreignSeries}
 					type="series"
-					viewAllHref="/series?origin=foreign"
+					viewAllHref="/series/foreign"
 				/>
 			)}
 
@@ -194,7 +194,7 @@ export default function Home() {
 					title={language === "fa" ? "سریال ایرانی جدید" : "New Iranian Series"}
 					items={iranianSeries}
 					type="series"
-					viewAllHref="/series?origin=iranian"
+					viewAllHref="/series/iranian"
 				/>
 			)}
 
@@ -213,7 +213,7 @@ export default function Home() {
 					title={language === "fa" ? "دوبله فارسی جدید" : "New Persian Dubbed"}
 					items={foreignMovies.slice(0, 8)}
 					type="movie"
-					viewAllHref="/movies?dubbed=true"
+					viewAllHref="/dubbed"
 				/>
 			)}
 
@@ -223,7 +223,7 @@ export default function Home() {
 					title={language === "fa" ? "انیمیشن" : "Animation"}
 					items={popularMovies.slice(0, 8)}
 					type="movie"
-					viewAllHref="/genres?type=animation"
+					viewAllHref="/animation"
 				/>
 			)}
 
