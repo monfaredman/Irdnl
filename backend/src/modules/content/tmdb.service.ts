@@ -67,6 +67,12 @@ export class TMDBService {
     if (!this.apiKey) {
       console.warn('TMDB_API_KEY is not set. TMDB features will not work.');
     }
+
+    // Log proxy configuration if set
+    const proxyHost = this.configService.get<string>('HTTP_PROXY') || this.configService.get<string>('HTTPS_PROXY');
+    if (proxyHost) {
+      this.logger.log(`Using proxy: ${proxyHost}`);
+    }
   }
 
   private isProbablyProxyNetworkError(error: unknown): boolean {
