@@ -312,6 +312,200 @@ export class TMDBService {
     );
   }
 
+  async discoverMovies(
+    language: 'en' | 'fa' = 'en',
+    options: {
+      genre?: string;
+      year?: number;
+      certification?: string;
+      country?: string;
+      page?: number;
+    } = {},
+  ): Promise<TMDBResponse<TMDBMovie>> {
+    const { genre, year, certification, country, page = 1 } = options;
+    const cacheKey = `tmdb:discover_movies:${language}:${genre}:${year}:${certification}:${country}:${page}`;
+    
+    const params: any = {
+      language: language === 'fa' ? 'fa-IR' : 'en-US',
+      page,
+      sort_by: 'popularity.desc',
+    };
+    
+    if (genre && genre !== 'all') {
+      // Map genre names to TMDB genre IDs
+      const genreMap: Record<string, number> = {
+        action: 28,
+        adventure: 12,
+        animation: 16,
+        comedy: 35,
+        crime: 80,
+        documentary: 99,
+        drama: 18,
+        family: 10751,
+        fantasy: 14,
+        history: 36,
+        horror: 27,
+        music: 10402,
+        mystery: 9648,
+        romance: 10749,
+        'science fiction': 878,
+        thriller: 53,
+        war: 10752,
+        western: 37,
+      };
+      
+      const genreId = genreMap[genre.toLowerCase()];
+      if (genreId) {
+        params.with_genres = genreId;
+      }
+    }
+    
+    if (year) {
+      params.primary_release_year = year;
+    }
+    
+    // Map age ratings to TMDB certifications
+    if (certification && certification !== 'all') {
+      const certMap: Record<string, string> = {
+        g: 'G',
+        pg: 'PG',
+        pg13: 'PG-13',
+        r: 'R',
+        nc17: 'NC-17',
+      };
+      const cert = certMap[certification.toLowerCase()];
+      if (cert) {
+        params.certification_country = 'US';
+        params.certification = cert;
+      }
+    }
+    
+    // Map country codes
+    if (country && country !== 'all') {
+      const countryMap: Record<string, string> = {
+        us: 'US',
+        usa: 'US',
+        uk: 'GB',
+        iran: 'IR',
+        ir: 'IR',
+        france: 'FR',
+        fr: 'FR',
+        germany: 'DE',
+        de: 'DE',
+        japan: 'JP',
+        jp: 'JP',
+        korea: 'KR',
+        kr: 'KR',
+      };
+      const countryCode = countryMap[country.toLowerCase()] || country.toUpperCase();
+      params.with_origin_country = countryCode;
+    }
+    
+    return this.fetchFromTMDB<TMDBResponse<TMDBMovie>>(
+      '/discover/movie',
+      params,
+      cacheKey,
+      3600, // 1 hour for discover results
+    );
+  }
+
+  async discoverTVShows(
+    language: 'en' | 'fa' = 'en',
+    options: {
+      genre?: string;
+      year?: number;
+      certification?: string;
+      country?: string;
+      page?: number;
+    } = {},
+  ): Promise<TMDBResponse<TMDBTVShow>> {
+    const { genre, year, certification, country, page = 1 } = options;
+    const cacheKey = `tmdb:discover_tv:${language}:${genre}:${year}:${certification}:${country}:${page}`;
+    
+    const params: any = {
+      language: language === 'fa' ? 'fa-IR' : 'en-US',
+      page,
+      sort_by: 'popularity.desc',
+    };
+    
+    if (genre && genre !== 'all') {
+      // Map genre names to TMDB genre IDs (TV genres)
+      const genreMap: Record<string, number> = {
+        action: 10759,
+        adventure: 10759,
+        animation: 16,
+        comedy: 35,
+        crime: 80,
+        documentary: 99,
+        drama: 18,
+        family: 10751,
+        fantasy: 10765,
+        history: 36,
+        horror: 9648,
+        kids: 10762,
+        mystery: 9648,
+        news: 10763,
+        reality: 10764,
+        'science fiction': 10765,
+        thriller: 9648,
+        war: 10768,
+        western: 37,
+      };
+      
+      const genreId = genreMap[genre.toLowerCase()];
+      if (genreId) {
+        params.with_genres = genreId;
+      }
+    }
+    
+    if (year) {
+      params.first_air_date_year = year;
+    }
+    
+    // TV content ratings (less straightforward than movies)
+    if (certification && certification !== 'all') {
+      const certMap: Record<string, string> = {
+        g: 'TV-G',
+        pg: 'TV-PG',
+        pg13: 'TV-14',
+        r: 'TV-MA',
+      };
+      const cert = certMap[certification.toLowerCase()];
+      if (cert) {
+        params.certification_country = 'US';
+        params.certification = cert;
+      }
+    }
+    
+    // Map country codes
+    if (country && country !== 'all') {
+      const countryMap: Record<string, string> = {
+        us: 'US',
+        usa: 'US',
+        uk: 'GB',
+        iran: 'IR',
+        ir: 'IR',
+        france: 'FR',
+        fr: 'FR',
+        germany: 'DE',
+        de: 'DE',
+        japan: 'JP',
+        jp: 'JP',
+        korea: 'KR',
+        kr: 'KR',
+      };
+      const countryCode = countryMap[country.toLowerCase()] || country.toUpperCase();
+      params.with_origin_country = countryCode;
+    }
+    
+    return this.fetchFromTMDB<TMDBResponse<TMDBTVShow>>(
+      '/discover/tv',
+      params,
+      cacheKey,
+      3600, // 1 hour for discover results
+    );
+  }
+
   // Transform TMDB movie to our Movie format
   transformMovie(tmdbMovie: TMDBMovie) {
     return {

@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 import { Box, Chip, Typography } from "@mui/material";
 import StarIcon from "@mui/icons-material/Star";
 import Image from "next/image";
@@ -14,6 +14,7 @@ import {
 } from "@/theme/glass-design-system";
 import { useWidgetGrid, type WidgetConfig } from "@/hooks/useWidgetGrid";
 import { WidgetGrid, DraggableWidget } from "@/components/interactive";
+import { pickWidgetImage } from "@/lib/tmdb-images";
 import type { Movie, Series } from "@/types/media";
 
 // ============================================================================
@@ -87,6 +88,8 @@ interface WidgetContentProps {
 	language: string;
 	isRTL: boolean;
 	isDragging: boolean;
+	widgetType: WidgetConfig["type"];
+	priority?: boolean;
 }
 
 const WidgetContent = memo(function WidgetContent({
@@ -95,10 +98,83 @@ const WidgetContent = memo(function WidgetContent({
 	language,
 	isRTL,
 	isDragging,
+	widgetType,
+	priority = false,
 }: WidgetContentProps) {
 	const chipColor = getChipColor(chipType);
 	const href = `/item/${item.id}`;
 	const isSeries = "type" in item;
+	const [isLoaded, setIsLoaded] = useState(false);
+	const [hasError, setHasError] = useState(false);
+
+	// Map widget types to TMDB image kinds + sizes.
+	// Requirements:
+	// - large (688x374): backdrop
+	// - small (335x178): poster
+	// - medium (688x178): backdrop (prefer original, center-crop)
+	// - poster (335x374): poster
+	const { imageUrl, objectPosition, sizes } = useMemo(() => {
+		const posterUrl = item.poster;
+		const backdropUrl = item.backdrop;
+
+		switch (widgetType) {
+			case "large": {
+				return {
+					imageUrl: pickWidgetImage({
+						kind: "backdrop",
+						size: "w1280",
+						backdropUrl,
+						posterUrl,
+					}),
+					objectPosition: "center",
+					sizes:
+						"(max-width: 600px) 100vw, (max-width: 960px) 100vw, 50vw",
+				};
+			}
+			case "medium": {
+				// Prefer a max-resolution backdrop since we are aggressively cropping to 3.86:1.
+				return {
+					imageUrl: pickWidgetImage({
+						kind: "backdrop",
+						size: "original",
+						backdropUrl,
+						posterUrl,
+					}),
+					// Vertical centering for crop preference
+					objectPosition: "center 50%",
+					sizes:
+						"(max-width: 600px) 100vw, (max-width: 960px) 100vw, 50vw",
+				};
+			}
+			case "poster": {
+				return {
+					imageUrl: pickWidgetImage({
+						kind: "poster",
+						size: "w500",
+						backdropUrl,
+						posterUrl,
+					}),
+					objectPosition: "center",
+					sizes:
+						"(max-width: 600px) 50vw, (max-width: 960px) 33vw, 25vw",
+				};
+			}
+			case "small":
+			default: {
+				return {
+					imageUrl: pickWidgetImage({
+						kind: "poster",
+						size: "w342",
+						backdropUrl,
+						posterUrl,
+					}),
+					objectPosition: "center",
+					sizes:
+						"(max-width: 600px) 50vw, (max-width: 960px) 33vw, 25vw",
+				};
+			}
+		}
+	}, [item.backdrop, item.poster, widgetType]);
 
 	return (
 		<Box
@@ -107,16 +183,54 @@ const WidgetContent = memo(function WidgetContent({
 				width: "100%",
 				height: "100%",
 				overflow: "hidden",
+				background: `linear-gradient(135deg, ${glassColors.glass.mid}, ${glassColors.glass.base})`,
 			}}
 		>
+			{/* Loading shimmer */}
+			{!isLoaded && !hasError && (
+				<Box
+					sx={{
+						position: "absolute",
+						inset: 0,
+						zIndex: 1,
+						background: `linear-gradient(90deg, ${glassColors.glass.base}, ${glassColors.glass.strong}, ${glassColors.glass.base})`,
+						backgroundSize: "200% 100%",
+						animation: "shimmer 1.2s ease-in-out infinite",
+					}}
+				/>
+			)}
+
+			{/* Error fallback */}
+			{hasError && (
+				<Box
+					sx={{
+						position: "absolute",
+						inset: 0,
+						zIndex: 2,
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						background: `linear-gradient(135deg, ${glassColors.deepMidnight}CC, ${glassColors.deepMidnight}99)`,
+						color: glassColors.text.secondary,
+						fontSize: "0.75rem",
+						textAlign: "center",
+						p: 2,
+					}}
+				>
+					{language === "fa" ? "تصویر در دسترس نیست" : "Image unavailable"}
+				</Box>
+			)}
+
 			{/* Background Image */}
 			<Image
-				src={item.poster}
+				src={imageUrl}
 				alt={item.title}
 				fill
-				style={{ objectFit: "cover" }}
-				sizes="(max-width: 600px) 50vw, (max-width: 960px) 33vw, 25vw"
+				style={{ objectFit: "cover", objectPosition }}
+				sizes={sizes}
 				loading="lazy"
+				onLoad={() => setIsLoaded(true)}
+				onError={() => setHasError(true)}
 				draggable={false}
 			/>
 
@@ -280,6 +394,14 @@ const WidgetContent = memo(function WidgetContent({
 							}`}
 				</Typography>
 			</Box>
+
+			{/* Inject shimmer keyframes */}
+			<style>{`
+				@keyframes shimmer {
+					0% { background-position: 200% 0; }
+					100% { background-position: -200% 0; }
+				}
+			`}</style>
 		</Box>
 	);
 });
@@ -422,6 +544,9 @@ export const IOSWidgetGridSection = memo(function IOSWidgetGridSection({
 							language={language}
 							isRTL={isRTL}
 							isDragging={isEditMode}
+							widgetType={config.type}
+							// Prioritize the first 2 widgets (largest above-the-fold-ish)
+							priority={index < 2}
 						/>
 					</DraggableWidget>
 				);

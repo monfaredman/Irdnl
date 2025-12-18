@@ -1,18 +1,28 @@
 "use client";
 
 import { Alert, Box, CircularProgress } from "@mui/material";
+import { useMemo, useState } from "react";
 import { BannerCarousel } from "@/components/sections/BannerCarousel";
 import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
 import { FiltersSection } from "@/components/sections/FiltersSection";
 import { IOSWidgetGridSection } from "@/components/sections/IOSWidgetGridSection";
 import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
 import {
+	useBackendFilteredContent,
 	useBackendCombinedContent,
 	useBackendPopularMovies,
 	useBackendPopularTVShows,
 	useBackendTrendingMovies,
 } from "@/hooks/useBackendContent";
 import { useLanguage } from "@/providers/language-provider";
+
+type UiFilterState = {
+	type: string;
+	genre: string;
+	country: string;
+	yearRange: [number, number];
+	ageRating: string;
+};
 
 /**
  * Apple-Inspired Liquid Glass Homepage
@@ -28,6 +38,38 @@ import { useLanguage } from "@/providers/language-provider";
  */
 export default function Home() {
 	const { language } = useLanguage();
+	const [filters, setFilters] = useState<UiFilterState>({
+		type: "all",
+		genre: "all",
+		country: "all",
+		yearRange: [2000, 2024],
+		ageRating: "all",
+	});
+
+	const backendFilters = useMemo(() => {
+		// Map UI filters to TMDB discover params
+		return {
+			type:
+				filters.type === "movie" || filters.type === "series"
+					? (filters.type as "movie" | "series")
+					: undefined,
+			genre: filters.genre !== "all" ? filters.genre : undefined,
+			// Use the end of year range as the target year
+			year: filters.yearRange[1] !== 2024 ? filters.yearRange[1] : undefined,
+			// Map age rating to TMDB certification
+			certification: filters.ageRating !== "all" ? filters.ageRating : undefined,
+			// Country - TMDB uses ISO 3166-1 codes
+			country: filters.country !== "all" ? filters.country : undefined,
+			page: 1,
+			limit: 20,
+		};
+	}, [
+		filters.genre,
+		filters.type,
+		filters.yearRange,
+		filters.ageRating,
+		filters.country,
+	]);
 
 	// Fetch real data from backend API (which integrates with TMDB)
 	const { data: combinedContent, loading: loadingCombined } =
@@ -38,6 +80,11 @@ export default function Home() {
 		useBackendTrendingMovies({ language });
 	const { data: popularSeries, loading: loadingSeries } =
 		useBackendPopularTVShows({ language });
+	const {
+		data: filteredContent,
+		loading: loadingFiltered,
+		error: errorFiltered,
+	} = useBackendFilteredContent(backendFilters, { enabled: true });
 
 	// Filter content by origin (Iranian vs Foreign)
 	const foreignMovies =
@@ -84,7 +131,33 @@ export default function Home() {
 			)}
 
 			{/* Filters Section */}
-			<FiltersSection />
+			<FiltersSection onFilterChange={setFilters} />
+
+			{/* Filtered Results (from backend /content) */}
+			{errorFiltered && (
+				<Box sx={{ px: { xs: 2, md: 4 }, pb: 4 }}>
+					<Alert severity="error" sx={{ maxWidth: 900, mx: "auto" }}>
+						{language === "fa"
+							? "خطا در دریافت نتایج فیلتر شده"
+							: "Failed to fetch filtered results"}
+					</Alert>
+				</Box>
+			)}
+
+			{loadingFiltered && (
+				<Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+					<CircularProgress sx={{ color: "#F59E0B" }} size={28} />
+				</Box>
+			)}
+
+			{!loadingFiltered && filteredContent && filteredContent.length > 0 && (
+				<EmblaCarousel
+					title={language === "fa" ? "نتایج فیلتر" : "Filtered Results"}
+					items={filteredContent}
+					type="movie"
+					viewAllHref="/search"
+				/>
+			)}
 
 			{/* New Movie Carousel - فیلم جدید */}
 			{trendingMovies && trendingMovies.length > 0 && (

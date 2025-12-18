@@ -24,6 +24,17 @@ interface UseBackendContentResult<T> {
 	refetch: () => Promise<void>;
 }
 
+export interface ContentFilters {
+	type?: "movie" | "series";
+	genre?: string;
+	year?: number;
+	certification?: string;
+	country?: string;
+	q?: string;
+	page?: number;
+	limit?: number;
+}
+
 // ============================================================================
 // POPULAR MOVIES
 // ============================================================================
@@ -310,6 +321,87 @@ export function useBackendTrendingContent(
 			fetchData();
 		}
 	}, [language, enabled, limit]);
+
+	return { data, loading, error, refetch: fetchData };
+}
+
+// ============================================================================
+// FILTERED CONTENT (TMDB Discover with Genre/Year filters)
+// ============================================================================
+
+export function useBackendFilteredContent(
+	filters: ContentFilters,
+	options: UseBackendContentOptions = {},
+): UseBackendContentResult<(Movie | Series)[]> {
+	const { language = "en", enabled = true } = options;
+	const [data, setData] = useState<(Movie | Series)[] | null>(null);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<Error | null>(null);
+
+	const fetchData = async () => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			// Determine which TMDB discover endpoint to call
+			const isMovie = filters.type === "movie";
+			const isSeries = filters.type === "series";
+
+			let items: (Movie | Series)[] = [];
+
+			if (isMovie || (!isMovie && !isSeries)) {
+				// Fetch movies (or both if type is "all")
+				const movieRes = await contentApi.discoverMovies({
+					language,
+					genre: filters.genre && filters.genre !== "all" ? filters.genre : undefined,
+					year: filters.year,
+					certification: filters.certification,
+					country: filters.country,
+					page: filters.page || 1,
+				});
+				items = [...items, ...movieRes.items];
+			}
+
+			if (isSeries || (!isMovie && !isSeries)) {
+				// Fetch TV shows (or both if type is "all")
+				const tvRes = await contentApi.discoverTVShows({
+					language,
+					genre: filters.genre && filters.genre !== "all" ? filters.genre : undefined,
+					year: filters.year,
+					certification: filters.certification,
+					country: filters.country,
+					page: filters.page || 1,
+				});
+				items = [...items, ...tvRes.items];
+			}
+
+			// Shuffle combined results for variety
+			if (!isMovie && !isSeries) {
+				items = items.sort(() => Math.random() - 0.5);
+			}
+
+			setData(items);
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err
+					: new Error("Failed to fetch filtered content"),
+			);
+			setData(null);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		if (!enabled) return;
+
+		// small debounce so rapid filter changes don't spam the API
+		const t = setTimeout(fetchData, 250);
+		return () => clearTimeout(t);
+		// We intentionally depend on a stable serialized key so object identity
+		// changes don't cause redundant refetches.
+	}, [enabled, language, JSON.stringify(filters)]);
 
 	return { data, loading, error, refetch: fetchData };
 }

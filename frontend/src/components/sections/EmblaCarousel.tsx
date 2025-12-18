@@ -236,7 +236,7 @@ export const EmblaCarousel = ({
 					sx={{
 						...sliderStyles.arrow,
 						position: "absolute",
-						left: { xs: -8, md: -16 },
+						right: { xs: 0, md: 0 },
 						top: "35%",
 						transform: "translateY(-50%)",
 						zIndex: 2,
@@ -256,7 +256,7 @@ export const EmblaCarousel = ({
 					sx={{
 						...sliderStyles.arrow,
 						position: "absolute",
-						right: { xs: -8, md: -16 },
+						left: { xs: 0, md: 0 },
 						top: "35%",
 						transform: "translateY(-50%)",
 						zIndex: 2,

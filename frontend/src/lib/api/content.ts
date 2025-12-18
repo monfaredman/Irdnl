@@ -146,4 +146,46 @@ export const contentApi = {
 		);
 		return response.items as Series[];
 	},
+
+	/**
+	 * Discover movies from TMDB with filters (via backend)
+	 */
+	async discoverMovies(params: {
+		language?: "en" | "fa";
+		genre?: string;
+		year?: number;
+		certification?: string;
+		country?: string;
+		page?: number;
+	}): Promise<ContentListResponse> {
+		const response = await apiClient.get<ContentListResponse>(
+			"/content/tmdb/discover/movies",
+			params,
+		);
+		return {
+			...response,
+			items: response.items as Movie[],
+		};
+	},
+
+	/**
+	 * Discover TV shows from TMDB with filters (via backend)
+	 */
+	async discoverTVShows(params: {
+		language?: "en" | "fa";
+		genre?: string;
+		year?: number;
+		certification?: string;
+		country?: string;
+		page?: number;
+	}): Promise<ContentListResponse> {
+		const response = await apiClient.get<ContentListResponse>(
+			"/content/tmdb/discover/tv",
+			params,
+		);
+		return {
+			...response,
+			items: response.items as Series[],
+		};
+	},
 };

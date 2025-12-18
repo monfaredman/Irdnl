@@ -121,6 +121,74 @@ export class ContentController {
     };
   }
 
+  @Get('tmdb/discover/movies')
+  @ApiOperation({ summary: 'Discover movies on TMDB with filters' })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiQuery({ name: 'genre', type: String, required: false })
+  @ApiQuery({ name: 'year', type: Number, required: false })
+  @ApiQuery({ name: 'certification', type: String, required: false })
+  @ApiQuery({ name: 'country', type: String, required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiResponse({ status: 200, description: 'Discovered movies from TMDB' })
+  async discoverMovies(
+    @Query('language') language: 'en' | 'fa' = 'en',
+    @Query('genre') genre?: string,
+    @Query('year') year?: number,
+    @Query('certification') certification?: string,
+    @Query('country') country?: string,
+    @Query('page') page?: number,
+  ) {
+    const response = await this.tmdbService.discoverMovies(language, {
+      genre,
+      year: year ? parseInt(year.toString()) : undefined,
+      certification,
+      country,
+      page: page ? parseInt(page.toString()) : 1,
+    });
+    const items = response.results.map((movie) => this.tmdbService.transformMovie(movie));
+    return {
+      items,
+      total: response.total_results,
+      page: response.page,
+      limit: response.results.length,
+      totalPages: response.total_pages,
+    };
+  }
+
+  @Get('tmdb/discover/tv')
+  @ApiOperation({ summary: 'Discover TV shows on TMDB with filters' })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiQuery({ name: 'genre', type: String, required: false })
+  @ApiQuery({ name: 'year', type: Number, required: false })
+  @ApiQuery({ name: 'certification', type: String, required: false })
+  @ApiQuery({ name: 'country', type: String, required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiResponse({ status: 200, description: 'Discovered TV shows from TMDB' })
+  async discoverTVShows(
+    @Query('language') language: 'en' | 'fa' = 'en',
+    @Query('genre') genre?: string,
+    @Query('year') year?: number,
+    @Query('certification') certification?: string,
+    @Query('country') country?: string,
+    @Query('page') page?: number,
+  ) {
+    const response = await this.tmdbService.discoverTVShows(language, {
+      genre,
+      year: year ? parseInt(year.toString()) : undefined,
+      certification,
+      country,
+      page: page ? parseInt(page.toString()) : 1,
+    });
+    const items = response.results.map((show) => this.tmdbService.transformTVShow(show));
+    return {
+      items,
+      total: response.total_results,
+      page: response.page,
+      limit: response.results.length,
+      totalPages: response.total_pages,
+    };
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get content by ID' })
   @ApiResponse({ status: 200, description: 'Content retrieved' })

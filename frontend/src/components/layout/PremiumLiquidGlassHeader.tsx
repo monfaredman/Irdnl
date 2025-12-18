@@ -161,7 +161,9 @@ export function PremiumLiquidGlassHeader() {
 	const pathname = usePathname();
 	const router = useRouter();
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+	const isMobile = useMediaQuery(theme.breakpoints.down("md"), {
+		noSsr: true,
+	});
 
 	// State management
 	const [scrolled, setScrolled] = useState(false);
@@ -181,10 +183,16 @@ export function PremiumLiquidGlassHeader() {
 
 	// NOTE: The public user auth implementation isn't wired yet in this repo.
 	// We treat presence of a token as authenticated (keeps behavior consistent with admin-auth).
-	const isAuthenticated =
-		typeof window !== "undefined"
-			? !!localStorage.getItem("access_token")
-			: false;
+	const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+	// Hydration-safe auth detection: read localStorage only after mount.
+	useEffect(() => {
+		try {
+			setIsAuthenticated(!!localStorage.getItem("access_token"));
+		} catch {
+			setIsAuthenticated(false);
+		}
+	}, []);
 
 	const searchInputRef = useRef<HTMLInputElement>(null);
 

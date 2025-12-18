@@ -289,7 +289,7 @@ export const BannerCarousel = ({
 						border: `1px solid ${glassColors.glass.border}`,
 						color: glassColors.text.primary,
 						width: { xs: 36, md: 44 },
-						height: { xs: 36, md: 44 },
+						height: { xs: 36, md: 88 },
 						transition: glassAnimations.transition.smooth,
 						zIndex: 10,
 						"&:hover": {
@@ -315,8 +315,8 @@ export const BannerCarousel = ({
 						backdropFilter: `blur(${glassBlur.medium}px)`,
 						border: `1px solid ${glassColors.glass.border}`,
 						color: glassColors.text.primary,
-						width: { xs: 36, md: 44 },
-						height: { xs: 36, md: 44 },
+					width: { xs: 36, md: 44 },
+						height: { xs: 36, md: 88 },
 						transition: glassAnimations.transition.smooth,
 						zIndex: 10,
 						"&:hover": {
