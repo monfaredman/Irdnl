@@ -22,4 +22,3 @@ export class MarkTranscodedDto {
   @IsNumber()
   filesize?: number;
 }
-

@@ -166,8 +166,12 @@ export class InitialMigration1700000000000 implements MigrationInterface {
     // Create indexes
     await queryRunner.query(`CREATE INDEX "IDX_content_type" ON "content" ("type");`);
     await queryRunner.query(`CREATE INDEX "IDX_content_status" ON "content" ("status");`);
-    await queryRunner.query(`CREATE INDEX "IDX_watch_history_user" ON "watch_history" ("user_id");`);
-    await queryRunner.query(`CREATE INDEX "IDX_watch_history_content" ON "watch_history" ("content_id");`);
+    await queryRunner.query(
+      `CREATE INDEX "IDX_watch_history_user" ON "watch_history" ("user_id");`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX "IDX_watch_history_content" ON "watch_history" ("content_id");`,
+    );
     await queryRunner.query(`CREATE INDEX "IDX_watchlist_user" ON "watchlist" ("user_id");`);
     await queryRunner.query(`CREATE INDEX "IDX_jobs_status" ON "jobs" ("status");`);
   }
@@ -193,4 +197,3 @@ export class InitialMigration1700000000000 implements MigrationInterface {
     await queryRunner.query(`DROP TYPE IF EXISTS "user_role_enum";`);
   }
 }
-

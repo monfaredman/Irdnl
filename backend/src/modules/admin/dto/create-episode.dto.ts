@@ -25,4 +25,3 @@ export class CreateEpisodeDto {
   @IsString()
   videoAssetId?: string;
 }
-

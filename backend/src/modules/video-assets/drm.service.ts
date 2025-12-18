@@ -1,8 +1,8 @@
 /**
  * DRM Service
- * 
+ *
  * TODO: Implement DRM integration for content protection
- * 
+ *
  * This service will handle:
  * - DRM packaging for video assets
  * - License server integration
@@ -39,10 +39,7 @@ export class DRMService {
    * @param userId - ID of the user requesting license
    * @returns DRM license token
    */
-  async generateLicense(
-    videoAssetId: string,
-    userId: string,
-  ): Promise<string> {
+  async generateLicense(videoAssetId: string, userId: string): Promise<string> {
     // TODO: Implement license generation
     // 1. Verify user subscription
     // 2. Generate license token
@@ -65,4 +62,3 @@ export class DRMService {
     throw new Error('License validation not implemented yet');
   }
 }
-

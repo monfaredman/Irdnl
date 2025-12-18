@@ -59,4 +59,3 @@ export class NotificationsService {
     return this.notificationRepository.findOne({ where: { id } });
   }
 }
-

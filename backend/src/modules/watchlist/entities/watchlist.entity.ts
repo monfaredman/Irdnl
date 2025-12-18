@@ -33,4 +33,3 @@ export class Watchlist {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }
-

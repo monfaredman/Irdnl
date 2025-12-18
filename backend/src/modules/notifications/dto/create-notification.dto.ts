@@ -20,4 +20,3 @@ export class CreateNotificationDto {
   @IsUUID()
   userId?: string;
 }
-

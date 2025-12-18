@@ -86,4 +86,3 @@ export class Content {
   @OneToMany(() => Watchlist, (watchlist) => watchlist.content)
   watchlist: Watchlist[];
 }
-

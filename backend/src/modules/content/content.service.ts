@@ -44,10 +44,9 @@ export class ContentService {
     }
 
     if (q) {
-      queryBuilder.andWhere(
-        '(content.title ILIKE :q OR content.description ILIKE :q)',
-        { q: `%${q}%` },
-      );
+      queryBuilder.andWhere('(content.title ILIKE :q OR content.description ILIKE :q)', {
+        q: `%${q}%`,
+      });
     }
 
     // TODO: Add genre filtering when genres table is implemented
@@ -186,4 +185,3 @@ export class ContentService {
     await this.cacheManager.del('content:trending');
   }
 }
-

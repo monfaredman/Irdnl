@@ -81,4 +81,3 @@ export class CreateContentDto {
   @Type(() => SeoDto)
   seo?: SeoDto;
 }
-

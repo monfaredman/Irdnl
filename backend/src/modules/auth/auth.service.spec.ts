@@ -104,9 +104,7 @@ describe('AuthService', () => {
 
       (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser);
 
-      await expect(service.register(registerDto)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(service.register(registerDto)).rejects.toThrow(ConflictException);
     });
   });
 
@@ -137,9 +135,7 @@ describe('AuthService', () => {
       (usersService.findByEmail as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException with non-existent user', async () => {
@@ -150,10 +146,7 @@ describe('AuthService', () => {
 
       (usersService.findByEmail as jest.Mock).mockResolvedValue(null);
 
-      await expect(service.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(service.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
   });
 });
-

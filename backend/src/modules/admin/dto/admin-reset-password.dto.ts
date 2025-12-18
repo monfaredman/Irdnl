@@ -17,4 +17,3 @@ export class AdminResetPasswordConfirmDto {
   @MinLength(6)
   newPassword: string;
 }
-

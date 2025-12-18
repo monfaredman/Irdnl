@@ -208,10 +208,9 @@ export class AdminService {
     const queryBuilder = this.userRepository.createQueryBuilder('user');
 
     if (search) {
-      queryBuilder.where(
-        '(user.name ILIKE :search OR user.email ILIKE :search)',
-        { search: `%${search}%` },
-      );
+      queryBuilder.where('(user.name ILIKE :search OR user.email ILIKE :search)', {
+        search: `%${search}%`,
+      });
     }
 
     if (role) {
@@ -301,4 +300,3 @@ export class AdminService {
     };
   }
 }
-

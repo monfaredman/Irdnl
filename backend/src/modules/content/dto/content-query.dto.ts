@@ -34,4 +34,3 @@ export class ContentQueryDto {
   @Max(100)
   limit?: number = 20;
 }
-

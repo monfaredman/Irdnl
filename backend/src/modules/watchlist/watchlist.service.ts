@@ -27,10 +27,7 @@ export class WatchlistService {
     return this.watchlistRepository.save(watchlist);
   }
 
-  async removeFromWatchlist(
-    userId: string,
-    contentId: string,
-  ): Promise<void> {
+  async removeFromWatchlist(userId: string, contentId: string): Promise<void> {
     const watchlist = await this.watchlistRepository.findOne({
       where: { userId, contentId },
     });
@@ -50,4 +47,3 @@ export class WatchlistService {
     });
   }
 }
-

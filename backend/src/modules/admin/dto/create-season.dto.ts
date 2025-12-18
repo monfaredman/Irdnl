@@ -16,4 +16,3 @@ export class CreateSeasonDto {
   @IsString()
   title?: string;
 }
-

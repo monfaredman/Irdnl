@@ -21,5 +21,4 @@ import { VideoAssetsModule } from '../video-assets/video-assets.module';
   controllers: [AdminController],
   providers: [AdminService],
 })
-export class AdminModule { }
-
+export class AdminModule {}

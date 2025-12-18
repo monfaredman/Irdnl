@@ -9,18 +9,9 @@ import { WatchHistory } from '../watch-history/entities/watch-history.entity';
 import { VideoAsset } from '../video-assets/entities/video-asset.entity';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      User,
-      Content,
-      Subscription,
-      WatchHistory,
-      VideoAsset,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([User, Content, Subscription, WatchHistory, VideoAsset])],
   controllers: [AnalyticsController],
   providers: [AnalyticsService],
   exports: [AnalyticsService],
 })
 export class AnalyticsModule {}
-

@@ -9,12 +9,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { ListNotificationsDto } from './dto/list-notifications.dto';
@@ -37,10 +32,7 @@ export class NotificationsController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Send notification (admin only)' })
   @ApiResponse({ status: 201, description: 'Notification sent' })
-  async create(
-    @Body() createNotificationDto: CreateNotificationDto,
-    @CurrentUser() user: User,
-  ) {
+  async create(@Body() createNotificationDto: CreateNotificationDto, @CurrentUser() user: User) {
     return this.notificationsService.create(createNotificationDto, user.id);
   }
 
@@ -58,4 +50,3 @@ export class NotificationsController {
     return this.notificationsService.findOne(id);
   }
 }
-

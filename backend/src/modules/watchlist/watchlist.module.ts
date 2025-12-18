@@ -10,4 +10,3 @@ import { Watchlist } from './entities/watchlist.entity';
   providers: [WatchlistService],
 })
 export class WatchlistModule {}
-

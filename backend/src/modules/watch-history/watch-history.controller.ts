@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { WatchHistoryService } from './watch-history.service';
 import { RecordProgressDto } from './dto/record-progress.dto';
@@ -22,10 +16,7 @@ export class WatchHistoryController {
   @Post()
   @ApiOperation({ summary: 'Record watch progress' })
   @ApiResponse({ status: 201, description: 'Progress recorded' })
-  async recordProgress(
-    @CurrentUser() user: User,
-    @Body() recordProgressDto: RecordProgressDto,
-  ) {
+  async recordProgress(@CurrentUser() user: User, @Body() recordProgressDto: RecordProgressDto) {
     return this.watchHistoryService.recordProgress(
       user.id,
       recordProgressDto.content_id,
@@ -40,4 +31,3 @@ export class WatchHistoryController {
     return this.watchHistoryService.getUserHistory(user.id);
   }
 }
-

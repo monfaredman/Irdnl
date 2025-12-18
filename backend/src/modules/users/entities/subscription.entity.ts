@@ -46,4 +46,3 @@ export class Subscription {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-

@@ -48,10 +48,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      loginDto.password,
-      user.passwordHash,
-    );
+    const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -109,10 +106,7 @@ export class AuthService {
       throw new ForbiddenException('Access denied. Admin or moderator role required.');
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      loginDto.password,
-      user.passwordHash,
-    );
+    const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -190,14 +184,10 @@ export class AuthService {
       }),
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
-        expiresIn: this.configService.get<string>(
-          'JWT_REFRESH_EXPIRES_IN',
-          '7d',
-        ),
+        expiresIn: this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d'),
       }),
     ]);
 
     return { accessToken, refreshToken };
   }
 }
-

@@ -59,4 +59,3 @@ export class User {
   @OneToMany(() => Watchlist, (watchlist) => watchlist.user)
   watchlist: Watchlist[];
 }
-

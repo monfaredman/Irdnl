@@ -88,7 +88,7 @@ export const buildTypeOrmOptions = (config: ConfigLike): DataSourceOptions => {
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
-  constructor(private configService: ConfigService) { }
+  constructor(private configService: ConfigService) {}
 
   createTypeOrmOptions(): TypeOrmModuleOptions {
     return buildTypeOrmOptions(this.configService);
@@ -107,4 +107,3 @@ const envConfig: ConfigLike = {
 
 export const dataSourceOptions = buildTypeOrmOptions(envConfig);
 export const appDataSource = new DataSource(dataSourceOptions);
-

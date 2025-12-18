@@ -10,4 +10,3 @@ import { WatchHistory } from './entities/watch-history.entity';
   providers: [WatchHistoryService],
 })
 export class WatchHistoryModule {}
-

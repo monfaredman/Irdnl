@@ -49,4 +49,3 @@ export class VideoAsset {
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
 }
-

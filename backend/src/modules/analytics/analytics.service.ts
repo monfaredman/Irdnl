@@ -160,4 +160,3 @@ export class AnalyticsService {
     return activeSubs.length * 9.99;
   }
 }
-

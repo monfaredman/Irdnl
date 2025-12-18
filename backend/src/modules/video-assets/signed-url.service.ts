@@ -8,10 +8,7 @@ export class SignedUrlService {
   private ttl: number;
 
   constructor(private configService: ConfigService) {
-    this.secret = this.configService.get<string>(
-      'SIGNED_URL_SECRET',
-      'default-secret-key',
-    );
+    this.secret = this.configService.get<string>('SIGNED_URL_SECRET', 'default-secret-key');
     this.ttl = this.configService.get<number>('SIGNED_URL_TTL', 3600);
   }
 
@@ -46,13 +43,9 @@ export class SignedUrlService {
         .update(`${baseUrl}${expires}`)
         .digest('hex');
 
-      return crypto.timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature),
-      );
+      return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
     } catch {
       return false;
     }
   }
 }
-

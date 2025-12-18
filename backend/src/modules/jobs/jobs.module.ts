@@ -9,4 +9,3 @@ import { Job } from './entities/job.entity';
   exports: [JobsService],
 })
 export class JobsModule {}
-

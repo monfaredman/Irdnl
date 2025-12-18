@@ -11,4 +11,3 @@ import { LocalStorageAdapter } from './storage.service';
   exports: [StorageService, SignedUrlService],
 })
 export class VideoAssetsModule {}
-

@@ -11,4 +11,3 @@ export class RecordProgressDto {
   @Min(0)
   progress_seconds: number;
 }
-

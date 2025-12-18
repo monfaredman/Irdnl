@@ -28,4 +28,3 @@ export class ListUsersDto {
   @IsEnum(UserRole)
   role?: UserRole;
 }
-

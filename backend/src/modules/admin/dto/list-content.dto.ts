@@ -33,4 +33,3 @@ export class ListContentDto {
   @IsEnum(ContentStatus)
   status?: ContentStatus;
 }
-

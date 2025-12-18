@@ -13,13 +13,8 @@ export interface StorageAdapter {
 export class LocalStorageAdapter implements StorageAdapter {
   constructor(private configService: ConfigService) {}
 
-  async upload(
-    file: Express.Multer.File,
-    contentId: string,
-    quality: string,
-  ): Promise<string> {
-    const storagePath =
-      this.configService.get<string>('STORAGE_LOCAL_PATH') || './storage';
+  async upload(file: Express.Multer.File, contentId: string, quality: string): Promise<string> {
+    const storagePath = this.configService.get<string>('STORAGE_LOCAL_PATH') || './storage';
     const uploadDir = path.join(storagePath, contentId, quality);
 
     await fs.mkdir(uploadDir, { recursive: true });
@@ -50,11 +45,7 @@ export class LocalStorageAdapter implements StorageAdapter {
 // TODO: Implement S3StorageAdapter for production
 @Injectable()
 export class S3StorageAdapter implements StorageAdapter {
-  async upload(
-    file: Express.Multer.File,
-    contentId: string,
-    quality: string,
-  ): Promise<string> {
+  async upload(file: Express.Multer.File, contentId: string, quality: string): Promise<string> {
     // TODO: Implement S3 upload
     throw new Error('S3 storage not implemented yet');
   }
@@ -83,11 +74,7 @@ export class StorageService {
     }
   }
 
-  async upload(
-    file: Express.Multer.File,
-    contentId: string,
-    quality: string,
-  ): Promise<string> {
+  async upload(file: Express.Multer.File, contentId: string, quality: string): Promise<string> {
     return this.adapter.upload(file, contentId, quality);
   }
 
@@ -99,4 +86,3 @@ export class StorageService {
     return this.adapter.getUrl(filePath);
   }
 }
-

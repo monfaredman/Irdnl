@@ -10,10 +10,7 @@ export class JobsService {
     private jobRepository: Repository<Job>,
   ) {}
 
-  async create(
-    type: JobType,
-    payload: Record<string, any>,
-  ): Promise<Job> {
+  async create(type: JobType, payload: Record<string, any>): Promise<Job> {
     const job = this.jobRepository.create({
       type,
       payload,
@@ -30,11 +27,7 @@ export class JobsService {
     });
   }
 
-  async updateStatus(
-    id: string,
-    status: JobStatus,
-    error?: string,
-  ): Promise<Job> {
+  async updateStatus(id: string, status: JobStatus, error?: string): Promise<Job> {
     const job = await this.jobRepository.findOne({ where: { id } });
     if (!job) {
       throw new Error(`Job ${id} not found`);
@@ -48,4 +41,3 @@ export class JobsService {
     return this.jobRepository.save(job);
   }
 }
-

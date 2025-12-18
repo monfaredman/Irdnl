@@ -32,4 +32,3 @@ export class Series {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 }
-

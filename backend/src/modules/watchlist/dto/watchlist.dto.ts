@@ -6,4 +6,3 @@ export class WatchlistDto {
   @IsUUID()
   content_id: string;
 }
-

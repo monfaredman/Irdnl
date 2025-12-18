@@ -59,10 +59,7 @@ export class AdminController {
   @ApiOperation({ summary: 'Update content (admin only)' })
   @ApiResponse({ status: 200, description: 'Content updated' })
   @ApiResponse({ status: 404, description: 'Content not found' })
-  async updateContent(
-    @Param('id') id: string,
-    @Body() updateContentDto: UpdateContentDto,
-  ) {
+  async updateContent(@Param('id') id: string, @Body() updateContentDto: UpdateContentDto) {
     return this.adminService.updateContent(id, updateContentDto);
   }
 
@@ -181,10 +178,7 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update user (admin only)' })
   @ApiResponse({ status: 200, description: 'User updated' })
-  async updateUser(
-    @Param('id') id: string,
-    @Body() updateUserDto: UpdateUserDto,
-  ) {
+  async updateUser(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.adminService.updateUser(id, updateUserDto);
   }
 
@@ -223,4 +217,3 @@ export class AdminController {
     return this.adminService.uploadImage(file, type);
   }
 }
-

@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Query,
-  UseGuards,
-  Req,
-} from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ContentService } from './content.service';
 import { TMDBService } from './tmdb.service';
@@ -25,10 +18,7 @@ export class ContentController {
   @Get()
   @ApiOperation({ summary: 'List content with pagination and filters' })
   @ApiResponse({ status: 200, description: 'Content list retrieved' })
-  async findAll(
-    @Query() query: ContentQueryDto,
-    @CurrentUser() user?: User,
-  ) {
+  async findAll(@Query() query: ContentQueryDto, @CurrentUser() user?: User) {
     const isAdmin = user?.role === UserRole.ADMIN;
     return this.contentService.findAll(query, isAdmin);
   }
@@ -102,10 +92,7 @@ export class ContentController {
   @ApiQuery({ name: 'q', type: String, required: true })
   @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
   @ApiResponse({ status: 200, description: 'Movie search results from TMDB' })
-  async searchMovies(
-    @Query('q') query: string,
-    @Query('language') language: 'en' | 'fa' = 'en',
-  ) {
+  async searchMovies(@Query('q') query: string, @Query('language') language: 'en' | 'fa' = 'en') {
     const response = await this.tmdbService.searchMovies(query, language);
     const items = response.results.map((movie) => this.tmdbService.transformMovie(movie));
     return {
@@ -122,10 +109,7 @@ export class ContentController {
   @ApiQuery({ name: 'q', type: String, required: true })
   @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
   @ApiResponse({ status: 200, description: 'TV show search results from TMDB' })
-  async searchTVShows(
-    @Query('q') query: string,
-    @Query('language') language: 'en' | 'fa' = 'en',
-  ) {
+  async searchTVShows(@Query('q') query: string, @Query('language') language: 'en' | 'fa' = 'en') {
     const response = await this.tmdbService.searchTVShows(query, language);
     const items = response.results.map((show) => this.tmdbService.transformTVShow(show));
     return {
@@ -141,10 +125,7 @@ export class ContentController {
   @ApiOperation({ summary: 'Get content by ID' })
   @ApiResponse({ status: 200, description: 'Content retrieved' })
   @ApiResponse({ status: 404, description: 'Content not found' })
-  async findOne(
-    @Param('id') id: string,
-    @CurrentUser() user?: User,
-  ) {
+  async findOne(@Param('id') id: string, @CurrentUser() user?: User) {
     const isAdmin = user?.role === UserRole.ADMIN;
     return this.contentService.findOne(id, isAdmin);
   }
@@ -161,12 +142,8 @@ export class ContentController {
   @ApiOperation({ summary: 'Get streaming info for content' })
   @ApiResponse({ status: 200, description: 'Streaming info retrieved' })
   @ApiResponse({ status: 404, description: 'Content not found' })
-  async getStreamInfo(
-    @Param('id') id: string,
-    @CurrentUser() user?: User,
-  ) {
+  async getStreamInfo(@Param('id') id: string, @CurrentUser() user?: User) {
     const isAdmin = user?.role === UserRole.ADMIN;
     return this.contentService.getStreamInfo(id, isAdmin);
   }
 }
-

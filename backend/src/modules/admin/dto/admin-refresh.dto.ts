@@ -6,4 +6,3 @@ export class AdminRefreshDto {
   @IsString()
   refresh_token: string;
 }
-

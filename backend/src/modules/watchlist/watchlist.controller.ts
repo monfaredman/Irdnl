@@ -27,24 +27,15 @@ export class WatchlistController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Add content to watchlist' })
   @ApiResponse({ status: 201, description: 'Added to watchlist' })
-  async addToWatchlist(
-    @CurrentUser() user: User,
-    @Body() watchlistDto: WatchlistDto,
-  ) {
-    return this.watchlistService.addToWatchlist(
-      user.id,
-      watchlistDto.content_id,
-    );
+  async addToWatchlist(@CurrentUser() user: User, @Body() watchlistDto: WatchlistDto) {
+    return this.watchlistService.addToWatchlist(user.id, watchlistDto.content_id);
   }
 
   @Delete(':contentId')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Remove content from watchlist' })
   @ApiResponse({ status: 204, description: 'Removed from watchlist' })
-  async removeFromWatchlist(
-    @CurrentUser() user: User,
-    @Param('contentId') contentId: string,
-  ) {
+  async removeFromWatchlist(@CurrentUser() user: User, @Param('contentId') contentId: string) {
     await this.watchlistService.removeFromWatchlist(user.id, contentId);
   }
 
@@ -55,4 +46,3 @@ export class WatchlistController {
     return this.watchlistService.getUserWatchlist(user.id);
   }
 }
-
