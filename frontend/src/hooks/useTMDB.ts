@@ -288,3 +288,194 @@ export function useTMDBCombinedContent(
 
 	return { data, loading, error, refetch: fetchData };
 }
+
+// ============================================================================
+// DISCOVER MOVIES BY ORIGIN & GENRE
+// ============================================================================
+
+export function useTMDBDiscoverMovies(
+	origin: "foreign" | "iranian",
+	genre?: string,
+	options: UseTMDBOptions = {},
+): UseTMDBResult<Movie[]> {
+	const { language = "en", enabled = true } = options;
+	const [data, setData] = useState<Movie[] | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<Error | null>(null);
+
+	const fetchData = async () => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			// Map genre names to TMDB genre IDs
+			const genreMap: Record<string, string> = {
+				action: "28",
+				adventure: "12",
+				animation: "16",
+				comedy: "35",
+				thriller: "53,80", // thriller + crime
+				documentary: "99",
+				drama: "18",
+				family: "10751",
+				fantasy: "14",
+				historical: "36,10752", // history + war
+				horror: "27",
+				mystery: "9648",
+				romance: "10749",
+				"sci-fi": "878",
+			};
+
+			const params: {
+				language?: "en" | "fa";
+				with_genres?: string;
+				with_original_language?: string;
+			} = {
+				language,
+			};
+
+			// Set origin filter
+			if (origin === "iranian") {
+				params.with_original_language = "fa";
+			}
+			// For foreign, we don't filter by language to get all non-Persian content
+
+			// Set genre filter
+			if (genre && genreMap[genre]) {
+				params.with_genres = genreMap[genre];
+			}
+
+			const response = await tmdbClient.discoverMovies(params);
+			let movies = response.results.map(mapTMDBMovieToMovie);
+
+			// Filter for foreign origin (exclude Persian/Arabic)
+			if (origin === "foreign") {
+				movies = movies.filter(
+					(m) =>
+						m.languages[0] !== "fa" &&
+						!m.languages.includes("fa") &&
+						m.origin === "foreign",
+				);
+			}
+
+			// Additional genre filter if needed (for exact match)
+			if (genre) {
+				movies = movies.filter((m) =>
+					m.genres?.some((g) => g.toLowerCase().includes(genre.toLowerCase())),
+				);
+			}
+
+			setData(movies);
+		} catch (err) {
+			setError(
+				err instanceof Error
+					? err
+					: new Error("Failed to discover movies"),
+			);
+			setData(null);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		if (enabled) {
+			fetchData();
+		}
+	}, [origin, genre, language, enabled]);
+
+	return { data, loading, error, refetch: fetchData };
+}
+
+// ============================================================================
+// DISCOVER TV SHOWS BY ORIGIN & GENRE
+// ============================================================================
+
+export function useTMDBDiscoverSeries(
+	origin: "foreign" | "iranian",
+	genre?: string,
+	options: UseTMDBOptions = {},
+): UseTMDBResult<Series[]> {
+	const { language = "en", enabled = true } = options;
+	const [data, setData] = useState<Series[] | null>(null);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<Error | null>(null);
+
+	const fetchData = async () => {
+		try {
+			setLoading(true);
+			setError(null);
+
+			// Map genre names to TMDB genre IDs
+			const genreMap: Record<string, string> = {
+				action: "10759", // Action & Adventure
+				animation: "16",
+				comedy: "35",
+				thriller: "80", // Crime
+				documentary: "99",
+				drama: "18",
+				family: "10751",
+				fantasy: "14",
+				horror: "27",
+				mystery: "9648",
+				romance: "10749",
+				"sci-fi": "10765", // Sci-Fi & Fantasy
+			};
+
+			const params: {
+				language?: "en" | "fa";
+				with_genres?: string;
+				with_original_language?: string;
+			} = {
+				language,
+			};
+
+			// Set origin filter
+			if (origin === "iranian") {
+				params.with_original_language = "fa";
+			}
+
+			// Set genre filter
+			if (genre && genreMap[genre]) {
+				params.with_genres = genreMap[genre];
+			}
+
+			const response = await tmdbClient.discoverTVShows(params);
+			let series = response.results.map(mapTMDBTVShowToSeries);
+
+			// Filter for foreign origin (exclude Persian)
+			if (origin === "foreign") {
+				series = series.filter(
+					(s) =>
+						s.languages[0] !== "fa" &&
+						!s.languages.includes("fa") &&
+						s.origin === "foreign",
+				);
+			}
+
+			// Additional genre filter if needed
+			if (genre) {
+				series = series.filter((s) =>
+					s.genres?.some((g) => g.toLowerCase().includes(genre.toLowerCase())),
+				);
+			}
+
+			setData(series);
+		} catch (err) {
+			setError(
+				err instanceof Error ? err : new Error("Failed to discover TV shows"),
+			);
+			setData(null);
+		} finally {
+			setLoading(false);
+		}
+	};
+
+	useEffect(() => {
+		if (enabled) {
+			fetchData();
+		}
+	}, [origin, genre, language, enabled]);
+
+	return { data, loading, error, refetch: fetchData };
+}

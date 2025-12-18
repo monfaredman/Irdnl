@@ -11,6 +11,7 @@
  */
 
 import type { Movie, Series } from "@/types/media";
+import type { Genre } from "@/types/media";
 
 // ============================================================================
 // CONFIGURATION
@@ -313,6 +314,80 @@ class TMDBClient {
 		return data;
 	}
 
+	async discoverMovies(
+		params: {
+			language?: "en" | "fa";
+			page?: number;
+			with_genres?: string;
+			with_original_language?: string;
+			sort_by?: string;
+		} = {},
+	): Promise<TMDBResponse<TMDBMovie>> {
+		const {
+			language = "en",
+			page = 1,
+			with_genres,
+			with_original_language,
+			sort_by = "popularity.desc",
+		} = params;
+
+		const cacheKey = `discover_movies_${language}_${page}_${with_genres}_${with_original_language}`;
+		const cached = cache.get<TMDBResponse<TMDBMovie>>(cacheKey);
+		if (cached) return cached;
+
+		const urlParams: Record<string, string | number> = {
+			language: language === "fa" ? "fa-IR" : "en-US",
+			page,
+			sort_by,
+		};
+
+		if (with_genres) urlParams.with_genres = with_genres;
+		if (with_original_language)
+			urlParams.with_original_language = with_original_language;
+
+		const url = this.buildUrl("/discover/movie", urlParams);
+		const data = await this.fetchWithRetry<TMDBResponse<TMDBMovie>>(url);
+		cache.set(cacheKey, data);
+		return data;
+	}
+
+	async discoverTVShows(
+		params: {
+			language?: "en" | "fa";
+			page?: number;
+			with_genres?: string;
+			with_original_language?: string;
+			sort_by?: string;
+		} = {},
+	): Promise<TMDBResponse<TMDBTVShow>> {
+		const {
+			language = "en",
+			page = 1,
+			with_genres,
+			with_original_language,
+			sort_by = "popularity.desc",
+		} = params;
+
+		const cacheKey = `discover_tv_${language}_${page}_${with_genres}_${with_original_language}`;
+		const cached = cache.get<TMDBResponse<TMDBTVShow>>(cacheKey);
+		if (cached) return cached;
+
+		const urlParams: Record<string, string | number> = {
+			language: language === "fa" ? "fa-IR" : "en-US",
+			page,
+			sort_by,
+		};
+
+		if (with_genres) urlParams.with_genres = with_genres;
+		if (with_original_language)
+			urlParams.with_original_language = with_original_language;
+
+		const url = this.buildUrl("/discover/tv", urlParams);
+		const data = await this.fetchWithRetry<TMDBResponse<TMDBTVShow>>(url);
+		cache.set(cacheKey, data);
+		return data;
+	}
+
 	getImageUrl(
 		path: string | null,
 		size: "w200" | "w500" | "original" = "w500",
@@ -328,7 +403,36 @@ export const tmdbClient = new TMDBClient();
 // DATA MAPPERS
 // ============================================================================
 
+// TMDB Genre ID to name mapping
+const GENRE_MAP: Record<number, Genre> = {
+	28: "action",
+	12: "adventure",
+	16: "animation",
+	35: "comedy",
+	80: "thriller", // crime -> thriller
+	99: "documentary",
+	18: "drama",
+	10751: "family",
+	14: "fantasy",
+	36: "historical",
+	27: "horror",
+	10402: "documentary", // music -> documentary
+	9648: "mystery",
+	10749: "romance",
+	878: "sci-fi",
+	10770: "drama", // TV movie -> drama
+	53: "thriller",
+	10752: "historical", // war -> historical
+	37: "adventure", // western -> adventure
+};
+
 export function mapTMDBMovieToMovie(tmdbMovie: TMDBMovie): Movie {
+	const genres = tmdbMovie.genre_ids
+		? tmdbMovie.genre_ids
+				.map((id) => GENRE_MAP[id])
+				.filter((g): g is Genre => Boolean(g))
+		: (["drama"] as Genre[]);
+
 	return {
 		id: String(tmdbMovie.id),
 		title: tmdbMovie.title,
@@ -341,7 +445,7 @@ export function mapTMDBMovieToMovie(tmdbMovie: TMDBMovie): Movie {
 			: 2024,
 		rating: Math.round(tmdbMovie.vote_average * 10) / 10,
 		duration: 120, // TMDB doesn't provide this in list endpoints
-		genres: ["drama"], // Map genre_ids to actual genres if needed
+		genres,
 		languages: [tmdbMovie.original_language === "fa" ? "fa" : "en"],
 		origin:
 			tmdbMovie.original_language === "fa" ||
@@ -370,6 +474,12 @@ export function mapTMDBMovieToMovie(tmdbMovie: TMDBMovie): Movie {
 }
 
 export function mapTMDBTVShowToSeries(tmdbShow: TMDBTVShow): Series {
+	const genres = tmdbShow.genre_ids
+		? tmdbShow.genre_ids
+				.map((id) => GENRE_MAP[id])
+				.filter((g): g is Genre => Boolean(g))
+		: (["drama"] as Genre[]);
+
 	return {
 		id: String(tmdbShow.id),
 		title: tmdbShow.name,
@@ -381,7 +491,7 @@ export function mapTMDBTVShowToSeries(tmdbShow: TMDBTVShow): Series {
 			? new Date(tmdbShow.first_air_date).getFullYear()
 			: 2024,
 		rating: Math.round(tmdbShow.vote_average * 10) / 10,
-		genres: ["drama"],
+		genres,
 		languages: [tmdbShow.original_language === "fa" ? "fa" : "en"],
 		origin:
 			tmdbShow.origin_country.includes("IR") ||
