@@ -31,6 +31,7 @@ import { VisualRatingsDisplay } from "@/components/media/VisualRatingsDisplay";
 import { VisualSynopsisCard } from "@/components/media/VisualSynopsisCard";
 import { VisualContentGrid } from "@/components/media/VisualContentGrid";
 import { useTMDBMovieDetails, useTMDBTVDetails } from "@/hooks/useTMDBDetails";
+import { ShareDialog } from "@/components/modals/ShareDialog";
 
 // Mock data for development
 import { movies, series } from "@/data/mockContent";
@@ -42,6 +43,7 @@ export default function ItemDetailPage() {
 	const [type, setType] = useState<"movie" | "series" | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [shareDialogOpen, setShareDialogOpen] = useState(false);
 
 	// Extract TMDB ID from the data (assuming it's stored as numeric ID)
 	const tmdbId = data ? Number(data.id) : null;
@@ -311,18 +313,7 @@ export default function ItemDetailPage() {
 						genres={data.genres || []}
 						onPlay={() => console.log("Play clicked")}
 						onAddToList={() => console.log("Add to list clicked")}
-						onShare={async () => {
-							try {
-								if (navigator.share) {
-									await navigator.share({
-										title: data.title,
-										url: window.location.href,
-									});
-								}
-							} catch (e) {
-								console.log("Share cancelled");
-							}
-						}}
+						onShare={() => setShareDialogOpen(true)}
 					/>
 
 					<Container maxWidth="lg" sx={{ pb: 8 }}>
@@ -372,6 +363,13 @@ export default function ItemDetailPage() {
 						{/* H. Comments with Visual Context */}
 						<Comments itemId={id} />
 					</Container>
+
+					{/* Share Dialog */}
+					<ShareDialog
+						open={shareDialogOpen}
+						onClose={() => setShareDialogOpen(false)}
+						title={data.title}
+					/>
 				</>
 			)}
 		</Box>
