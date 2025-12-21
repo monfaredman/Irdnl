@@ -333,7 +333,7 @@ export function useBackendFilteredContent(
 	filters: ContentFilters,
 	options: UseBackendContentOptions = {},
 ): UseBackendContentResult<(Movie | Series)[]> {
-	const { language = "en", enabled = true } = options;
+	const { language = "fa", enabled = true } = options;
 	const [data, setData] = useState<(Movie | Series)[] | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<Error | null>(null);

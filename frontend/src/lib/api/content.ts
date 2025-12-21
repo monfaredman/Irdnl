@@ -82,7 +82,7 @@ export const contentApi = {
 	 * Get popular movies from TMDB (via backend)
 	 */
 	async getPopularMovies(
-		language: "en" | "fa" = "en",
+		language: "en" | "fa" = "fa",
 		page: number = 1,
 	): Promise<Movie[]> {
 		const response = await apiClient.get<ContentListResponse>(
@@ -98,7 +98,7 @@ export const contentApi = {
 	/**
 	 * Get trending movies from TMDB (via backend)
 	 */
-	async getTrendingMovies(language: "en" | "fa" = "en"): Promise<Movie[]> {
+	async getTrendingMovies(language: "en" | "fa" = "fa"): Promise<Movie[]> {
 		const response = await apiClient.get<ContentListResponse>(
 			"/content/tmdb/trending/movies",
 			{
@@ -112,7 +112,7 @@ export const contentApi = {
 	 * Get popular TV shows from TMDB (via backend)
 	 */
 	async getPopularTVShows(
-		language: "en" | "fa" = "en",
+		language: "en" | "fa" = "fa",
 		page: number = 1,
 	): Promise<Series[]> {
 		const response = await apiClient.get<ContentListResponse>(
@@ -130,7 +130,7 @@ export const contentApi = {
 	 */
 	async searchMovies(
 		query: string,
-		language: "en" | "fa" = "en",
+		language: "en" | "fa" = "fa",
 	): Promise<Movie[]> {
 		const response = await apiClient.get<ContentListResponse>(
 			"/content/tmdb/search/movies",
@@ -147,7 +147,7 @@ export const contentApi = {
 	 */
 	async searchTVShows(
 		query: string,
-		language: "en" | "fa" = "en",
+		language: "en" | "fa" = "fa",
 	): Promise<Series[]> {
 		const response = await apiClient.get<ContentListResponse>(
 			"/content/tmdb/search/tv",
@@ -204,6 +204,7 @@ export const contentApi = {
 	async discoverMovies(params: {
 		language?: "en" | "fa";
 		genre?: string;
+		with_genres?: string;
 		year?: number;
 		certification?: string;
 		country?: string;
@@ -225,6 +226,7 @@ export const contentApi = {
 	async discoverTVShows(params: {
 		language?: "en" | "fa";
 		genre?: string;
+		with_genres?: string;
 		year?: number;
 		certification?: string;
 		country?: string;
@@ -237,6 +239,27 @@ export const contentApi = {
 		return {
 			...response,
 			items: response.items as Series[],
+		};
+	},
+
+	/**
+	 * Animation content (genre 16) from TMDB (via backend discover)
+	 */
+	async getAnimationContent(params?: {
+		language?: "en" | "fa";
+		page?: number;
+	}): Promise<{ movies: Movie[]; series: Series[] }> {
+		const language = params?.language ?? "fa";
+		const page = params?.page ?? 1;
+
+		const [movieRes, seriesRes] = await Promise.all([
+			this.discoverMovies({ language, page, with_genres: "16" }),
+			this.discoverTVShows({ language, page, with_genres: "16" }),
+		]);
+
+		return {
+			movies: movieRes.items as Movie[],
+			series: seriesRes.items as Series[],
 		};
 	},
 };

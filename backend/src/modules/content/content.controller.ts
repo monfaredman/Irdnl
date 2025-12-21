@@ -37,7 +37,7 @@ export class ContentController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiResponse({ status: 200, description: 'Popular movies retrieved from TMDB' })
   async getPopularMovies(
-    @Query('language') language: 'en' | 'fa' = 'en',
+    @Query('language') language: 'en' | 'fa' = 'fa',
     @Query('page') page: number = 1,
   ) {
     const response = await this.tmdbService.getPopularMovies(language, page);
@@ -55,7 +55,7 @@ export class ContentController {
   @ApiOperation({ summary: 'Get trending movies from TMDB' })
   @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
   @ApiResponse({ status: 200, description: 'Trending movies retrieved from TMDB' })
-  async getTrendingMovies(@Query('language') language: 'en' | 'fa' = 'en') {
+  async getTrendingMovies(@Query('language') language: 'en' | 'fa' = 'fa') {
     const response = await this.tmdbService.getTrendingMovies(language);
     const items = response.results.map((movie) => this.tmdbService.transformMovie(movie));
     return {
@@ -73,7 +73,7 @@ export class ContentController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiResponse({ status: 200, description: 'Popular TV shows retrieved from TMDB' })
   async getPopularTVShows(
-    @Query('language') language: 'en' | 'fa' = 'en',
+    @Query('language') language: 'en' | 'fa' = 'fa',
     @Query('page') page: number = 1,
   ) {
     const response = await this.tmdbService.getPopularTVShows(language, page);
@@ -129,7 +129,7 @@ export class ContentController {
   @ApiResponse({ status: 200, description: 'Multi search results from TMDB' })
   async search(
     @Query('q') query: string,
-    @Query('language') language: 'en' | 'fa' = 'en',
+    @Query('language') language: 'en' | 'fa' = 'fa',
     @Query('page') page: number = 1,
   ) {
     const trimmed = (query || '').trim();
@@ -179,8 +179,9 @@ export class ContentController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiResponse({ status: 200, description: 'Discovered movies from TMDB' })
   async discoverMovies(
-    @Query('language') language: 'en' | 'fa' = 'en',
+    @Query('language') language: 'en' | 'fa' = 'fa',
     @Query('genre') genre?: string,
+    @Query('with_genres') withGenres?: string,
     @Query('year') year?: number,
     @Query('certification') certification?: string,
     @Query('country') country?: string,
@@ -188,6 +189,7 @@ export class ContentController {
   ) {
     const response = await this.tmdbService.discoverMovies(language, {
       genre,
+      withGenres,
       year: year ? parseInt(year.toString()) : undefined,
       certification,
       country,
@@ -213,8 +215,9 @@ export class ContentController {
   @ApiQuery({ name: 'page', type: Number, required: false })
   @ApiResponse({ status: 200, description: 'Discovered TV shows from TMDB' })
   async discoverTVShows(
-    @Query('language') language: 'en' | 'fa' = 'en',
+    @Query('language') language: 'en' | 'fa' = 'fa',
     @Query('genre') genre?: string,
+    @Query('with_genres') withGenres?: string,
     @Query('year') year?: number,
     @Query('certification') certification?: string,
     @Query('country') country?: string,
@@ -222,6 +225,7 @@ export class ContentController {
   ) {
     const response = await this.tmdbService.discoverTVShows(language, {
       genre,
+      withGenres,
       year: year ? parseInt(year.toString()) : undefined,
       certification,
       country,

@@ -1,7 +1,7 @@
 "use client";
 
 import { Alert, Box, CircularProgress } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BannerCarousel } from "@/components/sections/BannerCarousel";
 import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
 import { FiltersSection } from "@/components/sections/FiltersSection";
@@ -16,6 +16,8 @@ import {
 	useBackendTrendingMovies,
 } from "@/hooks/useBackendContent";
 import { useLanguage } from "@/providers/language-provider";
+import { contentApi } from "@/lib/api/content";
+import type { Movie } from "@/types/media";
 
 type UiFilterState = {
 	type: string;
@@ -46,6 +48,7 @@ export default function Home() {
 		yearRange: [2000, 2024],
 		ageRating: "all",
 	});
+	const [hasAppliedFilters, setHasAppliedFilters] = useState(false);
 
 	const backendFilters = useMemo(() => {
 		// Map UI filters to TMDB discover params
@@ -87,6 +90,32 @@ export default function Home() {
 		error: errorFiltered,
 	} = useBackendFilteredContent(backendFilters, { enabled: true });
 
+	const [animationItems, setAnimationItems] = useState<Movie[]>([]);
+	const [loadingAnimation, setLoadingAnimation] = useState(false);
+
+	// Animation content (genre 16) from TMDB via backend discover
+	// Lightweight client-side fetch (no need for a dedicated hook yet).
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				setLoadingAnimation(true);
+				const res = await contentApi.getAnimationContent({
+					language: language === "fa" ? "fa" : "en",
+					page: 1,
+				});
+				if (cancelled) return;
+				// For the home carousel we show movies (can be extended to mixed types later)
+				setAnimationItems(res.movies.slice(0, 8));
+			} finally {
+				if (!cancelled) setLoadingAnimation(false);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [language]);
+
 	// Filter content by origin (Iranian vs Foreign)
 	const foreignMovies =
 		popularMovies?.filter((m) => m.origin === "foreign") || [];
@@ -121,10 +150,15 @@ export default function Home() {
 			)}
 
 			{/* Filters Section */}
-			<FiltersSection onFilterChange={setFilters} />
+			<FiltersSection
+				onFilterChange={(next) => {
+					setFilters(next);
+					setHasAppliedFilters(true);
+				}}
+			/>
 
 			{/* Filtered Results (from backend /content) */}
-			{errorFiltered && (
+			{hasAppliedFilters && errorFiltered && (
 				<Box sx={{ px: { xs: 2, md: 4 }, pb: 4 }}>
 					<Alert severity="error" sx={{ maxWidth: 900, mx: "auto" }}>
 						{language === "fa"
@@ -134,13 +168,16 @@ export default function Home() {
 				</Box>
 			)}
 
-			{loadingFiltered && (
+			{hasAppliedFilters && loadingFiltered && (
 				<Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
 					<CircularProgress sx={{ color: "#F59E0B" }} size={28} />
 				</Box>
 			)}
 
-			{!loadingFiltered && filteredContent && filteredContent.length > 0 && (
+			{hasAppliedFilters &&
+				!loadingFiltered &&
+				filteredContent &&
+				filteredContent.length > 0 && (
 				<EmblaCarousel
 					title={language === "fa" ? "نتایج فیلتر" : "Filtered Results"}
 					items={filteredContent}
@@ -208,10 +245,10 @@ export default function Home() {
 			)}
 
 			{/* Animation Carousel - انیمیشن */}
-			{popularMovies && popularMovies.length > 0 && (
+			{!loadingAnimation && animationItems.length > 0 && (
 				<EmblaCarousel
 					title={language === "fa" ? "انیمیشن" : "Animation"}
-					items={popularMovies.slice(0, 8)}
+					items={animationItems}
 					type="movie"
 					viewAllHref="/animation"
 				/>

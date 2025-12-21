@@ -257,7 +257,7 @@ export class TMDBService {
   }
 
   async getPopularMovies(
-    language: 'en' | 'fa' = 'en',
+    language: 'en' | 'fa' = 'fa',
     page: number = 1,
   ): Promise<TMDBResponse<TMDBMovie>> {
     const cacheKey = `tmdb:popular_movies:${language}:${page}`;
@@ -283,7 +283,7 @@ export class TMDBService {
   }
 
   async getPopularTVShows(
-    language: 'en' | 'fa' = 'en',
+    language: 'en' | 'fa' = 'fa',
     page: number = 1,
   ): Promise<TMDBResponse<TMDBTVShow>> {
     const cacheKey = `tmdb:popular_tv:${language}:${page}`;
@@ -299,7 +299,7 @@ export class TMDBService {
 
   async searchMovies(
     query: string,
-    language: 'en' | 'fa' = 'en',
+    language: 'en' | 'fa' = 'fa',
   ): Promise<TMDBResponse<TMDBMovie>> {
     const cacheKey = `tmdb:search_movies:${query}:${language}`;
     return this.fetchFromTMDB<TMDBResponse<TMDBMovie>>(
@@ -315,7 +315,7 @@ export class TMDBService {
 
   async searchTVShows(
     query: string,
-    language: 'en' | 'fa' = 'en',
+    language: 'en' | 'fa' = 'fa',
   ): Promise<TMDBResponse<TMDBTVShow>> {
     const cacheKey = `tmdb:search_tv:${query}:${language}`;
     return this.fetchFromTMDB<TMDBResponse<TMDBTVShow>>(
@@ -337,7 +337,7 @@ export class TMDBService {
       includeAdult?: boolean;
     } = {},
   ): Promise<TMDBResponse<TMDBMultiSearchResult>> {
-    const { language = 'en', page = 1, includeAdult = false } = options;
+    const { language = 'fa', page = 1, includeAdult = false } = options;
     const cacheKey = `tmdb:search_multi:${query}:${language}:${page}:${includeAdult}`;
 
     return this.fetchFromTMDB<TMDBResponse<TMDBMultiSearchResult>>(
@@ -354,17 +354,18 @@ export class TMDBService {
   }
 
   async discoverMovies(
-    language: 'en' | 'fa' = 'en',
+    language: 'en' | 'fa' = 'fa',
     options: {
       genre?: string;
+      withGenres?: string;
       year?: number;
       certification?: string;
       country?: string;
       page?: number;
     } = {},
   ): Promise<TMDBResponse<TMDBMovie>> {
-    const { genre, year, certification, country, page = 1 } = options;
-    const cacheKey = `tmdb:discover_movies:${language}:${genre}:${year}:${certification}:${country}:${page}`;
+    const { genre, withGenres, year, certification, country, page = 1 } = options;
+  const cacheKey = `tmdb:discover_movies:${language}:${withGenres || ''}:${genre}:${year}:${certification}:${country}:${page}`;
     
     const params: any = {
       language: language === 'fa' ? 'fa-IR' : 'en-US',
@@ -372,7 +373,9 @@ export class TMDBService {
       sort_by: 'popularity.desc',
     };
     
-    if (genre && genre !== 'all') {
+    if (withGenres) {
+      params.with_genres = withGenres;
+    } else if (genre && genre !== 'all') {
       // Map genre names to TMDB genre IDs
       const genreMap: Record<string, number> = {
         action: 28,
@@ -451,17 +454,18 @@ export class TMDBService {
   }
 
   async discoverTVShows(
-    language: 'en' | 'fa' = 'en',
+    language: 'en' | 'fa' = 'fa',
     options: {
       genre?: string;
+      withGenres?: string;
       year?: number;
       certification?: string;
       country?: string;
       page?: number;
     } = {},
   ): Promise<TMDBResponse<TMDBTVShow>> {
-    const { genre, year, certification, country, page = 1 } = options;
-    const cacheKey = `tmdb:discover_tv:${language}:${genre}:${year}:${certification}:${country}:${page}`;
+    const { genre, withGenres, year, certification, country, page = 1 } = options;
+  const cacheKey = `tmdb:discover_tv:${language}:${withGenres || ''}:${genre}:${year}:${certification}:${country}:${page}`;
     
     const params: any = {
       language: language === 'fa' ? 'fa-IR' : 'en-US',
@@ -469,7 +473,9 @@ export class TMDBService {
       sort_by: 'popularity.desc',
     };
     
-    if (genre && genre !== 'all') {
+    if (withGenres) {
+      params.with_genres = withGenres;
+    } else if (genre && genre !== 'all') {
       // Map genre names to TMDB genre IDs (TV genres)
       const genreMap: Record<string, number> = {
         action: 10759,

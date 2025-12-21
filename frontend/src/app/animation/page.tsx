@@ -1,30 +1,66 @@
 "use client";
 
-import { Box, Chip, Container, Stack, Typography } from "@mui/material";
+import {
+	Box,
+	Chip,
+	CircularProgress,
+	Container,
+	Stack,
+	Typography,
+} from "@mui/material";
 import { MediaCard } from "@/components/media/MediaCard";
-import { movies, series } from "@/data/mockContent";
 import { useLanguage } from "@/providers/language-provider";
+import { contentApi } from "@/lib/api/content";
+import type { Movie, Series } from "@/types/media";
 import {
 	glassBlur,
 	glassBorderRadius,
 	glassColors,
 } from "@/theme/glass-design-system";
+import { useEffect, useMemo, useState } from "react";
 
 export default function AnimationPage() {
 	const { language } = useLanguage();
-	
-	// Filter for animation content
-	const animationMovies = movies.filter((movie) => 
-		movie.genres?.some(g => g.toLowerCase() === "animation")
-	);
-	const animationSeries = series.filter((show) => 
-		show.genres?.some(g => g.toLowerCase() === "animation")
-	);
 
-	const allAnimation = [
-		...animationMovies.map(item => ({ ...item, type: "movie" as const })),
-		...animationSeries.map(item => ({ ...item, type: "series" as const })),
-	];
+	const [movies, setMovies] = useState<Movie[]>([]);
+	const [series, setSeries] = useState<Series[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				setLoading(true);
+				setError(null);
+				const res = await contentApi.getAnimationContent({
+					language: language === "fa" ? "fa" : "en",
+					page: 1,
+				});
+				if (cancelled) return;
+				setMovies(res.movies);
+				setSeries(res.series);
+			} catch (err) {
+				if (cancelled) return;
+				setError(err instanceof Error ? err.message : "Failed to load animation");
+				setMovies([]);
+				setSeries([]);
+			} finally {
+				if (!cancelled) setLoading(false);
+			}
+		})();
+		return () => {
+			cancelled = true;
+		};
+	}, [language]);
+
+	const allAnimation = useMemo(
+		() => [
+			...movies.map((item) => ({ ...item, type: "movie" as const })),
+			...series.map((item) => ({ ...item, type: "series" as const })),
+		],
+		[movies, series],
+	);
 
 	const glassStyle = {
 		background: `linear-gradient(135deg, ${glassColors.glass.strong}, ${glassColors.glass.mid})`,
@@ -177,7 +213,7 @@ export default function AnimationPage() {
 										color: glassColors.persianGold,
 									}}
 								>
-									{animationMovies.length}
+									{movies.length}
 								</Typography>
 								<Typography
 									variant="body2"
@@ -194,7 +230,7 @@ export default function AnimationPage() {
 										color: glassColors.persianGold,
 									}}
 								>
-									{animationSeries.length}
+									{series.length}
 								</Typography>
 								<Typography
 									variant="body2"
@@ -207,6 +243,18 @@ export default function AnimationPage() {
 					</Box>
 
 					{/* Content Grid */}
+					{error && (
+						<Box sx={{ ...glassStyle, p: 4, textAlign: "center" }}>
+							<Typography sx={{ color: "rgba(255, 100, 100, 0.9)" }}>
+								{error}
+							</Typography>
+						</Box>
+					)}
+					{loading && (
+						<Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
+							<CircularProgress sx={{ color: glassColors.persianGold }} size={28} />
+						</Box>
+					)}
 					<Box
 						sx={{
 							display: "grid",
@@ -220,13 +268,14 @@ export default function AnimationPage() {
 							gap: 3,
 						}}
 					>
-						{allAnimation.map((item) => (
-							<MediaCard key={item.id} item={item} type={item.type} />
-						))}
+						{!loading &&
+							allAnimation.map((item) => (
+								<MediaCard key={`${item.type}-${item.id}`} item={item} type={item.type} />
+							))}
 					</Box>
 
 					{/* Empty State */}
-					{allAnimation.length === 0 && (
+					{!loading && allAnimation.length === 0 && (
 						<Box
 							sx={{
 								...glassStyle,

@@ -320,7 +320,7 @@ export const LiquidGlassSlider = ({
 											}}
 										>
 											<PlayArrowIcon />
-											Watch Now
+											{language === "fa" ? "تماشا" : "Watch Now"}
 										</Box>
 									</Box>
 								</Box>
