@@ -4,6 +4,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import {
 	Box,
 	Card,
+	CircularProgress,
 	FormControl,
 	InputAdornment,
 	MenuItem,
@@ -13,10 +14,12 @@ import {
 	Typography,
 	useTheme,
 } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { MediaCard } from "@/components/media/MediaCard";
 import { movies, series } from "@/data/mockContent";
-import { searchContent } from "@/lib/content";
+import { contentApi } from "@/lib/api/content";
+import { useLanguage } from "@/providers/language-provider";
+import type { Movie, Series } from "@/types/media";
 import type { Genre } from "@/types/media";
 
 const uniqueGenres = Array.from(
@@ -30,10 +33,65 @@ export const SearchExperience = () => {
 	const [query, setQuery] = useState("");
 	const [genre, setGenre] = useState<Genre | "all">("all");
 	const [year, setYear] = useState<number | "all">("all");
-	const results = useMemo(
-		() => searchContent({ keyword: query, genre, year }),
-		[query, genre, year],
-	);
+	const { language } = useLanguage();
+	const [moviesResult, setMoviesResult] = useState<Movie[]>([]);
+	const [seriesResult, setSeriesResult] = useState<Series[]>([]);
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	// Backend multi-search results (TMDB). We still keep the genre/year dropdowns
+	// for now by filtering the returned items client-side.
+	useEffect(() => {
+		const trimmed = query.trim();
+		if (!trimmed) {
+			setMoviesResult([]);
+			setSeriesResult([]);
+			setError(null);
+			setLoading(false);
+			return;
+		}
+
+		let cancelled = false;
+		const handle = setTimeout(async () => {
+			try {
+				setLoading(true);
+				setError(null);
+				const response = await contentApi.search({
+					q: trimmed,
+					language: language === "fa" ? "fa" : "en",
+					page: 1,
+				});
+				if (cancelled) return;
+				setMoviesResult(response.movies);
+				setSeriesResult(response.series);
+			} catch (err) {
+				if (cancelled) return;
+				setError(err instanceof Error ? err.message : "Search failed");
+				setMoviesResult([]);
+				setSeriesResult([]);
+			} finally {
+				if (!cancelled) setLoading(false);
+			}
+		}, 450);
+
+		return () => {
+			cancelled = true;
+			clearTimeout(handle);
+		};
+	}, [query, language]);
+
+	const results = useMemo(() => {
+		const filterByGenre = <T extends Movie | Series>(items: T[]) =>
+			genre === "all" ? items : items.filter((item) => item.genres.includes(genre));
+
+		const filterByYear = <T extends Movie | Series>(items: T[]) =>
+			year === "all" ? items : items.filter((item) => item.year === year);
+
+		return {
+			movies: filterByYear(filterByGenre(moviesResult)),
+			series: filterByYear(filterByGenre(seriesResult)),
+		};
+	}, [moviesResult, seriesResult, genre, year]);
 	const theme = useTheme();
 
 	const glassStyle = {
@@ -194,6 +252,25 @@ export const SearchExperience = () => {
 				</FormControl>
 			</Stack>
 			<Stack spacing={6}>
+				{error && (
+					<Card
+						sx={{
+							...glassSubtleStyle,
+							borderRadius: 3,
+							p: 2,
+							textAlign: "center",
+						}}
+					>
+						<Typography variant="body2" sx={{ color: "rgba(255, 100, 100, 0.9)" }}>
+							{error}
+						</Typography>
+					</Card>
+				)}
+				{loading && query.trim() && (
+					<Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+						<CircularProgress size={22} />
+					</Box>
+				)}
 				<Box>
 					<Typography
 						variant="h5"

@@ -46,6 +46,17 @@ interface TMDBResponse<T> {
   total_results: number;
 }
 
+type TMDBMultiSearchResult =
+  | ({ media_type: 'movie' } & TMDBMovie)
+  | ({ media_type: 'tv' } & TMDBTVShow)
+  | {
+      media_type: 'person';
+      id: number;
+      name: string;
+      profile_path: string | null;
+      known_for_department?: string;
+    };
+
 @Injectable()
 export class TMDBService {
   private readonly logger = new Logger(TMDBService.name);
@@ -315,6 +326,30 @@ export class TMDBService {
       },
       cacheKey,
       1800, // 30 minutes for search results
+    );
+  }
+
+  async searchMulti(
+    query: string,
+    options: {
+      language?: 'en' | 'fa';
+      page?: number;
+      includeAdult?: boolean;
+    } = {},
+  ): Promise<TMDBResponse<TMDBMultiSearchResult>> {
+    const { language = 'en', page = 1, includeAdult = false } = options;
+    const cacheKey = `tmdb:search_multi:${query}:${language}:${page}:${includeAdult}`;
+
+    return this.fetchFromTMDB<TMDBResponse<TMDBMultiSearchResult>>(
+      '/search/multi',
+      {
+        query,
+        page,
+        include_adult: includeAdult ? 'true' : 'false',
+        language: language === 'fa' ? 'fa-IR' : 'en-US',
+      },
+      cacheKey,
+      1800,
     );
   }
 

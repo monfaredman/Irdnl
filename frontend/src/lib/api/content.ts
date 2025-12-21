@@ -15,6 +15,18 @@ export interface ContentListResponse {
 	totalPages: number;
 }
 
+export type ContentSearchItem =
+	| { type: "movie"; item: Movie }
+	| { type: "series"; item: Series };
+
+export interface ContentSearchResponse {
+	items: ContentSearchItem[];
+	total: number;
+	page: number;
+	limit: number;
+	totalPages: number;
+}
+
 export interface ContentQueryParams {
 	type?: "movie" | "series";
 	genre?: string;
@@ -145,6 +157,45 @@ export const contentApi = {
 			},
 		);
 		return response.items as Series[];
+	},
+
+	/**
+	 * Search movies + TV shows from TMDB (via backend multi-search)
+	 */
+	async search(
+		params: {
+			q: string;
+			language?: "en" | "fa";
+			page?: number;
+		},
+	): Promise<{
+		movies: Movie[];
+		series: Series[];
+		total: number;
+		page: number;
+		limit: number;
+		totalPages: number;
+	}> {
+		const response = await apiClient.get<ContentSearchResponse>(
+			"/content/tmdb/search",
+			params,
+		);
+
+		const movies = response.items
+			.filter((entry) => entry.type === "movie")
+			.map((entry) => entry.item as Movie);
+		const series = response.items
+			.filter((entry) => entry.type === "series")
+			.map((entry) => entry.item as Series);
+
+		return {
+			movies,
+			series,
+			total: response.total,
+			page: response.page,
+			limit: response.limit,
+			totalPages: response.totalPages,
+		};
 	},
 
 	/**

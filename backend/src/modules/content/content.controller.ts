@@ -121,6 +121,54 @@ export class ContentController {
     };
   }
 
+  @Get('tmdb/search')
+  @ApiOperation({ summary: 'Search across movies and TV shows on TMDB (multi-search)' })
+  @ApiQuery({ name: 'q', type: String, required: true })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiResponse({ status: 200, description: 'Multi search results from TMDB' })
+  async search(
+    @Query('q') query: string,
+    @Query('language') language: 'en' | 'fa' = 'en',
+    @Query('page') page: number = 1,
+  ) {
+    const trimmed = (query || '').trim();
+    if (!trimmed) {
+      return {
+        items: [],
+        total: 0,
+        page: 1,
+        limit: 0,
+        totalPages: 0,
+      };
+    }
+
+    const response = await this.tmdbService.searchMulti(trimmed, {
+      language,
+      page: page ? parseInt(page.toString()) : 1,
+    });
+
+    const items = response.results
+      .map((result: any) => {
+        if (result?.media_type === 'movie') {
+          return { type: 'movie', item: this.tmdbService.transformMovie(result) };
+        }
+        if (result?.media_type === 'tv') {
+          return { type: 'series', item: this.tmdbService.transformTVShow(result) };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    return {
+      items,
+      total: response.total_results,
+      page: response.page,
+      limit: response.results.length,
+      totalPages: response.total_pages,
+    };
+  }
+
   @Get('tmdb/discover/movies')
   @ApiOperation({ summary: 'Discover movies on TMDB with filters' })
   @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
