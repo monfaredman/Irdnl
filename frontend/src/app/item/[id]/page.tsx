@@ -340,14 +340,7 @@ export default function ItemDetailPage() {
 						/>
 
 						{/* E. Cast & Crew Gallery */}
-						{castMembers.length > 0 && (
-							<CastGallery
-								cast={castMembers}
-								onMemberClick={(member) =>
-									console.log("Cast member clicked:", member)
-								}
-							/>
-						)}
+						{castMembers.length > 0 && <CastGallery cast={castMembers} />}
 
 						{/* F. Season & Episodes (Series Only) */}
 						{type === "series" && <SeasonsEpisodes series={data as Series} />}

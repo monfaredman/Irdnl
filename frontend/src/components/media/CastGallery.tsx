@@ -5,6 +5,7 @@
 "use client";
 
 import { Box, Typography, Avatar } from "@mui/material";
+import Link from "next/link";
 import { useState } from "react";
 import {
 	glassColors,
@@ -28,6 +29,15 @@ export function CastGallery({ cast, onMemberClick }: CastGalleryProps) {
 	const [hoveredId, setHoveredId] = useState<number | null>(null);
 
 	if (!cast.length) return null;
+
+	// Helper to create cast member slug
+	const createSlug = (id: number, name: string) => {
+		const slug = name
+			.toLowerCase()
+			.replace(/[^a-z0-9\s-]/g, "")
+			.replace(/\s+/g, "-");
+		return `${id}-${slug}`;
+	};
 
 	return (
 		<Box sx={{ mb: 4 }}>
@@ -68,9 +78,16 @@ export function CastGallery({ cast, onMemberClick }: CastGalleryProps) {
 				{cast.map((member) => (
 					<Box
 						key={member.id}
+						component={Link}
+						href={`/cast/${createSlug(member.id, member.name)}`}
 						onMouseEnter={() => setHoveredId(member.id)}
 						onMouseLeave={() => setHoveredId(null)}
-						onClick={() => onMemberClick?.(member)}
+						onClick={(e) => {
+							if (onMemberClick) {
+								e.preventDefault();
+								onMemberClick(member);
+							}
+						}}
 						sx={{
 							position: "relative",
 							flexShrink: 0,
@@ -79,6 +96,7 @@ export function CastGallery({ cast, onMemberClick }: CastGalleryProps) {
 							transition: "transform 0.3s ease",
 							transform:
 								hoveredId === member.id ? "translateY(-8px)" : "translateY(0)",
+							textDecoration: "none",
 						}}
 					>
 						{/* Profile Picture in Glass Frame */}
