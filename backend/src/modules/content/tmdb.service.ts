@@ -555,15 +555,25 @@ export class TMDBService {
 
   // Transform TMDB movie to our Movie format
   transformMovie(tmdbMovie: TMDBMovie) {
+    const title = (tmdbMovie.title || '').trim() || 'بدون عنوان';
+    const description = (tmdbMovie.overview || '').trim() || '';
+    const releaseYear = tmdbMovie.release_date
+      ? new Date(tmdbMovie.release_date).getFullYear()
+      : undefined;
+
     return {
       id: String(tmdbMovie.id),
-      title: tmdbMovie.title,
-      slug: tmdbMovie.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      description: tmdbMovie.overview || 'No description available.',
+      title,
+      slug: this.slugify(title, tmdbMovie.id),
+      // Keep empty string instead of leaking placeholder text into UI.
+      description,
       poster: this.getImageUrl(tmdbMovie.poster_path, 'w500'),
       backdrop: this.getImageUrl(tmdbMovie.backdrop_path, 'original'),
-      year: tmdbMovie.release_date ? new Date(tmdbMovie.release_date).getFullYear() : 2024,
-      rating: Math.round(tmdbMovie.vote_average * 10) / 10,
+      year: releaseYear && Number.isFinite(releaseYear) ? releaseYear : new Date().getFullYear(),
+      rating:
+        typeof tmdbMovie.vote_average === 'number' && Number.isFinite(tmdbMovie.vote_average)
+          ? Math.round(tmdbMovie.vote_average * 10) / 10
+          : 0,
       duration: 120, // TMDB doesn't provide this in list endpoints
       genres: ['drama'], // Map genre_ids to actual genres if needed
       languages: [tmdbMovie.original_language === 'fa' ? 'fa' : 'en'],
@@ -594,15 +604,25 @@ export class TMDBService {
 
   // Transform TMDB TV show to our Series format
   transformTVShow(tmdbShow: TMDBTVShow) {
+    const title = (tmdbShow.name || '').trim() || 'بدون عنوان';
+    const description = (tmdbShow.overview || '').trim() || '';
+    const firstAirYear = tmdbShow.first_air_date
+      ? new Date(tmdbShow.first_air_date).getFullYear()
+      : undefined;
+
     return {
       id: String(tmdbShow.id),
-      title: tmdbShow.name,
-      slug: tmdbShow.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      description: tmdbShow.overview || 'No description available.',
+      title,
+      slug: this.slugify(title, tmdbShow.id),
+      // Keep empty string instead of leaking placeholder text into UI.
+      description,
       poster: this.getImageUrl(tmdbShow.poster_path, 'w500'),
       backdrop: this.getImageUrl(tmdbShow.backdrop_path, 'original'),
-      year: tmdbShow.first_air_date ? new Date(tmdbShow.first_air_date).getFullYear() : 2024,
-      rating: Math.round(tmdbShow.vote_average * 10) / 10,
+      year: firstAirYear && Number.isFinite(firstAirYear) ? firstAirYear : new Date().getFullYear(),
+      rating:
+        typeof tmdbShow.vote_average === 'number' && Number.isFinite(tmdbShow.vote_average)
+          ? Math.round(tmdbShow.vote_average * 10) / 10
+          : 0,
       genres: ['drama'],
       languages: [tmdbShow.original_language === 'fa' ? 'fa' : 'en'],
       origin:
@@ -614,5 +634,16 @@ export class TMDBService {
       seasons: [],
       ongoing: true,
     };
+  }
+
+  private slugify(title: string, fallbackId: number | string) {
+    const base = (title || '').trim().toLowerCase();
+    // Keep unicode letters/digits (including Persian) + latin digits; collapse the rest.
+    const slug = base
+      .replace(/[^\p{L}\p{N}]+/gu, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80);
+
+    return slug || String(fallbackId);
   }
 }

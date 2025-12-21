@@ -283,8 +283,7 @@ export const LiquidGlassSlider = ({
 												textShadow: "0 1px 4px rgba(0, 0, 0, 0.7)",
 											}}
 										>
-											{item.description ||
-												"Experience this amazing content on irdnl."}
+											{item.description}
 										</Typography>
 
 										{/* CTA Button */}
