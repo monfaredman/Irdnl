@@ -108,6 +108,8 @@ async function fetchTMDB<T>(endpoint: string): Promise<T> {
 	return response.json();
 }
 
+const DEFAULT_LANGUAGE = "fa-IR";
+
 // ============================================================================
 // MOVIE DETAILS
 // ============================================================================
@@ -131,13 +133,13 @@ export function useTMDBMovieDetails(tmdbId: number | null) {
 			try {
 				const [detailsData, imagesData, creditsData, recommendationsData] =
 					await Promise.all([
-						fetchTMDB<TMDBMovieDetails>(`/movie/${tmdbId}?language=en-US`),
+						fetchTMDB<TMDBMovieDetails>(`/movie/${tmdbId}?language=${DEFAULT_LANGUAGE}`),
 						fetchTMDB<TMDBImagesResponse>(
-							`/movie/${tmdbId}/images?include_image_language=en,null`,
+							`/movie/${tmdbId}/images?include_image_language=${DEFAULT_LANGUAGE},en,null`,
 						),
 						fetchTMDB<TMDBCreditsResponse>(`/movie/${tmdbId}/credits`),
 						fetchTMDB<TMDBRecommendationsResponse>(
-							`/movie/${tmdbId}/recommendations?language=en-US`,
+							`/movie/${tmdbId}/recommendations?language=${DEFAULT_LANGUAGE}`,
 						),
 					]);
 
@@ -191,13 +193,13 @@ export function useTMDBTVDetails(tmdbId: number | null) {
 			try {
 				const [detailsData, imagesData, creditsData, recommendationsData] =
 					await Promise.all([
-						fetchTMDB<TMDBTVDetails>(`/tv/${tmdbId}?language=en-US`),
+						fetchTMDB<TMDBTVDetails>(`/tv/${tmdbId}?language=${DEFAULT_LANGUAGE}`),
 						fetchTMDB<TMDBImagesResponse>(
-							`/tv/${tmdbId}/images?include_image_language=en,null`,
+							`/tv/${tmdbId}/images?include_image_language=${DEFAULT_LANGUAGE},en,null`,
 						),
 						fetchTMDB<TMDBCreditsResponse>(`/tv/${tmdbId}/credits`),
 						fetchTMDB<TMDBRecommendationsResponse>(
-							`/tv/${tmdbId}/recommendations?language=en-US`,
+							`/tv/${tmdbId}/recommendations?language=${DEFAULT_LANGUAGE}`,
 						),
 					]);
 

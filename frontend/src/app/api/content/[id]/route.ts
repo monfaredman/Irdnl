@@ -6,6 +6,7 @@ const BACKEND_BASE_URL =
 
 const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || "";
 const TMDB_BASE_URL = "https://api.themoviedb.org/3";
+const DEFAULT_LANGUAGE = "fa-IR";
 
 // Check if ID is a TMDB ID (numeric)
 function isTMDBId(id: string): boolean {
@@ -17,8 +18,8 @@ function transformTMDBContent(data: any, mediaType: "movie" | "tv"): Movie | Ser
 	const base = {
 		id: String(data.id),
 		slug: String(data.id),
-		title: data.title || data.name || "Unknown Title",
-		description: data.overview || "No description available",
+		title: data.title || data.name || "بدون عنوان",
+		description: (data.overview || "").trim() || "",
 		year: data.release_date
 			? new Date(data.release_date).getFullYear()
 			: data.first_air_date
@@ -35,7 +36,7 @@ function transformTMDBContent(data: any, mediaType: "movie" | "tv"): Movie | Ser
 			.map((g: any) => g.name.toLowerCase().replace(/\s+/g, '-'))
 			.filter((g: string) => ["action", "drama", "comedy", "romance", "thriller", "mystery", "horror", "sci-fi", "fantasy", "animation", "documentary", "adventure", "historical", "family"].includes(g))
 			.slice(0, 3),
-		languages: ["en" as const],
+		languages: [data.original_language === "fa" ? ("fa" as const) : ("en" as const)],
 		cast: [],
 		tags: [],
 		origin: "foreign" as const,
@@ -124,10 +125,37 @@ export async function GET(
 		// Check if this is a TMDB ID (numeric)
 		if (isTMDBId(id)) {
 			console.log(`[API] Detected TMDB ID: ${id}, fetching from TMDB...`);
+
+			// Prefer backend proxy first (handles proxy/network and keeps API key server-side)
+			const backendCandidates = [
+				`${BACKEND_BASE_URL}/content/tmdb/details/movie/${encodeURIComponent(id)}?language=fa`,
+				`${BACKEND_BASE_URL}/content/tmdb/details/tv/${encodeURIComponent(id)}?language=fa`,
+			];
+
+			for (const url of backendCandidates) {
+				try {
+					const res = await fetch(url, {
+						method: "GET",
+						headers: { Accept: "application/json" },
+						cache: "no-store",
+						signal: AbortSignal.timeout(7000),
+					});
+
+					if (res.status === 404) continue;
+					if (!res.ok) break;
+					const data = await res.json();
+					const mediaType = url.includes("/movie/") ? "movie" : "tv";
+					return NextResponse.json(transformTMDBContent(data, mediaType), {
+						status: 200,
+					});
+				} catch {
+					// ignore and try next
+				}
+			}
 			
 			// Try movie first
 			try {
-				const movieUrl = `${TMDB_BASE_URL}/movie/${id}?api_key=${TMDB_API_KEY}`;
+				const movieUrl = `${TMDB_BASE_URL}/movie/${id}?api_key=${TMDB_API_KEY}&language=${DEFAULT_LANGUAGE}`;
 				console.log(`[API] Trying TMDB movie endpoint...`);
 				const movieResponse = await fetch(movieUrl, {
 					method: "GET",
@@ -148,7 +176,7 @@ export async function GET(
 
 			// Try TV series
 			try {
-				const tvUrl = `${TMDB_BASE_URL}/tv/${id}?api_key=${TMDB_API_KEY}`;
+				const tvUrl = `${TMDB_BASE_URL}/tv/${id}?api_key=${TMDB_API_KEY}&language=${DEFAULT_LANGUAGE}`;
 				console.log(`[API] Trying TMDB TV endpoint...`);
 				const tvResponse = await fetch(tvUrl, {
 					method: "GET",
@@ -167,32 +195,13 @@ export async function GET(
 				console.log(`[API] TMDB TV request failed:`, e instanceof Error ? e.message : 'Unknown error');
 			}
 
-			// If TMDB ID but not found or network error, return mock data
-			console.log(`[API] TMDB ID ${id} not found or network error, returning mock data`);
-			
-			// Create mock data for TMDB ID
-			const mockMovie: Movie = {
-				id: id,
-				slug: id,
-				title: `TMDB Movie #${id}`,
-				description: `This is mock data for TMDB ID ${id}. TMDB API is currently unavailable or the content doesn't exist. Please check your network connection or try a different ID.`,
-				year: 2024,
-				poster: "/images/movies/m_placeholder_1.jpg",
-				backdrop: "/images/movies/m_placeholder_1.jpg",
-				rating: 7.5,
-				genres: ["drama"],
-				languages: ["en"],
-				cast: [],
-				tags: ["tmdb", "placeholder"],
-				origin: "foreign",
-				duration: 120,
-				sources: [],
-				downloads: [],
-				subtitles: [],
-				featured: false,
-			};
-			
-			return NextResponse.json(mockMovie, { status: 200 });
+
+			// If TMDB ID but not found or network error, return 404 (no mock placeholders)
+			console.log(`[API] TMDB ID ${id} not found or network error`);
+			return NextResponse.json(
+				{ error: "TMDB content not found", id },
+				{ status: 404 },
+			);
 		}
 
 		// Try to fetch from backend (UUID format)

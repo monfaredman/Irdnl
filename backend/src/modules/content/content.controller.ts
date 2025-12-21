@@ -92,7 +92,7 @@ export class ContentController {
   @ApiQuery({ name: 'q', type: String, required: true })
   @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
   @ApiResponse({ status: 200, description: 'Movie search results from TMDB' })
-  async searchMovies(@Query('q') query: string, @Query('language') language: 'en' | 'fa' = 'en') {
+  async searchMovies(@Query('q') query: string, @Query('language') language: 'en' | 'fa' = 'fa') {
     const response = await this.tmdbService.searchMovies(query, language);
     const items = response.results.map((movie) => this.tmdbService.transformMovie(movie));
     return {
@@ -109,7 +109,7 @@ export class ContentController {
   @ApiQuery({ name: 'q', type: String, required: true })
   @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
   @ApiResponse({ status: 200, description: 'TV show search results from TMDB' })
-  async searchTVShows(@Query('q') query: string, @Query('language') language: 'en' | 'fa' = 'en') {
+  async searchTVShows(@Query('q') query: string, @Query('language') language: 'en' | 'fa' = 'fa') {
     const response = await this.tmdbService.searchTVShows(query, language);
     const items = response.results.map((show) => this.tmdbService.transformTVShow(show));
     return {
@@ -119,6 +119,28 @@ export class ContentController {
       limit: response.results.length,
       totalPages: response.total_pages,
     };
+  }
+
+  @Get('tmdb/details/movie/:id')
+  @ApiOperation({ summary: 'Get movie details from TMDB' })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiResponse({ status: 200, description: 'Movie details retrieved from TMDB' })
+  async getTMDBMovieDetails(
+    @Param('id') id: string,
+    @Query('language') language: 'en' | 'fa' = 'fa',
+  ) {
+    return this.tmdbService.getMovieDetails(id, language);
+  }
+
+  @Get('tmdb/details/tv/:id')
+  @ApiOperation({ summary: 'Get TV show details from TMDB' })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiResponse({ status: 200, description: 'TV show details retrieved from TMDB' })
+  async getTMDBTVDetails(
+    @Param('id') id: string,
+    @Query('language') language: 'en' | 'fa' = 'fa',
+  ) {
+    return this.tmdbService.getTVDetails(id, language);
   }
 
   @Get('tmdb/search')

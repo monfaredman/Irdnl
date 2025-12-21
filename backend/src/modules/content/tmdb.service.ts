@@ -353,6 +353,28 @@ export class TMDBService {
     );
   }
 
+  async getMovieDetails(id: string | number, language: 'en' | 'fa' = 'fa') {
+    const tmdbId = String(id);
+    const cacheKey = `tmdb:movie:details:${tmdbId}:${language}`;
+    return this.fetchFromTMDB<any>(
+      `/movie/${encodeURIComponent(tmdbId)}`,
+      { language: language === 'fa' ? 'fa-IR' : 'en-US' },
+      cacheKey,
+      3600,
+    );
+  }
+
+  async getTVDetails(id: string | number, language: 'en' | 'fa' = 'fa') {
+    const tmdbId = String(id);
+    const cacheKey = `tmdb:tv:details:${tmdbId}:${language}`;
+    return this.fetchFromTMDB<any>(
+      `/tv/${encodeURIComponent(tmdbId)}`,
+      { language: language === 'fa' ? 'fa-IR' : 'en-US' },
+      cacheKey,
+      3600,
+    );
+  }
+
   async discoverMovies(
     language: 'en' | 'fa' = 'fa',
     options: {

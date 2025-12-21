@@ -81,7 +81,7 @@ function normalizeToItemData(source: TMDBDetails): ItemData {
 		id: String(source.id),
 		title,
 		subtitle,
-		description: source.overview || "No description available.",
+		description: (source.overview || "").trim() || "",
 		// Pricing is app-specific (not TMDB). Use a deterministic placeholder until you
 		// store prices in DB.
 		price: 0,
@@ -168,8 +168,8 @@ export async function GET(
 
 	if (tmdbApiKey) {
 		const tmdbCandidates = [
-			`${tmdbBase}/movie/${encodeURIComponent(id)}?api_key=${encodeURIComponent(tmdbApiKey)}&language=en-US`,
-			`${tmdbBase}/tv/${encodeURIComponent(id)}?api_key=${encodeURIComponent(tmdbApiKey)}&language=en-US`,
+			`${tmdbBase}/movie/${encodeURIComponent(id)}?api_key=${encodeURIComponent(tmdbApiKey)}&language=fa-IR`,
+			`${tmdbBase}/tv/${encodeURIComponent(id)}?api_key=${encodeURIComponent(tmdbApiKey)}&language=fa-IR`,
 		];
 
 		for (const url of tmdbCandidates) {
