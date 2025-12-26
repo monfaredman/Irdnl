@@ -336,8 +336,30 @@ export function CategoryHero({
 
 // Helper function to get base path from breadcrumbs
 function getBreadcrumbBase(breadcrumbs: BreadcrumbItem[]): string {
-  if (breadcrumbs.length >= 2) {
+  console.log(breadcrumbs);
+  if (breadcrumbs.length >= 2 && breadcrumbs.length <= 3 && ['Movies','Films','TV Shows'].includes(breadcrumbs[1].label)) {
+    console.log('1');
     return breadcrumbs[breadcrumbs.length - 1].href;
+  }
+    else if (breadcrumbs.length >= 2 && breadcrumbs.length <=3 && ['Series'].includes(breadcrumbs[1].label)) {
+    console.log('5');
+    return breadcrumbs[breadcrumbs.length - 1].href;
+  }
+     else if (breadcrumbs.length >= 2 && breadcrumbs.length <=4 && ['Series'].includes(breadcrumbs[1].label)) {
+    console.log('8');
+    return breadcrumbs[breadcrumbs.length - 2].href;
+  }
+  else if (breadcrumbs.length >= 2 && breadcrumbs.length <=4 && ['Movies','Films','TV Shows'].includes(breadcrumbs[1].label)) {
+    console.log('2');
+    return breadcrumbs[breadcrumbs.length - 2].href;
+  }
+ else if (breadcrumbs.length >= 2 && breadcrumbs.length < 3 && ['Anime','Persian Dubbed','Animation','Series'].includes(breadcrumbs[1].label)) {
+  console.log('yeess');
+    return breadcrumbs[breadcrumbs.length - 1].href;
+  }
+   else if (breadcrumbs.length >= 2 && breadcrumbs.length <= 3 && ['Anime','Persian Dubbed','Animation','Series'].includes(breadcrumbs[1].label)) {
+  console.log('yeess');
+    return breadcrumbs[breadcrumbs.length - 2].href;
   }
   return "/";
 }
