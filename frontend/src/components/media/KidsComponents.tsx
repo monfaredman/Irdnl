@@ -1,35 +1,29 @@
-"use client";
-
 /**
- * Kids Page - بخش کودکان
+ * Kids Components
  * 
- * Child-friendly Premium Liquid Glass design
- * Features: Age selector, parental controls, playful animations, TMDB integration
+ * Reusable components for the kids section
+ * Playful Premium Liquid Glass design with animations
  */
 
+"use client";
+
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import ChildCareIcon from "@mui/icons-material/ChildCare";
 import LockIcon from "@mui/icons-material/Lock";
-import MusicNoteIcon from "@mui/icons-material/MusicNote";
-import PetsIcon from "@mui/icons-material/Pets";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import ScienceIcon from "@mui/icons-material/Science";
 import SettingsIcon from "@mui/icons-material/Settings";
 import StarIcon from "@mui/icons-material/Star";
 import TimerIcon from "@mui/icons-material/Timer";
-import { 
-  Avatar, 
-  Box, 
-  Button, 
-  Chip, 
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
   FormControlLabel,
-  Grid, 
-  IconButton, 
-  Skeleton, 
+  Grid,
   Slider,
   Switch,
-  Typography 
+  Typography,
 } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
@@ -41,104 +35,8 @@ import {
   glassBorderRadius,
   glassColors,
 } from "@/theme/glass-design-system";
-import {
-  useKidsContent,
-  useFeaturedKidsShows,
-  KIDS_CATEGORIES,
-  POPULAR_CHARACTERS,
-  EDUCATIONAL_BADGES,
-  getRandomBadge,
-  formatKidsDuration,
-  type AgeRange,
-  type KidsCategory,
-  type KidsCharacter,
-} from "@/hooks/useKidsContent";
+import type { AgeRange, KidsCategory, KidsCharacter, EducationalBadge } from "@/hooks/useKidsContent";
 import type { Movie, Series } from "@/types/media";
-
-const translations = {
-  en: {
-    title: "Kids' Happy World",
-    subtitle: "Safe and fun content for children",
-    ageSelector: "Age Range",
-    years: "Years",
-    allAges: "All Ages",
-    recommendedByAge: "Recommended for You",
-    categories: "Categories",
-    characters: "Meet the Characters",
-    charactersSubtitle: "Get to know your favorite characters",
-    featuredShows: "Featured Shows",
-    parentalControls: "Parental Controls",
-    watchTime: "Max Watch Time",
-    hours: "hours",
-    educationalOnly: "Educational Only",
-    dubOnly: "Persian Dubbed Only",
-    enableKidsMode: "Enable Kids Mode",
-    exitKidsMode: "Exit Kids Mode",
-    enterPin: "Enter PIN to exit",
-    watchNow: "Watch",
-    episodes: "episodes",
-    duration: "Duration",
-    rating: "Rating",
-    educational: "Educational",
-    adventure: "Adventure",
-    comedy: "Comedy",
-    emptyState: "Create a child profile to see kids content",
-    loading: "Loading...",
-    short: "Short",
-    medium: "Medium",
-    long: "Long",
-  },
-  fa: {
-    title: "جهان شاد کودکان",
-    subtitle: "محتوای امن و سرگرم‌کننده برای کودکان",
-    ageSelector: "محدوده سنی",
-    years: "سال",
-    allAges: "همه سنین",
-    recommendedByAge: "پیشنهاد شده برای شما",
-    categories: "دسته‌بندی‌ها",
-    characters: "با شخصیت‌های محبوب آشنا شوید",
-    charactersSubtitle: "شخصیت‌های دوست‌داشتنی کارتونی",
-    featuredShows: "برنامه‌های ویژه",
-    parentalControls: "کنترل والدین",
-    watchTime: "حداکثر زمان تماشا",
-    hours: "ساعت",
-    educationalOnly: "فقط محتوای آموزشی",
-    dubOnly: "فقط دوبله فارسی",
-    enableKidsMode: "فعال کردن حالت کودک",
-    exitKidsMode: "خروج از حالت کودک",
-    enterPin: "برای خروج PIN وارد کنید",
-    watchNow: "تماشا",
-    episodes: "قسمت",
-    duration: "مدت زمان",
-    rating: "امتیاز",
-    educational: "آموزشی",
-    adventure: "ماجراجویی",
-    comedy: "طنز",
-    emptyState: "برای دیدن محتوای کودک، ابتدا یک پروفایل کودک ایجاد کنید",
-    loading: "در حال بارگذاری...",
-    short: "کوتاه",
-    medium: "متوسط",
-    long: "بلند",
-  },
-};
-
-// Age group data
-const AGE_GROUPS: { id: AgeRange; label: string; labelFa: string; icon: string; color: string }[] = [
-  { id: "all", label: "All Ages", labelFa: "همه سنین", icon: "🌟", color: "#F59E0B" },
-  { id: "3-5", label: "3-5 Years", labelFa: "۳-۵ سال", icon: "👶", color: "#F472B6" },
-  { id: "6-9", label: "6-9 Years", labelFa: "۶-۹ سال", icon: "🧒", color: "#60A5FA" },
-  { id: "10-12", label: "10-12 Years", labelFa: "۱۰-۱۲ سال", icon: "🧑", color: "#34D399" },
-];
-
-// Category icons mapping
-const CATEGORY_ICONS: Record<string, React.ReactNode> = {
-  animals: <PetsIcon />,
-  educational: <AutoStoriesIcon />,
-  music: <MusicNoteIcon />,
-  science: <ScienceIcon />,
-  classics: <StarIcon />,
-  iranian: <ChildCareIcon />,
-};
 
 // Persian number converter
 function toPersianNumber(num: number | string): string {
@@ -146,10 +44,13 @@ function toPersianNumber(num: number | string): string {
   return String(num).replace(/\d/g, (d) => persianDigits[parseInt(d)]);
 }
 
+// ============================================================================
 // Floating Animation Elements
-function FloatingElements() {
+// ============================================================================
+
+export function FloatingElements() {
   const elements = ["⭐", "🌈", "🎈", "🎨", "🎵", "🦋", "🌸", "☁️"];
-  
+
   return (
     <Box sx={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none" }}>
       {elements.map((emoji, index) => (
@@ -159,7 +60,7 @@ function FloatingElements() {
             position: "absolute",
             fontSize: { xs: "1.5rem", md: "2rem" },
             opacity: 0.4,
-            left: `${10 + (index * 12)}%`,
+            left: `${10 + index * 12}%`,
             top: `${20 + (index * 8) % 60}%`,
             animation: `float${index % 3} ${4 + index * 0.5}s ease-in-out infinite`,
             animationDelay: `${index * 0.3}s`,
@@ -184,78 +85,80 @@ function FloatingElements() {
   );
 }
 
+// ============================================================================
 // Age Selector Component
-function AgeSelector({
-  selectedAge,
-  onAgeChange,
-}: {
+// ============================================================================
+
+export interface AgeSelectorProps {
   selectedAge: AgeRange;
   onAgeChange: (age: AgeRange) => void;
-}) {
+  ageGroups?: { id: AgeRange; label: string; labelFa: string; icon: string; color: string }[];
+}
+
+const DEFAULT_AGE_GROUPS = [
+  { id: "all" as const, label: "All Ages", labelFa: "همه سنین", icon: "🌟", color: "#F59E0B" },
+  { id: "3-5" as const, label: "3-5 Years", labelFa: "۳-۵ سال", icon: "👶", color: "#F472B6" },
+  { id: "6-9" as const, label: "6-9 Years", labelFa: "۶-۹ سال", icon: "🧒", color: "#60A5FA" },
+  { id: "10-12" as const, label: "10-12 Years", labelFa: "۱۰-۱۲ سال", icon: "🧑", color: "#34D399" },
+];
+
+export function AgeSelector({
+  selectedAge,
+  onAgeChange,
+  ageGroups,
+}: AgeSelectorProps) {
   const { language } = useLanguage();
-  const t = translations[language] || translations.en;
   const isRTL = language === "fa";
 
+  const groups = ageGroups ?? DEFAULT_AGE_GROUPS;
+
   return (
-    <Box sx={{ mb: 5 }}>
-      <Typography
-        variant="h5"
-        sx={{
-          color: "#fff",
-          fontWeight: 700,
-          mb: 3,
-          textShadow: "0 2px 8px rgba(0,0,0,0.2)",
-        }}
-      >
-        {t.ageSelector}
-      </Typography>
-      
-      <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
-        {AGE_GROUPS.map((group) => (
-          <Button
-            key={group.id}
-            onClick={() => onAgeChange(group.id)}
-            sx={{
-              width: { xs: "calc(50% - 8px)", sm: 140 },
-              height: 120,
-              borderRadius: glassBorderRadius.xl,
-              background: selectedAge === group.id
+    <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
+      {groups.map((group) => (
+        <Button
+          key={group.id}
+          onClick={() => onAgeChange(group.id)}
+          sx={{
+            width: { xs: "calc(50% - 8px)", sm: 140 },
+            height: 120,
+            borderRadius: glassBorderRadius.xl,
+            background:
+              selectedAge === group.id
                 ? `linear-gradient(135deg, ${group.color}, ${group.color}CC)`
                 : "rgba(255,255,255,0.1)",
-              border: `3px solid ${selectedAge === group.id ? group.color : "rgba(255,255,255,0.2)"}`,
-              flexDirection: "column",
-              gap: 1,
-              transition: glassAnimations.transition.spring,
-              transform: selectedAge === group.id ? "scale(1.05)" : "scale(1)",
-              boxShadow: selectedAge === group.id
-                ? `0 8px 32px ${group.color}40`
-                : "none",
-              "&:hover": {
-                background: `linear-gradient(135deg, ${group.color}CC, ${group.color}99)`,
-                transform: "scale(1.05)",
-                borderColor: group.color,
-              },
-            }}
-          >
-            <Typography sx={{ fontSize: "2.5rem" }}>{group.icon}</Typography>
-            <Typography
-              sx={{
-                color: "#fff",
-                fontWeight: 700,
-                fontSize: "0.95rem",
-              }}
-            >
-              {isRTL ? group.labelFa : group.label}
-            </Typography>
-          </Button>
-        ))}
-      </Box>
+            border: `3px solid ${selectedAge === group.id ? group.color : "rgba(255,255,255,0.2)"}`,
+            flexDirection: "column",
+            gap: 1,
+            transition: glassAnimations.transition.spring,
+            transform: selectedAge === group.id ? "scale(1.05)" : "scale(1)",
+            boxShadow: selectedAge === group.id ? `0 8px 32px ${group.color}40` : "none",
+            "&:hover": {
+              background: `linear-gradient(135deg, ${group.color}CC, ${group.color}99)`,
+              transform: "scale(1.05)",
+              borderColor: group.color,
+            },
+          }}
+        >
+          <Typography sx={{ fontSize: "2.5rem" }}>{group.icon}</Typography>
+          <Typography sx={{ color: "#fff", fontWeight: 700, fontSize: "0.95rem" }}>
+            {isRTL ? group.labelFa : group.label}
+          </Typography>
+        </Button>
+      ))}
     </Box>
   );
 }
 
-// Category Card Component
-function CategoryCard({ category }: { category: KidsCategory }) {
+// ============================================================================
+// Kids Category Card Component
+// ============================================================================
+
+export interface KidsCategoryCardProps {
+  category: KidsCategory;
+  icon?: React.ReactNode;
+}
+
+export function KidsCategoryCard({ category, icon }: KidsCategoryCardProps) {
   const { language } = useLanguage();
   const isRTL = language === "fa";
   const [isHovered, setIsHovered] = useState(false);
@@ -281,7 +184,6 @@ function CategoryCard({ category }: { category: KidsCategory }) {
           },
         }}
       >
-        {/* Icon */}
         <Box
           sx={{
             position: "absolute",
@@ -310,9 +212,9 @@ function CategoryCard({ category }: { category: KidsCategory }) {
               transform: isHovered ? "scale(1.1) rotate(-5deg)" : "scale(1)",
             }}
           >
-            {CATEGORY_ICONS[category.id] || <StarIcon />}
+            {icon || category.icon}
           </Box>
-          
+
           <Typography
             sx={{
               color: "#fff",
@@ -326,7 +228,7 @@ function CategoryCard({ category }: { category: KidsCategory }) {
           </Typography>
         </Box>
 
-        {/* Decorative corner elements */}
+        {/* Decorative corner */}
         <Box
           sx={{
             position: "absolute",
@@ -343,14 +245,23 @@ function CategoryCard({ category }: { category: KidsCategory }) {
   );
 }
 
+// ============================================================================
 // Character Card Component
-function CharacterCard({ character }: { character: KidsCharacter }) {
+// ============================================================================
+
+export interface CharacterCardProps {
+  character: KidsCharacter;
+  onClick?: () => void;
+}
+
+export function CharacterCard({ character, onClick }: CharacterCardProps) {
   const { language } = useLanguage();
   const isRTL = language === "fa";
   const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Box
+      onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       sx={{
@@ -399,25 +310,29 @@ function CharacterCard({ character }: { character: KidsCharacter }) {
   );
 }
 
-// Content Card Component
-function ContentCard({ 
-  item, 
-  type,
-}: { 
+// ============================================================================
+// Kids Content Card Component
+// ============================================================================
+
+export interface KidsContentCardProps {
   item: Movie | Series;
   type: "movie" | "series";
-}) {
+  badge?: EducationalBadge;
+}
+
+export function KidsContentCard({ item, type, badge }: KidsContentCardProps) {
   const { language } = useLanguage();
-  const t = translations[language] || translations.en;
   const isRTL = language === "fa";
   const [isHovered, setIsHovered] = useState(false);
 
-  // Random badge for demo
-  const badge = getRandomBadge();
   const duration = type === "movie" ? (item as Movie).duration || 90 : 25;
-  const durationInfo = formatKidsDuration(duration);
+  const durationLabel =
+    duration <= 20
+      ? { en: "Short (15 min)", fa: "کوتاه (۱۵ دقیقه)" }
+      : duration <= 60
+        ? { en: "Medium (30-60 min)", fa: "متوسط (۳۰-۶۰ دقیقه)" }
+        : { en: "Long (90 min)", fa: "بلند (۹۰ دقیقه)" };
 
-  // Generate a playful color based on title
   const colorHue = item.title.charCodeAt(0) * 3 % 360;
   const cardColor = `hsl(${colorHue}, 70%, 60%)`;
 
@@ -445,13 +360,13 @@ function ContentCard({
             src={item.poster}
             alt={item.title}
             fill
-            style={{ 
+            style={{
               objectFit: "cover",
               transition: "transform 0.4s ease",
               transform: isHovered ? "scale(1.1)" : "scale(1)",
             }}
           />
-          
+
           {/* Play Button Overlay */}
           <Box
             sx={{
@@ -504,21 +419,23 @@ function ContentCard({
           </Box>
 
           {/* Educational Badge */}
-          <Box
-            sx={{
-              position: "absolute",
-              top: 8,
-              left: 8,
-              background: `${badge.color}CC`,
-              borderRadius: glassBorderRadius.md,
-              px: 1.5,
-              py: 0.5,
-            }}
-          >
-            <Typography sx={{ color: "#fff", fontSize: "0.7rem", fontWeight: 600 }}>
-              {isRTL ? badge.labelFa : badge.labelEn}
-            </Typography>
-          </Box>
+          {badge && (
+            <Box
+              sx={{
+                position: "absolute",
+                top: 8,
+                left: 8,
+                background: `${badge.color}CC`,
+                borderRadius: glassBorderRadius.md,
+                px: 1.5,
+                py: 0.5,
+              }}
+            >
+              <Typography sx={{ color: "#fff", fontSize: "0.7rem", fontWeight: 600 }}>
+                {isRTL ? badge.labelFa : badge.labelEn}
+              </Typography>
+            </Box>
+          )}
         </Box>
 
         {/* Info */}
@@ -536,37 +453,65 @@ function ContentCard({
           >
             {item.title}
           </Typography>
-          
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexWrap: "wrap" }}>
-            <Chip
-              icon={<AccessTimeIcon sx={{ fontSize: "0.8rem" }} />}
-              label={isRTL ? durationInfo.labelFa : durationInfo.label}
-              size="small"
-              sx={{
-                background: "rgba(255,255,255,0.1)",
-                color: "rgba(255,255,255,0.8)",
-                fontSize: "0.7rem",
-                height: 24,
-                "& .MuiChip-icon": { color: "rgba(255,255,255,0.8)" },
-              }}
-            />
-          </Box>
+
+          <Chip
+            icon={<AccessTimeIcon sx={{ fontSize: "0.8rem" }} />}
+            label={isRTL ? durationLabel.fa : durationLabel.en}
+            size="small"
+            sx={{
+              background: "rgba(255,255,255,0.1)",
+              color: "rgba(255,255,255,0.8)",
+              fontSize: "0.7rem",
+              height: 24,
+              "& .MuiChip-icon": { color: "rgba(255,255,255,0.8)" },
+            }}
+          />
         </Box>
       </Box>
     </Link>
   );
 }
 
-// Parental Controls Panel
-function ParentalControlsPanel() {
+// ============================================================================
+// Parental Controls Panel Component
+// ============================================================================
+
+export interface ParentalControlsPanelProps {
+  onSettingsChange?: (settings: {
+    watchTime: number;
+    educationalOnly: boolean;
+    dubOnly: boolean;
+    kidsModeEnabled: boolean;
+  }) => void;
+}
+
+export function ParentalControlsPanel({ onSettingsChange }: ParentalControlsPanelProps) {
   const { language } = useLanguage();
-  const t = translations[language] || translations.en;
   const isRTL = language === "fa";
-  
+
   const [watchTime, setWatchTime] = useState<number>(1);
   const [educationalOnly, setEducationalOnly] = useState(false);
   const [dubOnly, setDubOnly] = useState(true);
   const [kidsModeEnabled, setKidsModeEnabled] = useState(true);
+
+  const t = {
+    title: language === "fa" ? "کنترل والدین" : "Parental Controls",
+    watchTime: language === "fa" ? "حداکثر زمان تماشا" : "Max Watch Time",
+    hours: language === "fa" ? "ساعت" : "hours",
+    educationalOnly: language === "fa" ? "فقط محتوای آموزشی" : "Educational Only",
+    dubOnly: language === "fa" ? "فقط دوبله فارسی" : "Persian Dubbed Only",
+    enableKidsMode: language === "fa" ? "فعال کردن حالت کودک" : "Enable Kids Mode",
+    exitKidsMode: language === "fa" ? "خروج از حالت کودک" : "Exit Kids Mode",
+  };
+
+  const handleChange = () => {
+    onSettingsChange?.({
+      watchTime,
+      educationalOnly,
+      dubOnly,
+      kidsModeEnabled,
+    });
+  };
 
   return (
     <Box
@@ -576,7 +521,6 @@ function ParentalControlsPanel() {
         borderRadius: glassBorderRadius.xxl,
         border: "2px solid rgba(255,255,255,0.15)",
         p: 3,
-        mb: 5,
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
@@ -594,7 +538,7 @@ function ParentalControlsPanel() {
           <SettingsIcon sx={{ color: "#fff" }} />
         </Box>
         <Typography variant="h6" sx={{ color: "#fff", fontWeight: 700 }}>
-          {t.parentalControls}
+          {t.title}
         </Typography>
       </Box>
 
@@ -610,7 +554,10 @@ function ParentalControlsPanel() {
             </Box>
             <Slider
               value={watchTime}
-              onChange={(_, value) => setWatchTime(value as number)}
+              onChange={(_, value) => {
+                setWatchTime(value as number);
+                handleChange();
+              }}
               min={0.5}
               max={4}
               step={0.5}
@@ -636,11 +583,12 @@ function ParentalControlsPanel() {
               control={
                 <Switch
                   checked={educationalOnly}
-                  onChange={(e) => setEducationalOnly(e.target.checked)}
+                  onChange={(e) => {
+                    setEducationalOnly(e.target.checked);
+                    handleChange();
+                  }}
                   sx={{
-                    "& .MuiSwitch-switchBase.Mui-checked": {
-                      color: "#22C55E",
-                    },
+                    "& .MuiSwitch-switchBase.Mui-checked": { color: "#22C55E" },
                     "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
                       backgroundColor: "#22C55E",
                     },
@@ -650,16 +598,17 @@ function ParentalControlsPanel() {
               label={t.educationalOnly}
               sx={{ color: "rgba(255,255,255,0.9)" }}
             />
-            
+
             <FormControlLabel
               control={
                 <Switch
                   checked={dubOnly}
-                  onChange={(e) => setDubOnly(e.target.checked)}
+                  onChange={(e) => {
+                    setDubOnly(e.target.checked);
+                    handleChange();
+                  }}
                   sx={{
-                    "& .MuiSwitch-switchBase.Mui-checked": {
-                      color: "#3B82F6",
-                    },
+                    "& .MuiSwitch-switchBase.Mui-checked": { color: "#3B82F6" },
                     "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
                       backgroundColor: "#3B82F6",
                     },
@@ -682,17 +631,20 @@ function ParentalControlsPanel() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          flexWrap: "wrap",
+          gap: 2,
         }}
       >
         <FormControlLabel
           control={
             <Switch
               checked={kidsModeEnabled}
-              onChange={(e) => setKidsModeEnabled(e.target.checked)}
+              onChange={(e) => {
+                setKidsModeEnabled(e.target.checked);
+                handleChange();
+              }}
               sx={{
-                "& .MuiSwitch-switchBase.Mui-checked": {
-                  color: "#F59E0B",
-                },
+                "& .MuiSwitch-switchBase.Mui-checked": { color: "#F59E0B" },
                 "& .MuiSwitch-switchBase.Mui-checked + .MuiSwitch-track": {
                   backgroundColor: "#F59E0B",
                 },
@@ -702,7 +654,7 @@ function ParentalControlsPanel() {
           label={t.enableKidsMode}
           sx={{ color: "#fff", fontWeight: 600 }}
         />
-        
+
         <Button
           startIcon={<LockIcon />}
           sx={{
@@ -724,11 +676,33 @@ function ParentalControlsPanel() {
   );
 }
 
-// Hero Section Component
-function HeroSection() {
+// ============================================================================
+// Kids Hero Section Component
+// ============================================================================
+
+export interface KidsHeroProps {
+  title?: string;
+  subtitle?: string;
+  showFloatingElements?: boolean;
+  showExitButton?: boolean;
+  onExit?: () => void;
+}
+
+export function KidsHero({
+  title,
+  subtitle,
+  showFloatingElements = true,
+  showExitButton = true,
+  onExit,
+}: KidsHeroProps) {
   const { language } = useLanguage();
-  const t = translations[language] || translations.en;
   const isRTL = language === "fa";
+
+  const t = {
+    title: title || (language === "fa" ? "جهان شاد کودکان" : "Kids' Happy World"),
+    subtitle: subtitle || (language === "fa" ? "محتوای امن و سرگرم‌کننده برای کودکان" : "Safe and fun content for children"),
+    exitKidsMode: language === "fa" ? "خروج از حالت کودک" : "Exit Kids Mode",
+  };
 
   return (
     <Box
@@ -737,7 +711,6 @@ function HeroSection() {
         borderRadius: glassBorderRadius.xxl,
         overflow: "hidden",
         p: { xs: 4, md: 6 },
-        mb: 5,
         background: `linear-gradient(135deg, 
           rgba(147, 51, 234, 0.3) 0%, 
           rgba(236, 72, 153, 0.2) 50%, 
@@ -746,8 +719,7 @@ function HeroSection() {
         border: "2px solid rgba(255,255,255,0.2)",
       }}
     >
-      {/* Floating Elements */}
-      <FloatingElements />
+      {showFloatingElements && <FloatingElements />}
 
       <Box sx={{ position: "relative", zIndex: 1, display: "flex", alignItems: "center", gap: 3 }}>
         <Box
@@ -769,7 +741,7 @@ function HeroSection() {
         >
           <ChildCareIcon sx={{ fontSize: { xs: "2.5rem", md: "3rem" }, color: "#fff" }} />
         </Box>
-        
+
         <Box>
           <Typography
             variant="h3"
@@ -794,232 +766,39 @@ function HeroSection() {
         </Box>
       </Box>
 
-      {/* Exit Kids Mode Button */}
-      <Button
-        startIcon={<LockIcon />}
-        sx={{
-          position: "absolute",
-          top: { xs: 16, md: 24 },
-          right: isRTL ? "auto" : { xs: 16, md: 24 },
-          left: isRTL ? { xs: 16, md: 24 } : "auto",
-          borderRadius: glassBorderRadius.lg,
-          background: "rgba(255,255,255,0.15)",
-          border: "1px solid rgba(255,255,255,0.3)",
-          color: "#fff",
-          textTransform: "none",
-          px: 2,
-          "&:hover": {
-            background: "rgba(255,255,255,0.25)",
-          },
-        }}
-      >
-        {t.exitKidsMode}
-      </Button>
-    </Box>
-  );
-}
-
-// Main Kids Page
-export default function KidsPage() {
-  const { language } = useLanguage();
-  const t = translations[language] || translations.en;
-  const isRTL = language === "fa";
-
-  const [selectedAge, setSelectedAge] = useState<AgeRange>("all");
-  
-  const { movies, series, loading, error } = useKidsContent({ ageRange: selectedAge });
-  const { movies: featuredMovies, series: featuredSeries, loading: featuredLoading } = useFeaturedKidsShows();
-
-  // Combine movies and series for display
-  const allContent = [...(movies || []), ...(series || [])].slice(0, 12);
-  const featuredContent = [...(featuredMovies || []), ...(featuredSeries || [])].slice(0, 6);
-
-  return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        py: 4,
-        px: { xs: 2, md: 4 },
-        background: `linear-gradient(180deg, 
-          rgba(147, 51, 234, 0.15) 0%, 
-          rgba(59, 130, 246, 0.1) 50%, 
-          rgba(16, 185, 129, 0.1) 100%)`,
-      }}
-    >
-      {/* Hero Section */}
-      <HeroSection />
-
-      {/* Parental Controls */}
-      <ParentalControlsPanel />
-
-      {/* Age Selector */}
-      <AgeSelector selectedAge={selectedAge} onAgeChange={setSelectedAge} />
-
-      {/* Categories Grid */}
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="h5"
+      {showExitButton && (
+        <Button
+          onClick={onExit}
+          startIcon={<LockIcon />}
           sx={{
+            position: "absolute",
+            top: { xs: 16, md: 24 },
+            right: isRTL ? "auto" : { xs: 16, md: 24 },
+            left: isRTL ? { xs: 16, md: 24 } : "auto",
+            borderRadius: glassBorderRadius.lg,
+            background: "rgba(255,255,255,0.15)",
+            border: "1px solid rgba(255,255,255,0.3)",
             color: "#fff",
-            fontWeight: 700,
-            mb: 3,
-            textShadow: "0 2px 8px rgba(0,0,0,0.2)",
+            textTransform: "none",
+            px: 2,
+            "&:hover": {
+              background: "rgba(255,255,255,0.25)",
+            },
           }}
         >
-          {t.categories}
-        </Typography>
-        
-        <Grid container spacing={2}>
-          {KIDS_CATEGORIES.map((category) => (
-            <Grid size={{ xs: 6, sm: 4, md: 2 }} key={category.id}>
-              <CategoryCard category={category} />
-            </Grid>
-          ))}
-        </Grid>
-      </Box>
-
-      {/* Character World Section */}
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            color: "#fff",
-            fontWeight: 700,
-            mb: 1,
-            textShadow: "0 2px 8px rgba(0,0,0,0.2)",
-          }}
-        >
-          {t.characters}
-        </Typography>
-        <Typography
-          sx={{
-            color: "rgba(255,255,255,0.7)",
-            mb: 3,
-          }}
-        >
-          {t.charactersSubtitle}
-        </Typography>
-        
-        <Box
-          sx={{
-            display: "flex",
-            gap: 4,
-            overflowX: "auto",
-            pb: 2,
-            "&::-webkit-scrollbar": { display: "none" },
-            scrollbarWidth: "none",
-          }}
-        >
-          {POPULAR_CHARACTERS.map((character) => (
-            <CharacterCard key={character.id} character={character} />
-          ))}
-        </Box>
-      </Box>
-
-      {/* Featured Shows */}
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            color: "#fff",
-            fontWeight: 700,
-            mb: 3,
-            textShadow: "0 2px 8px rgba(0,0,0,0.2)",
-          }}
-        >
-          {t.featuredShows}
-        </Typography>
-        
-        {featuredLoading ? (
-          <Grid container spacing={3}>
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={i}>
-                <Skeleton
-                  variant="rounded"
-                  height={280}
-                  sx={{ 
-                    bgcolor: "rgba(255,255,255,0.1)", 
-                    borderRadius: glassBorderRadius.xxl,
-                  }}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Grid container spacing={3}>
-            {featuredContent.map((item, index) => (
-              <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={item.id}>
-                <ContentCard
-                  item={item}
-                  type={index < (featuredMovies?.length || 0) ? "movie" : "series"}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Box>
-
-      {/* Recommended Content */}
-      <Box sx={{ mb: 5 }}>
-        <Typography
-          variant="h5"
-          sx={{
-            color: "#fff",
-            fontWeight: 700,
-            mb: 3,
-            textShadow: "0 2px 8px rgba(0,0,0,0.2)",
-          }}
-        >
-          {t.recommendedByAge}
-        </Typography>
-        
-        {loading ? (
-          <Grid container spacing={3}>
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={i}>
-                <Skeleton
-                  variant="rounded"
-                  height={280}
-                  sx={{ 
-                    bgcolor: "rgba(255,255,255,0.1)", 
-                    borderRadius: glassBorderRadius.xxl,
-                  }}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Grid container spacing={3}>
-            {allContent.map((item, index) => (
-              <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={item.id}>
-                <ContentCard
-                  item={item}
-                  type={index < (movies?.length || 0) ? "movie" : "series"}
-                />
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Box>
-
-      {/* Empty State */}
-      {!loading && allContent.length === 0 && (
-        <Box
-          sx={{
-            textAlign: "center",
-            py: 8,
-            background: "rgba(255,255,255,0.08)",
-            backdropFilter: glassBlur.medium,
-            borderRadius: glassBorderRadius.xxl,
-            border: "2px solid rgba(255,255,255,0.15)",
-          }}
-        >
-          <ChildCareIcon sx={{ fontSize: "4rem", color: "rgba(255,255,255,0.5)", mb: 2 }} />
-          <Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
-            {t.emptyState}
-          </Typography>
-        </Box>
+          {t.exitKidsMode}
+        </Button>
       )}
     </Box>
   );
 }
+
+export default {
+  FloatingElements,
+  AgeSelector,
+  KidsCategoryCard,
+  CharacterCard,
+  KidsContentCard,
+  ParentalControlsPanel,
+  KidsHero,
+};

@@ -51,6 +51,42 @@ interface TMDBMovie {
 	adult: boolean;
 }
 
+// TMDB Collection types
+interface TMDBCollectionPart {
+	id: number;
+	title: string;
+	original_title: string;
+	overview: string;
+	poster_path: string | null;
+	backdrop_path: string | null;
+	release_date: string;
+	vote_average: number;
+	vote_count: number;
+	genre_ids: number[];
+	original_language: string;
+	popularity: number;
+	adult: boolean;
+	media_type?: string;
+}
+
+interface TMDBCollection {
+	id: number;
+	name: string;
+	overview: string;
+	poster_path: string | null;
+	backdrop_path: string | null;
+	parts: TMDBCollectionPart[];
+}
+
+interface TMDBCollectionSearchResult {
+	id: number;
+	name: string;
+	overview: string;
+	poster_path: string | null;
+	backdrop_path: string | null;
+	adult: boolean;
+}
+
 interface TMDBTVShow {
 	id: number;
 	name: string;
@@ -70,6 +106,13 @@ interface TMDBTVShow {
 interface TMDBResponse<T> {
 	page: number;
 	results: T[];
+	total_pages: number;
+	total_results: number;
+}
+
+interface TMDBCollectionResponse {
+	page: number;
+	results: TMDBCollectionSearchResult[];
 	total_pages: number;
 	total_results: number;
 }
@@ -314,6 +357,45 @@ class TMDBClient {
 		return data;
 	}
 
+	// ========================================================================
+	// COLLECTION METHODS
+	// ========================================================================
+
+	async getCollection(
+		collectionId: number,
+		language: "en" | "fa" = "en",
+	): Promise<TMDBCollection> {
+		const cacheKey = `collection_${collectionId}_${language}`;
+		const cached = cache.get<TMDBCollection>(cacheKey);
+		if (cached) return cached;
+
+		const url = this.buildUrl(`/collection/${collectionId}`, {
+			language: language === "fa" ? "fa-IR" : "en-US",
+		});
+
+		const data = await this.fetchWithRetry<TMDBCollection>(url);
+		cache.set(cacheKey, data);
+		return data;
+	}
+
+	async searchCollections(
+		query: string,
+		language: "en" | "fa" = "en",
+	): Promise<TMDBCollectionResponse> {
+		const cacheKey = `search_collections_${query}_${language}`;
+		const cached = cache.get<TMDBCollectionResponse>(cacheKey);
+		if (cached) return cached;
+
+		const url = this.buildUrl("/search/collection", {
+			query,
+			language: language === "fa" ? "fa-IR" : "en-US",
+		});
+
+		const data = await this.fetchWithRetry<TMDBCollectionResponse>(url);
+		cache.set(cacheKey, data);
+		return data;
+	}
+
 	async discoverMovies(
 		params: {
 			language?: "en" | "fa";
@@ -506,8 +588,61 @@ export function mapTMDBTVShowToSeries(tmdbShow: TMDBTVShow): Series {
 }
 
 // ============================================================================
+// COLLECTION MAPPER
+// ============================================================================
+
+export interface MappedCollection {
+	id: number;
+	name: string;
+	nameFa?: string;
+	overview: string;
+	overviewFa?: string;
+	poster: string;
+	backdrop: string;
+	movieCount: number;
+	movies: Movie[];
+	timeline?: string;
+	averageRating: number;
+}
+
+export function mapTMDBCollection(collection: TMDBCollection): MappedCollection {
+	const movies = collection.parts
+		.filter((part) => part.release_date) // Filter out unreleased movies
+		.sort((a, b) => new Date(a.release_date).getTime() - new Date(b.release_date).getTime())
+		.map((part) => mapTMDBMovieToMovie(part as TMDBMovie));
+
+	const years = collection.parts
+		.filter((part) => part.release_date)
+		.map((part) => new Date(part.release_date).getFullYear())
+		.filter((year) => !isNaN(year));
+
+	const minYear = years.length > 0 ? Math.min(...years) : null;
+	const maxYear = years.length > 0 ? Math.max(...years) : null;
+	const timeline = minYear && maxYear ? `${minYear}-${maxYear}` : undefined;
+
+	const ratings = collection.parts
+		.filter((part) => part.vote_average > 0)
+		.map((part) => part.vote_average);
+	const averageRating = ratings.length > 0
+		? Math.round((ratings.reduce((a, b) => a + b, 0) / ratings.length) * 10) / 10
+		: 0;
+
+	return {
+		id: collection.id,
+		name: collection.name,
+		overview: collection.overview || "No description available.",
+		poster: tmdbClient.getImageUrl(collection.poster_path, "w500"),
+		backdrop: tmdbClient.getImageUrl(collection.backdrop_path, "original"),
+		movieCount: collection.parts.length,
+		movies,
+		timeline,
+		averageRating,
+	};
+}
+
+// ============================================================================
 // EXPORTS
 // ============================================================================
 
 export { cache, rateLimiter, TMDB_CONFIG };
-export type { TMDBMovie, TMDBTVShow, TMDBResponse };
+export type { TMDBMovie, TMDBTVShow, TMDBResponse, TMDBCollection, TMDBCollectionSearchResult };
