@@ -24,6 +24,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { type ReactNode, useState } from "react";
 import { useLanguage } from "@/providers/language-provider";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { useAuth } from "@/hooks/useAuth";
 import {
 	glassAnimations,
 	glassBlur,
@@ -73,6 +75,11 @@ export const UserLayout = ({ children }: UserLayoutProps) => {
 	const t = translations[language] || translations.en;
 	const pathname = usePathname();
 	const [mobileOpen, setMobileOpen] = useState(false);
+	const { user, logout, isLoading } = useAuth();
+
+	const handleLogout = async () => {
+		await logout();
+	};
 
 	const sidebarContent = (
 		<Box
@@ -89,6 +96,7 @@ export const UserLayout = ({ children }: UserLayoutProps) => {
 			{/* User Info */}
 			<Box sx={{ textAlign: "center", mb: 4 }}>
 				<Avatar
+					src={user?.avatarUrl || undefined}
 					sx={{
 						width: 80,
 						height: 80,
@@ -99,18 +107,18 @@ export const UserLayout = ({ children }: UserLayoutProps) => {
 						fontWeight: 700,
 					}}
 				>
-					U
+					{user?.name?.charAt(0).toUpperCase() || "U"}
 				</Avatar>
 				<Typography
 					variant="h6"
 					sx={{ color: glassColors.text.primary, fontWeight: 600 }}
 				>
-					کاربر تست
+					{user?.name || "User"}
 				</Typography>
 				<Typography
 					sx={{ color: glassColors.text.tertiary, fontSize: "0.875rem" }}
 				>
-					test@example.com
+					{user?.email || ""}
 				</Typography>
 			</Box>
 
@@ -175,6 +183,8 @@ export const UserLayout = ({ children }: UserLayoutProps) => {
 				{/* Logout */}
 				<ListItem
 					component="button"
+					onClick={handleLogout}
+					disabled={isLoading}
 					sx={{
 						borderRadius: glassBorderRadius.lg,
 						mt: 4,
@@ -189,13 +199,17 @@ export const UserLayout = ({ children }: UserLayoutProps) => {
 							background: "rgba(239, 68, 68, 0.1)",
 							transform: "translateX(4px)",
 						},
+						"&:disabled": {
+							opacity: 0.5,
+							cursor: "not-allowed",
+						},
 					}}
 				>
 					<ListItemIcon sx={{ minWidth: 40 }}>
 						<LogoutIcon sx={{ color: "#EF4444" }} />
 					</ListItemIcon>
 					<ListItemText
-						primary={t.logout}
+						primary={isLoading ? "..." : t.logout}
 						sx={{
 							"& .MuiListItemText-primary": {
 								color: "#EF4444",
@@ -208,13 +222,14 @@ export const UserLayout = ({ children }: UserLayoutProps) => {
 	);
 
 	return (
-		<Box
-			sx={{
-				minHeight: "100vh",
-				display: "flex",
-				direction: isRTL ? "rtl" : "ltr",
-			}}
-		>
+		<ProtectedRoute>
+			<Box
+				sx={{
+					minHeight: "100vh",
+					display: "flex",
+					direction: isRTL ? "rtl" : "ltr",
+				}}
+			>
 			{/* Mobile Menu Button */}
 			<IconButton
 				onClick={() => setMobileOpen(true)}
@@ -287,6 +302,7 @@ export const UserLayout = ({ children }: UserLayoutProps) => {
 				{children}
 			</Box>
 		</Box>
+		</ProtectedRoute>
 	);
 };
 

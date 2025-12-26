@@ -24,6 +24,8 @@ import {
 } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useLanguage } from "@/providers/language-provider";
+import { useAuth } from "@/hooks/useAuth";
+import { authApi } from "@/lib/api/auth";
 import {
 	glassAnimations,
 	glassBlur,
@@ -115,6 +117,9 @@ export const AuthModals = ({
 	const isRTL = language === "fa";
 	const t = translations[language] || translations.en;
 
+	// Auth hook for real API calls
+	const { login, register, isLoading: authLoading } = useAuth();
+
 	const [mode, setMode] = useState<AuthMode>(initialMode);
 	const [showPassword, setShowPassword] = useState(false);
 	const [loading, setLoading] = useState(false);
@@ -147,28 +152,65 @@ export const AuthModals = ({
 		setSuccess(null);
 
 		try {
-			// Simulate API call
-			await new Promise((resolve) => setTimeout(resolve, 1500));
-
 			if (mode === "login") {
-				// Mock login validation
-				if (
-					formData.email === "test@test.com" &&
-					formData.password === "password"
-				) {
+				// Real API login
+				const success = await login({
+					email: formData.email,
+					password: formData.password,
+				});
+
+				if (success) {
 					setSuccess(t.loginSuccess);
-					setTimeout(() => onClose(), 1500);
+					setTimeout(() => {
+						onClose();
+						// Reset form
+						setFormData({
+							email: "",
+							phone: "",
+							password: "",
+							confirmPassword: "",
+							fullName: "",
+							otp: "",
+						});
+					}, 1000);
 				} else {
 					setError(t.invalidCredentials);
 				}
 			} else if (mode === "register") {
+				// Validate passwords match
 				if (formData.password !== formData.confirmPassword) {
 					setError(t.passwordMismatch);
-				} else {
+					setLoading(false);
+					return;
+				}
+
+				// Real API registration
+				const success = await register({
+					email: formData.email,
+					password: formData.password,
+					name: formData.fullName,
+				});
+
+				if (success) {
 					setSuccess(t.registerSuccess);
-					setTimeout(() => setMode("login"), 1500);
+					setTimeout(() => {
+						onClose();
+						// Reset form
+						setFormData({
+							email: "",
+							phone: "",
+							password: "",
+							confirmPassword: "",
+							fullName: "",
+							otp: "",
+						});
+					}, 1000);
+				} else {
+					setError("Registration failed. Please try again.");
 				}
 			} else if (mode === "forgot-password") {
+				// Real API password reset request
+				await authApi.requestPasswordReset(formData.email);
 				setSuccess(t.resetLinkSent);
 			} else if (mode === "otp") {
 				if (formData.otp.length === 6) {

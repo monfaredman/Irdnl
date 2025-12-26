@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Vazirmatn } from "next/font/google";
 import "./globals.css";
 import { PremiumLiquidGlassLayout } from "@/components/layout/PremiumLiquidGlassLayout";
 import { LanguageProvider } from "@/providers/language-provider";
+import { AuthProvider } from "@/providers/auth-provider";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -57,7 +58,9 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} ${vazirmatn.variable} antialiased`}
 			>
 				<LanguageProvider>
-					<PremiumLiquidGlassLayout>{children}</PremiumLiquidGlassLayout>
+					<AuthProvider>
+						<PremiumLiquidGlassLayout>{children}</PremiumLiquidGlassLayout>
+					</AuthProvider>
 				</LanguageProvider>
 			</body>
 		</html>
