@@ -6,7 +6,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Box, Grid, LinearProgress, Skeleton, Typography } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
-import { useTMDBTrendingMovies } from "@/hooks/useTMDB";
+import { useBackendTrendingMovies } from "@/hooks/useBackendContent";
 import { useLanguage } from "@/providers/language-provider";
 import {
 	glassAnimations,
@@ -64,7 +64,7 @@ export default function HistoryPage() {
 	const { language } = useLanguage();
 	const t = translations[language] || translations.en;
 
-	const { data: movies, loading } = useTMDBTrendingMovies({ language });
+	const { data: movies, loading } = useBackendTrendingMovies();
 
 	// Generate mock progress for items using deterministic values
 	const historyItems =

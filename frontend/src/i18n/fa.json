@@ -1,0 +1,187 @@
+{
+  "admin": {
+    "title": "پنل مدیریت",
+    "menu": {
+      "dashboard": "داشبورد",
+      "content": "محتوا",
+      "users": "کاربران",
+      "videos": "ویدیوها",
+      "notifications": "اعلان‌ها",
+      "finance": "مالی",
+      "settings": "تنظیمات",
+      "logout": "خروج"
+    },
+    "dashboard": {
+      "title": "داشبورد",
+      "overview": "نمای کلی"
+    },
+    "content": {
+      "title": "مدیریت محتوا",
+      "createNew": "افزودن محتوای جدید",
+      "editContent": "ویرایش محتوا",
+      "list": "لیست محتوا",
+      "movie": "فیلم",
+      "series": "سریال",
+      "episode": "قسمت",
+      "status": {
+        "draft": "پیش‌نویس",
+        "published": "منتشر شده",
+        "archived": "بایگانی شده"
+      }
+    },
+    "form": {
+      "save": "ذخیره",
+      "cancel": "انصراف",
+      "submit": "ثبت",
+      "update": "به‌روزرسانی",
+      "delete": "حذف",
+      "upload": "آپلود",
+      "browse": "انتخاب فایل",
+      "required": "الزامی",
+      "optional": "اختیاری",
+      "next": "بعدی",
+      "previous": "قبلی",
+      "finish": "اتمام"
+    },
+    "upload": {
+      "title": "آپلود محتوا",
+      "steps": {
+        "basicInfo": "اطلاعات پایه",
+        "mediaAssets": "فایل‌های رسانه‌ای",
+        "metadata": "متادیتا",
+        "localization": "محلی‌سازی",
+        "technical": "مشخصات فنی",
+        "seo": "سئو و کشف‌پذیری",
+        "review": "بررسی و انتشار"
+      },
+      "basicInfo": {
+        "title": "عنوان",
+        "originalTitle": "عنوان اصلی",
+        "type": "نوع محتوا",
+        "year": "سال تولید",
+        "description": "توضیحات",
+        "shortDescription": "توضیحات کوتاه",
+        "tagline": "شعار",
+        "duration": "مدت زمان",
+        "status": "وضعیت",
+        "externalPlayerUrl": "آدرس پخش‌کننده خارجی"
+      },
+      "mediaAssets": {
+        "videoFile": "فایل ویدیو",
+        "videoQualities": "کیفیت‌های ویدیو",
+        "quality": {
+          "sd": "کیفیت استاندارد (SD 480p)",
+          "hd": "کیفیت HD (720p)",
+          "fullHd": "کیفیت Full HD (1080p)",
+          "uhd4k": "کیفیت 4K (2160p)",
+          "uhd8k": "کیفیت 8K (4320p)",
+          "hdr": "HDR",
+          "dolbyVision": "Dolby Vision"
+        },
+        "audioTracks": "مسیرهای صوتی",
+        "subtitles": "زیرنویس‌ها",
+        "trailers": "تریلرها",
+        "visualAssets": "تصاویر و لوگو"
+      },
+      "visualAssets": {
+        "poster": "پوستر",
+        "banner": "بنر",
+        "thumbnail": "تصویر بندانگشتی",
+        "backdrop": "پس‌زمینه",
+        "logo": "لوگو",
+        "episodeStills": "تصاویر قسمت",
+        "seasonArtwork": "تصویر فصل"
+      },
+      "metadata": {
+        "genres": "ژانرها",
+        "tags": "برچسب‌ها",
+        "cast": "بازیگران",
+        "crew": "عوامل",
+        "director": "کارگردان",
+        "writer": "نویسنده",
+        "producer": "تهیه‌کننده",
+        "productionCompany": "شرکت تولیدکننده",
+        "country": "کشور",
+        "language": "زبان",
+        "originalLanguage": "زبان اصلی",
+        "ageRating": "رده سنی",
+        "contentWarnings": "هشدارهای محتوا",
+        "imdbId": "شناسه IMDb",
+        "tmdbId": "شناسه TMDB"
+      },
+      "localization": {
+        "language": "زبان",
+        "addLanguage": "افزودن زبان",
+        "localizedTitle": "عنوان محلی",
+        "localizedDescription": "توضیحات محلی",
+        "subtitleFile": "فایل زیرنویس",
+        "subtitleFormat": "فرمت زیرنویس",
+        "audioDubFile": "فایل دوبله",
+        "audioLanguage": "زبان صوتی"
+      },
+      "technical": {
+        "codec": "کدک",
+        "bitrate": "نرخ بیت",
+        "resolution": "وضوح",
+        "frameRate": "نرخ فریم",
+        "aspectRatio": "نسبت تصویر",
+        "audioCodec": "کدک صوتی",
+        "audioChannels": "کانال‌های صوتی",
+        "drm": "DRM",
+        "encryption": "رمزگذاری",
+        "cdnSettings": "تنظیمات CDN"
+      },
+      "scheduling": {
+        "publishDate": "تاریخ انتشار",
+        "availabilityStart": "شروع دسترسی",
+        "availabilityEnd": "پایان دسترسی",
+        "geoRestrictions": "محدودیت‌های جغرافیایی",
+        "deviceRestrictions": "محدودیت‌های دستگاه"
+      },
+      "monetization": {
+        "price": "قیمت",
+        "rentalFee": "هزینه اجاره",
+        "subscriptionTier": "سطح اشتراک",
+        "freeOrPremium": "رایگان یا پریمیوم",
+        "adInsertionPoints": "نقاط درج تبلیغ"
+      },
+      "seo": {
+        "metaTitle": "عنوان متا",
+        "metaDescription": "توضیحات متا",
+        "urlSlug": "نامک URL",
+        "keywords": "کلمات کلیدی",
+        "featured": "ویژه",
+        "priority": "اولویت"
+      },
+      "rights": {
+        "rightsHolder": "صاحب حقوق",
+        "licenseExpiration": "انقضای مجوز",
+        "distributionTerritories": "مناطق توزیع",
+        "exclusivity": "انحصاری بودن"
+      },
+      "series": {
+        "seasonNumber": "شماره فصل",
+        "episodeNumber": "شماره قسمت",
+        "episodeTitle": "عنوان قسمت",
+        "seriesTitle": "عنوان سریال"
+      }
+    },
+    "validation": {
+      "required": "این فیلد الزامی است",
+      "invalidEmail": "ایمیل نامعتبر است",
+      "invalidUrl": "آدرس نامعتبر است",
+      "minLength": "حداقل {min} کاراکتر",
+      "maxLength": "حداکثر {max} کاراکتر",
+      "invalidFormat": "فرمت نامعتبر است"
+    },
+    "messages": {
+      "success": "عملیات با موفقیت انجام شد",
+      "error": "خطایی رخ داد",
+      "loading": "در حال بارگذاری...",
+      "noData": "داده‌ای یافت نشد",
+      "confirmDelete": "آیا مطمئن هستید که می‌خواهید حذف کنید؟",
+      "uploadSuccess": "فایل با موفقیت آپلود شد",
+      "uploadError": "خطا در آپلود فایل"
+    }
+  }
+}

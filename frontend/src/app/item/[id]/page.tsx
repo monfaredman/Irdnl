@@ -30,7 +30,6 @@ import { CastGallery } from "@/components/media/CastGallery";
 import { VisualRatingsDisplay } from "@/components/media/VisualRatingsDisplay";
 import { VisualSynopsisCard } from "@/components/media/VisualSynopsisCard";
 import { VisualContentGrid } from "@/components/media/VisualContentGrid";
-import { useTMDBMovieDetails, useTMDBTVDetails } from "@/hooks/useTMDBDetails";
 import { ShareDialog } from "@/components/modals/ShareDialog";
 
 // Mock data for development
@@ -44,15 +43,6 @@ export default function ItemDetailPage() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [shareDialogOpen, setShareDialogOpen] = useState(false);
-
-	// Extract TMDB ID from the data (assuming it's stored as numeric ID)
-	const tmdbId = data ? Number(data.id) : null;
-
-	// Fetch detailed TMDB data
-	const movieDetails = useTMDBMovieDetails(type === "movie" ? tmdbId : null);
-	const tvDetails = useTMDBTVDetails(type === "series" ? tmdbId : null);
-
-	const tmdbDetails = type === "movie" ? movieDetails : tvDetails;
 
 	const fetchItem = useCallback(async () => {
 		// Guard against undefined id
@@ -115,53 +105,47 @@ export default function ItemDetailPage() {
 		fetchItem();
 	}, [fetchItem]);
 
-	// Prepare visual data from TMDB
+	// Prepare visual data from database content
 	const visualImages = useMemo(() => {
-		if (!tmdbDetails.images?.backdrops) return [];
-		return tmdbDetails.images.backdrops.slice(0, 10).map((img, idx) => ({
-			url: tmdbDetails.getImageUrl(img.file_path, "original"),
-			caption: `Scene ${idx + 1}`,
-			aspectRatio: img.aspect_ratio,
-		}));
-	}, [tmdbDetails.images]);
+		if (!data) return [];
+		// Use backdrop image if available
+		const images: Array<{ url: string; caption: string; aspectRatio: number }> = [];
+		if (data.backdrop) {
+			images.push({ url: data.backdrop, caption: "Scene 1", aspectRatio: 1.78 });
+		}
+		if ((data as any).bannerUrl) {
+			images.push({ url: (data as any).bannerUrl, caption: "Banner", aspectRatio: 1.78 });
+		}
+		return images;
+	}, [data]);
 
 	const castMembers = useMemo(() => {
-		if (!tmdbDetails.credits?.cast) return [];
-		return tmdbDetails.credits.cast.slice(0, 15).map((member) => ({
-			id: member.id,
-			name: member.name,
-			character: member.character,
-			profileUrl:
-				tmdbDetails.getImageUrl(member.profile_path, "w200") ||
-				"/images/placeholder.jpg",
+		if (!data) return [];
+		// Use cast from database content
+		const cast = (data as any).cast;
+		if (!Array.isArray(cast)) return [];
+		return cast.slice(0, 15).map((member: any, idx: number) => ({
+			id: member.id || idx,
+			name: member.name || member,
+			character: member.character || "",
+			profileUrl: member.profileUrl || member.profile_path || "/images/placeholder.jpg",
 		}));
-	}, [tmdbDetails.credits]);
+	}, [data]);
 
 	const relatedContent = useMemo(() => {
-		if (!tmdbDetails.recommendations?.results) {
-			// Fallback to mock similar content
-			const items =
-				type === "movie"
-					? movies.filter((m) => m.id !== id).slice(0, 12)
-					: series.filter((s) => s.id !== id).slice(0, 12);
-			return items.map((item) => ({
-				id: item.id,
-				title: item.title,
-				backdropUrl: item.backdrop,
-				rating: item.rating,
-				year: item.year,
-			}));
-		}
-		return tmdbDetails.recommendations.results.slice(0, 12).map((item) => ({
-			id: String(item.id),
-			title: item.title || item.name || "Unknown",
-			backdropUrl:
-				tmdbDetails.getImageUrl(item.backdrop_path, "w500") ||
-				"/images/placeholder.jpg",
-			rating: item.vote_average,
-			year: undefined,
+		// Fallback to mock similar content from local data
+		const items =
+			type === "movie"
+				? movies.filter((m) => m.id !== id).slice(0, 12)
+				: series.filter((s) => s.id !== id).slice(0, 12);
+		return items.map((item) => ({
+			id: item.id,
+			title: item.title,
+			backdropUrl: item.backdrop,
+			rating: item.rating,
+			year: item.year,
 		}));
-	}, [tmdbDetails.recommendations, type, id]);
+	}, [type, id]);
 
 	// Get similar content
 	const similarContent =
@@ -276,39 +260,16 @@ export default function ItemDetailPage() {
 				<>
 					{/* A. Cinematic Hero Section */}
 					<CinematicHero
-						backdropUrl={
-							tmdbDetails.details
-								? tmdbDetails.getImageUrl(
-										type === "movie"
-											? (tmdbDetails.details as any).backdrop_path
-											: (tmdbDetails.details as any).backdrop_path,
-										"original",
-									)
-								: data.backdrop
-						}
+						backdropUrl={data.backdrop}
 						title={data.title}
-						englishTitle={
-							tmdbDetails.details
-								? type === "movie"
-									? (tmdbDetails.details as any).original_title
-									: (tmdbDetails.details as any).original_name
-								: undefined
-						}
-						tagline={
-							tmdbDetails.details
-								? (tmdbDetails.details as any).tagline
-								: undefined
-						}
+						englishTitle={(data as any).originalTitle || undefined}
+						tagline={(data as any).tagline || undefined}
 						year={data.year}
 						rating={data.rating}
 						duration={
 							type === "movie"
-								? tmdbDetails.details
-									? (tmdbDetails.details as any).runtime
-									: (data as Movie).duration
-								: tmdbDetails.details
-									? `${(tmdbDetails.details as any).number_of_seasons} Seasons`
-									: "Series"
+								? (data as Movie).duration
+								: "Series"
 						}
 						genres={data.genres || []}
 						externalPlayerUrl={data.externalPlayerUrl}
@@ -336,11 +297,7 @@ export default function ItemDetailPage() {
 						{/* D. Visual Ratings Display */}
 						<VisualRatingsDisplay
 							userScore={data.rating}
-							voteCount={
-								tmdbDetails.details
-									? (tmdbDetails.details as any).vote_count || 1000
-									: 1000
-							}
+							voteCount={(data as any).voteCount || 1000}
 							criticsScore={Math.round((data.rating / 10) * 100)}
 						/>
 

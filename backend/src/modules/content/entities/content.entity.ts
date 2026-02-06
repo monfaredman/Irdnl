@@ -30,6 +30,12 @@ export class Content {
   @Column()
   title: string;
 
+  @Column({ name: 'original_title', nullable: true })
+  originalTitle: string | null;
+
+  @Column({ nullable: true })
+  tagline: string | null;
+
   @Column({
     type: 'enum',
     enum: ContentType,
@@ -42,14 +48,181 @@ export class Content {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
+  @Column({ name: 'short_description', type: 'text', nullable: true })
+  shortDescription: string | null;
+
+  @Column({ type: 'int', nullable: true })
+  duration: number | null; // Duration in seconds
+
   @Column({ name: 'poster_url', nullable: true })
   posterUrl: string | null;
 
   @Column({ name: 'banner_url', nullable: true })
   bannerUrl: string | null;
 
+  @Column({ name: 'thumbnail_url', nullable: true })
+  thumbnailUrl: string | null;
+
+  @Column({ name: 'backdrop_url', nullable: true })
+  backdropUrl: string | null;
+
+  @Column({ name: 'logo_url', nullable: true })
+  logoUrl: string | null;
+
   @Column({ type: 'numeric', precision: 3, scale: 1, nullable: true })
   rating: number | null;
+
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  genres: string[];
+
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  tags: string[];
+
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  languages: string[];
+
+  @Column({ name: 'original_language', nullable: true })
+  originalLanguage: string | null;
+
+  @Column({ name: 'age_rating', nullable: true })
+  ageRating: string | null;
+
+  @Column({ name: 'content_warnings', type: 'jsonb', nullable: true, default: '[]' })
+  contentWarnings: string[];
+
+  // Cast and Crew
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  cast: Array<{ name: string; character?: string; role?: string; imageUrl?: string }>;
+
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  crew: Array<{ name: string; role: string; department?: string }>;
+
+  @Column({ nullable: true })
+  director: string | null;
+
+  @Column({ nullable: true })
+  writer: string | null;
+
+  @Column({ nullable: true })
+  producer: string | null;
+
+  @Column({ name: 'production_company', nullable: true })
+  productionCompany: string | null;
+
+  @Column({ nullable: true })
+  country: string | null;
+
+  // External IDs
+  @Column({ name: 'imdb_id', nullable: true })
+  imdbId: string | null;
+
+  @Column({ name: 'tmdb_id', nullable: true })
+  tmdbId: string | null;
+
+  // Media Assets
+  @Column({ name: 'video_qualities', type: 'jsonb', nullable: true, default: '{}' })
+  videoQualities: {
+    sd?: { url: string; bitrate?: string; size?: string };
+    hd?: { url: string; bitrate?: string; size?: string };
+    fullHd?: { url: string; bitrate?: string; size?: string };
+    uhd4k?: { url: string; bitrate?: string; size?: string };
+    uhd8k?: { url: string; bitrate?: string; size?: string };
+    hdr?: { url: string; bitrate?: string; size?: string };
+    dolbyVision?: { url: string; bitrate?: string; size?: string };
+  } | null;
+
+  @Column({ name: 'audio_tracks', type: 'jsonb', nullable: true, default: '[]' })
+  audioTracks: Array<{
+    language: string;
+    url: string;
+    codec?: string;
+    channels?: string;
+    label?: string;
+  }>;
+
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  subtitles: Array<{
+    language: string;
+    url: string;
+    format?: string;
+    label?: string;
+  }>;
+
+  @Column({ type: 'jsonb', nullable: true, default: '[]' })
+  trailers: Array<{
+    title: string;
+    url: string;
+    type?: string;
+    quality?: string;
+  }>;
+
+  // Technical Specifications
+  @Column({ name: 'technical_specs', type: 'jsonb', nullable: true, default: '{}' })
+  technicalSpecs: {
+    codec?: string;
+    resolution?: string;
+    frameRate?: string;
+    aspectRatio?: string;
+    audioCodec?: string;
+    audioChannels?: string;
+  } | null;
+
+  @Column({ name: 'drm_settings', type: 'jsonb', nullable: true, default: '{}' })
+  drmSettings: {
+    enabled?: boolean;
+    provider?: string;
+    licenseUrl?: string;
+    certificateUrl?: string;
+  } | null;
+
+  // Scheduling and Availability
+  @Column({ name: 'publish_date', type: 'timestamp', nullable: true })
+  publishDate: Date | null;
+
+  @Column({ name: 'availability_start', type: 'timestamp', nullable: true })
+  availabilityStart: Date | null;
+
+  @Column({ name: 'availability_end', type: 'timestamp', nullable: true })
+  availabilityEnd: Date | null;
+
+  @Column({ name: 'geo_restrictions', type: 'jsonb', nullable: true, default: '[]' })
+  geoRestrictions: string[];
+
+  @Column({ name: 'device_restrictions', type: 'jsonb', nullable: true, default: '[]' })
+  deviceRestrictions: string[];
+
+  // Monetization
+  @Column({ type: 'jsonb', nullable: true, default: '{}' })
+  monetization: {
+    price?: number;
+    rentalFee?: number;
+    subscriptionTier?: string;
+    isFree?: boolean;
+    adInsertionPoints?: number[];
+  } | null;
+
+  // Rights and Licensing
+  @Column({ name: 'rights_info', type: 'jsonb', nullable: true, default: '{}' })
+  rightsInfo: {
+    rightsHolder?: string;
+    licenseExpiration?: string;
+    distributionTerritories?: string[];
+    exclusivity?: boolean;
+  } | null;
+
+  // Discovery and SEO
+  @Column({ type: 'boolean', default: false })
+  featured: boolean;
+
+  @Column({ type: 'int', default: 0 })
+  priority: number;
+
+  @Column({ name: 'localized_content', type: 'jsonb', nullable: true, default: '{}' })
+  localizedContent: Record<string, {
+    title?: string;
+    description?: string;
+    shortDescription?: string;
+  }> | null;
 
   @Column({
     type: 'enum',

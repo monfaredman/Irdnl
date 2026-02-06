@@ -8,7 +8,7 @@ import UpcomingIcon from "@mui/icons-material/Upcoming";
 import { Box, Button, Chip, IconButton, Typography } from "@mui/material";
 import Image from "next/image";
 import { useState } from "react";
-import { useTMDBPopularMovies } from "@/hooks/useTMDB";
+import { useBackendPopularMovies } from "@/hooks/useBackendContent";
 import { useLanguage } from "@/providers/language-provider";
 import {
 	glassBlur,
@@ -78,7 +78,7 @@ function formatDate(dateString: string, language: string): string {
 export default function ComingSoonPage() {
 	const { language } = useLanguage();
 	const t = translations[language] || translations.en;
-	const { data: movies, loading } = useTMDBPopularMovies();
+	const { data: movies, loading } = useBackendPopularMovies();
 	const [notifiedMovies, setNotifiedMovies] = useState<Set<string>>(new Set());
 
 	const glassCardSx = {

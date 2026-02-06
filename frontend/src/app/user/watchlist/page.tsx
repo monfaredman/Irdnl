@@ -18,7 +18,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
-import { useTMDBPopularMovies } from "@/hooks/useTMDB";
+import { useBackendPopularMovies } from "@/hooks/useBackendContent";
 import { useLanguage } from "@/providers/language-provider";
 import {
 	glassAnimations,
@@ -53,7 +53,7 @@ export default function WatchlistPage() {
 	const isRTL = language === "fa";
 	const t = translations[language] || translations.en;
 
-	const { data: movies, loading } = useTMDBPopularMovies({ language });
+	const { data: movies, loading } = useBackendPopularMovies();
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
 	const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {

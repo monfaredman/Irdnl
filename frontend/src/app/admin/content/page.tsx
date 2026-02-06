@@ -19,8 +19,10 @@ import {
 	TableRow,
 } from "@/components/admin/ui/table";
 import { contentApi } from "@/lib/api/admin";
+import { useTranslation } from "@/i18n";
 
 export default function ContentManagementPage() {
+	const { t } = useTranslation();
 	const [content, setContent] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
@@ -45,7 +47,7 @@ export default function ContentManagementPage() {
 	}, [page, search]);
 
 	const handleDelete = async (id: string) => {
-		if (confirm("Are you sure you want to delete this content?")) {
+		if (confirm(t("admin.messages.confirmDelete"))) {
 			try {
 				await contentApi.delete(id);
 				fetchContent();
@@ -60,27 +62,27 @@ export default function ContentManagementPage() {
 			<div className="flex items-center justify-between">
 				<div>
 					<h1 className="text-3xl font-bold text-gray-900">
-						Content Management
+						{t("admin.content.title")}
 					</h1>
-					<p className="text-gray-600">Manage movies and series</p>
+					<p className="text-gray-600">{t("admin.content.list")}</p>
 				</div>
 				<Link href="/admin/content/new">
 					<Button>
-						<Plus className="mr-2 h-4 w-4" />
-						Add Content
+						<Plus className="ml-2 h-4 w-4" />
+						{t("admin.content.createNew")}
 					</Button>
 				</Link>
 			</div>
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Content List</CardTitle>
+					<CardTitle>{t("admin.content.list")}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="mb-4">
 						<input
 							type="text"
-							placeholder="Search content..."
+							placeholder="جستجوی محتوا..."
 							value={search}
 							onChange={(e) => {
 								setSearch(e.target.value);
@@ -90,14 +92,14 @@ export default function ContentManagementPage() {
 						/>
 					</div>
 					{loading ? (
-						<div className="p-6 text-center">Loading...</div>
+						<div className="p-6 text-center">{t("admin.messages.loading")}</div>
 					) : (
 						<>
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>Title</TableHead>
-										<TableHead>Type</TableHead>
+										<TableHead>{t("admin.upload.basicInfo.title")}</TableHead>
+										<TableHead>{t("admin.upload.basicInfo.type")}</TableHead>
 										<TableHead>Status</TableHead>
 										<TableHead>Year</TableHead>
 										<TableHead>Actions</TableHead>

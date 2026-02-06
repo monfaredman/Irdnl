@@ -229,4 +229,101 @@ export const notificationsApi = {
 	},
 };
 
+// ========================================================================
+// TMDB Helper API (Admin Only) - Used for auto-fill in content wizard
+// ========================================================================
+
+export interface TMDBSearchResult {
+	tmdbId: string;
+	mediaType: "movie" | "tv";
+	title: string;
+	originalTitle: string;
+	description: string;
+	year: number | null;
+	posterUrl: string;
+	backdropUrl: string;
+	rating: number;
+	originalLanguage: string;
+	genreIds: number[];
+	originCountry?: string[];
+}
+
+export interface TMDBSearchResponse {
+	items: TMDBSearchResult[];
+	total: number;
+	page: number;
+	limit: number;
+	totalPages: number;
+}
+
+export interface TMDBContentDetails {
+	title: string;
+	originalTitle: string;
+	tagline: string;
+	type: "movie" | "series";
+	year: number | null;
+	description: string;
+	duration: number | null;
+	posterUrl: string;
+	bannerUrl: string;
+	backdropUrl: string;
+	rating: number;
+	genres: string[];
+	originalLanguage: string;
+	languages: string[];
+	cast: Array<{ name: string; character: string; imageUrl: string }>;
+	crew: Array<{ name: string; role: string; department: string }>;
+	director: string;
+	writer: string;
+	producer: string;
+	productionCompany: string;
+	country: string;
+	tmdbId: string;
+	imdbId: string;
+	numberOfSeasons?: number;
+	numberOfEpisodes?: number;
+}
+
+export const tmdbApi = {
+	/**
+	 * Search TMDB for movies and TV shows (admin helper for auto-fill)
+	 */
+	search: async (
+		q: string,
+		language: "en" | "fa" = "fa",
+		page: number = 1,
+	): Promise<TMDBSearchResponse> => {
+		const response = await adminApi.get("/tmdb/search", {
+			params: { q, language, page },
+		});
+		return response.data;
+	},
+
+	/**
+	 * Get full movie details from TMDB for auto-fill
+	 */
+	getMovieDetails: async (
+		tmdbId: string,
+		language: "en" | "fa" = "fa",
+	): Promise<TMDBContentDetails> => {
+		const response = await adminApi.get(`/tmdb/details/movie/${tmdbId}`, {
+			params: { language },
+		});
+		return response.data;
+	},
+
+	/**
+	 * Get full TV show details from TMDB for auto-fill
+	 */
+	getTVDetails: async (
+		tmdbId: string,
+		language: "en" | "fa" = "fa",
+	): Promise<TMDBContentDetails> => {
+		const response = await adminApi.get(`/tmdb/details/tv/${tmdbId}`, {
+			params: { language },
+		});
+		return response.data;
+	},
+};
+
 export default adminApi;

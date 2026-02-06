@@ -37,7 +37,7 @@ type UiFilterState = {
  * - Content-first experience
  * - Premium, sophisticated feel
  *
- * Data Source: Backend API (integrated with TMDB)
+ * Data Source: Backend Database (all content uploaded via admin panel)
  */
 export default function Home() {
 	const { language } = useLanguage();
@@ -51,18 +51,14 @@ export default function Home() {
 	const [hasAppliedFilters, setHasAppliedFilters] = useState(false);
 
 	const backendFilters = useMemo(() => {
-		// Map UI filters to TMDB discover params
+		// Map UI filters to database query params
 		return {
 			type:
 				filters.type === "movie" || filters.type === "series"
 					? (filters.type as "movie" | "series")
 					: undefined,
 			genre: filters.genre !== "all" ? filters.genre : undefined,
-			// Use the end of year range as the target year
 			year: filters.yearRange[1] !== 2024 ? filters.yearRange[1] : undefined,
-			// Map age rating to TMDB certification
-			certification: filters.ageRating !== "all" ? filters.ageRating : undefined,
-			// Country - TMDB uses ISO 3166-1 codes
 			country: filters.country !== "all" ? filters.country : undefined,
 			page: 1,
 			limit: 20,
@@ -71,19 +67,18 @@ export default function Home() {
 		filters.genre,
 		filters.type,
 		filters.yearRange,
-		filters.ageRating,
 		filters.country,
 	]);
 
-	// Fetch real data from backend API (which integrates with TMDB)
+	// Fetch real data from backend database
 	const { data: combinedContent, loading: loadingCombined } =
-		useBackendCombinedContent({ language });
+		useBackendCombinedContent();
 	const { data: popularMovies, loading: loadingMovies } =
-		useBackendPopularMovies({ language });
+		useBackendPopularMovies();
 	const { data: trendingMovies, loading: loadingTrending } =
-		useBackendTrendingMovies({ language });
+		useBackendTrendingMovies();
 	const { data: popularSeries, loading: loadingSeries } =
-		useBackendPopularTVShows({ language });
+		useBackendPopularTVShows();
 	const {
 		data: filteredContent,
 		loading: loadingFiltered,
@@ -93,7 +88,7 @@ export default function Home() {
 	const [animationItems, setAnimationItems] = useState<Movie[]>([]);
 	const [loadingAnimation, setLoadingAnimation] = useState(false);
 
-	// Animation content (genre 16) from TMDB via backend discover
+	// Animation content (genre animation) from database
 	// Lightweight client-side fetch (no need for a dedicated hook yet).
 	useEffect(() => {
 		let cancelled = false;
@@ -101,7 +96,6 @@ export default function Home() {
 			try {
 				setLoadingAnimation(true);
 				const res = await contentApi.getAnimationContent({
-					language: language === "fa" ? "fa" : "en",
 					page: 1,
 				});
 				if (cancelled) return;
@@ -114,7 +108,7 @@ export default function Home() {
 		return () => {
 			cancelled = true;
 		};
-	}, [language]);
+	}, []);
 
 	// Filter content by origin (Iranian vs Foreign)
 	const foreignMovies =

@@ -5,7 +5,7 @@ import StarIcon from "@mui/icons-material/Star";
 import { Box, Chip, Skeleton, Typography } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
-import { useTMDBTrendingMovies } from "@/hooks/useTMDB";
+import { useBackendTrendingMovies } from "@/hooks/useBackendContent";
 import { useLanguage } from "@/providers/language-provider";
 import {
 	glassBlur,
@@ -83,7 +83,7 @@ export default function Top250Page() {
 	const { language } = useLanguage();
 	const t = translations[language] || translations.en;
 
-	const { data: movies, loading: isLoading, error } = useTMDBTrendingMovies();
+	const { data: movies, loading: isLoading, error } = useBackendTrendingMovies();
 
 	const glassCardSx = {
 		background: `linear-gradient(135deg, ${glassColors.glass.strong}, ${glassColors.glass.mid})`,

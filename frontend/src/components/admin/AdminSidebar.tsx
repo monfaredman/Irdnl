@@ -6,7 +6,6 @@ import {
 	Film,
 	LayoutDashboard,
 	LogOut,
-	Settings,
 	Users,
 	Video,
 } from "lucide-react";
@@ -14,24 +13,26 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/store/admin-auth";
+import { useTranslation } from "@/i18n";
 
 const menuItems = [
-	{ href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-	{ href: "/admin/content", label: "Content", icon: Film },
-	{ href: "/admin/users", label: "Users", icon: Users },
-	{ href: "/admin/videos", label: "Videos", icon: Video },
-	{ href: "/admin/notifications", label: "Notifications", icon: Bell },
-	{ href: "/admin/finance", label: "Finance", icon: BarChart3 },
+	{ href: "/admin/dashboard", labelKey: "admin.menu.dashboard", icon: LayoutDashboard },
+	{ href: "/admin/content", labelKey: "admin.menu.content", icon: Film },
+	{ href: "/admin/users", labelKey: "admin.menu.users", icon: Users },
+	{ href: "/admin/videos", labelKey: "admin.menu.videos", icon: Video },
+	{ href: "/admin/notifications", labelKey: "admin.menu.notifications", icon: Bell },
+	{ href: "/admin/finance", labelKey: "admin.menu.finance", icon: BarChart3 },
 ];
 
 export function AdminSidebar() {
 	const pathname = usePathname();
 	const { logout, user } = useAdminAuth();
+	const { t } = useTranslation();
 
 	return (
-		<div className="flex h-screen w-64 flex-col border-r border-gray-200 bg-white">
+		<div className="flex h-screen w-64 flex-col border-l border-gray-200 bg-white">
 			<div className="flex h-16 items-center border-b border-gray-200 px-6">
-				<h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
+				<h1 className="text-xl font-bold text-gray-900">{t("admin.title")}</h1>
 			</div>
 			<nav className="flex-1 space-y-1 px-3 py-4">
 				{menuItems.map((item) => {
@@ -50,7 +51,7 @@ export function AdminSidebar() {
 							)}
 						>
 							<Icon className="h-5 w-5" />
-							{item.label}
+							{t(item.labelKey)}
 						</Link>
 					);
 				})}
@@ -70,7 +71,7 @@ export function AdminSidebar() {
 					className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
 				>
 					<LogOut className="h-5 w-5" />
-					Logout
+					{t("admin.menu.logout")}
 				</button>
 			</div>
 		</div>

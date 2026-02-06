@@ -22,8 +22,10 @@ import {
   ApiBearerAuth,
   ApiConsumes,
   ApiBody,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
+import { TMDBService } from '../content/tmdb.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
 import { ListContentDto } from './dto/list-content.dto';
@@ -43,7 +45,10 @@ import { UserRole } from '../users/entities/user.entity';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(UserRole.ADMIN)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(
+    private readonly adminService: AdminService,
+    private readonly tmdbService: TMDBService,
+  ) {}
 
   @Post('content')
   @HttpCode(HttpStatus.CREATED)
@@ -215,5 +220,154 @@ export class AdminController {
     @Body('type') type: 'poster' | 'banner',
   ) {
     return this.adminService.uploadImage(file, type);
+  }
+
+  // ========================================================================
+  // TMDB Helper Endpoints (Admin Only) - Used for auto-fill in content wizard
+  // ========================================================================
+
+  @Get('tmdb/search')
+  @ApiOperation({ summary: 'Search TMDB for movies and TV shows (admin helper for auto-fill)' })
+  @ApiQuery({ name: 'q', type: String, required: true })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiResponse({ status: 200, description: 'TMDB search results for admin auto-fill' })
+  async tmdbSearch(
+    @Query('q') query: string,
+    @Query('language') language: 'en' | 'fa' = 'fa',
+    @Query('page') page: number = 1,
+  ) {
+    const trimmed = (query || '').trim();
+    if (!trimmed) {
+      return { items: [], total: 0, page: 1, limit: 0, totalPages: 0 };
+    }
+
+    const response = await this.tmdbService.searchMulti(trimmed, {
+      language,
+      page: page ? parseInt(page.toString()) : 1,
+    });
+
+    const items = response.results
+      .map((result: any) => {
+        if (result?.media_type === 'movie') {
+          return {
+            tmdbId: String(result.id),
+            mediaType: 'movie',
+            title: result.title || '',
+            originalTitle: result.original_title || '',
+            description: result.overview || '',
+            year: result.release_date ? new Date(result.release_date).getFullYear() : null,
+            posterUrl: result.poster_path ? `https://image.tmdb.org/t/p/w500${result.poster_path}` : '',
+            backdropUrl: result.backdrop_path ? `https://image.tmdb.org/t/p/original${result.backdrop_path}` : '',
+            rating: typeof result.vote_average === 'number' ? Math.round(result.vote_average * 10) / 10 : 0,
+            originalLanguage: result.original_language || '',
+            genreIds: result.genre_ids || [],
+          };
+        }
+        if (result?.media_type === 'tv') {
+          return {
+            tmdbId: String(result.id),
+            mediaType: 'tv',
+            title: result.name || '',
+            originalTitle: result.original_name || '',
+            description: result.overview || '',
+            year: result.first_air_date ? new Date(result.first_air_date).getFullYear() : null,
+            posterUrl: result.poster_path ? `https://image.tmdb.org/t/p/w500${result.poster_path}` : '',
+            backdropUrl: result.backdrop_path ? `https://image.tmdb.org/t/p/original${result.backdrop_path}` : '',
+            rating: typeof result.vote_average === 'number' ? Math.round(result.vote_average * 10) / 10 : 0,
+            originalLanguage: result.original_language || '',
+            genreIds: result.genre_ids || [],
+            originCountry: result.origin_country || [],
+          };
+        }
+        return null;
+      })
+      .filter(Boolean);
+
+    return {
+      items,
+      total: response.total_results,
+      page: response.page,
+      limit: response.results.length,
+      totalPages: response.total_pages,
+    };
+  }
+
+  @Get('tmdb/details/movie/:id')
+  @ApiOperation({ summary: 'Get full movie details from TMDB for admin auto-fill' })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiResponse({ status: 200, description: 'TMDB movie details for auto-fill' })
+  async tmdbMovieDetails(
+    @Param('id') id: string,
+    @Query('language') language: 'en' | 'fa' = 'fa',
+  ) {
+    const data = await this.tmdbService.getMovieDetails(id, language);
+    return this.transformTMDBDetailsForAdmin(data, 'movie');
+  }
+
+  @Get('tmdb/details/tv/:id')
+  @ApiOperation({ summary: 'Get full TV show details from TMDB for admin auto-fill' })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiResponse({ status: 200, description: 'TMDB TV show details for auto-fill' })
+  async tmdbTVDetails(
+    @Param('id') id: string,
+    @Query('language') language: 'en' | 'fa' = 'fa',
+  ) {
+    const data = await this.tmdbService.getTVDetails(id, language);
+    return this.transformTMDBDetailsForAdmin(data, 'tv');
+  }
+
+  /**
+   * Transform raw TMDB details response into our ContentFormData shape
+   * so the admin wizard can directly populate fields.
+   */
+  private transformTMDBDetailsForAdmin(data: any, mediaType: 'movie' | 'tv') {
+    const genres = (data.genres || []).map((g: any) => g.name?.toLowerCase().replace(/\s+/g, '-') || '');
+    const cast = (data.credits?.cast || []).slice(0, 20).map((c: any) => ({
+      name: c.name || '',
+      character: c.character || '',
+      imageUrl: c.profile_path ? `https://image.tmdb.org/t/p/w200${c.profile_path}` : '',
+    }));
+    const crew = (data.credits?.crew || []).slice(0, 10).map((c: any) => ({
+      name: c.name || '',
+      role: c.job || '',
+      department: c.department || '',
+    }));
+    const director = (data.credits?.crew || []).find((c: any) => c.job === 'Director')?.name || '';
+    const writer = (data.credits?.crew || []).find((c: any) => c.job === 'Writer' || c.job === 'Screenplay')?.name || '';
+    const producer = (data.credits?.crew || []).find((c: any) => c.job === 'Producer')?.name || '';
+    const productionCompany = (data.production_companies || [])[0]?.name || '';
+    const country = (data.production_countries || [])[0]?.iso_3166_1 || '';
+
+    return {
+      title: data.title || data.name || '',
+      originalTitle: data.original_title || data.original_name || '',
+      tagline: data.tagline || '',
+      type: mediaType === 'movie' ? 'movie' : 'series',
+      year: mediaType === 'movie'
+        ? (data.release_date ? new Date(data.release_date).getFullYear() : null)
+        : (data.first_air_date ? new Date(data.first_air_date).getFullYear() : null),
+      description: data.overview || '',
+      duration: data.runtime ? data.runtime * 60 : null, // Convert minutes to seconds
+      posterUrl: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '',
+      bannerUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : '',
+      backdropUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : '',
+      rating: typeof data.vote_average === 'number' ? Math.round(data.vote_average * 10) / 10 : 0,
+      genres,
+      originalLanguage: data.original_language || '',
+      languages: data.spoken_languages ? data.spoken_languages.map((l: any) => l.iso_639_1) : [],
+      cast,
+      crew,
+      director,
+      writer,
+      producer,
+      productionCompany,
+      country,
+      tmdbId: String(data.id),
+      imdbId: data.imdb_id || '',
+      // TV-specific
+      ...(mediaType === 'tv' && data.number_of_seasons ? { numberOfSeasons: data.number_of_seasons } : {}),
+      ...(mediaType === 'tv' && data.number_of_episodes ? { numberOfEpisodes: data.number_of_episodes } : {}),
+    };
   }
 }

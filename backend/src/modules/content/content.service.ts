@@ -28,7 +28,7 @@ export class ContentService {
   ) {}
 
   async findAll(query: ContentQueryDto, isAdmin: boolean = false) {
-    const { type, genre, q, page = 1, limit = 20 } = query;
+    const { type, genre, q, page = 1, limit = 20, year, country, language, featured, sort, order } = query;
     const skip = (page - 1) * limit;
 
     const queryBuilder = this.contentRepository.createQueryBuilder('content');
@@ -44,16 +44,52 @@ export class ContentService {
     }
 
     if (q) {
-      queryBuilder.andWhere('(content.title ILIKE :q OR content.description ILIKE :q)', {
+      queryBuilder.andWhere('(content.title ILIKE :q OR content.description ILIKE :q OR content.original_title ILIKE :q)', {
         q: `%${q}%`,
       });
     }
 
-    // TODO: Add genre filtering when genres table is implemented
-    // For now, we can filter by genre in license_info or seo
+    // Genre filtering via JSONB array
+    if (genre && genre !== 'all') {
+      queryBuilder.andWhere("content.genres::jsonb @> :genreArr", {
+        genreArr: JSON.stringify([genre.toLowerCase()]),
+      });
+    }
+
+    // Year filtering
+    if (year) {
+      queryBuilder.andWhere('content.year = :year', { year });
+    }
+
+    // Country filtering
+    if (country && country !== 'all') {
+      queryBuilder.andWhere('content.country ILIKE :country', { country: `%${country}%` });
+    }
+
+    // Language filtering
+    if (language) {
+      queryBuilder.andWhere('content.original_language = :language', { language });
+    }
+
+    // Featured filtering
+    if (featured !== undefined) {
+      queryBuilder.andWhere('content.featured = :featured', { featured });
+    }
+
+    // Sorting
+    const sortField = sort || 'createdAt';
+    const sortOrder = order || 'DESC';
+    const allowedSorts: Record<string, string> = {
+      rating: 'content.rating',
+      year: 'content.year',
+      createdAt: 'content.created_at',
+      priority: 'content.priority',
+      title: 'content.title',
+    };
+    const sortColumn = allowedSorts[sortField] || 'content.created_at';
+    queryBuilder.orderBy(sortColumn, sortOrder as 'ASC' | 'DESC');
 
     const [items, total] = await queryBuilder
-      .orderBy('content.createdAt', 'DESC')
       .skip(skip)
       .take(limit)
       .getManyAndCount();
@@ -190,6 +226,75 @@ export class ContentService {
     await this.cacheManager.set(cacheKey, content, 300); // Cache for 5 minutes
 
     return content;
+  }
+
+  async getPopular(type?: ContentType, limit: number = 20): Promise<Content[]> {
+    const cacheKey = `content:popular:${type || 'all'}:${limit}`;
+    const cached = await this.cacheManager.get<Content[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const queryBuilder = this.contentRepository
+      .createQueryBuilder('content')
+      .where('content.status = :status', { status: ContentStatus.PUBLISHED });
+
+    if (type) {
+      queryBuilder.andWhere('content.type = :type', { type });
+    }
+
+    const content = await queryBuilder
+      .orderBy('content.priority', 'DESC')
+      .addOrderBy('content.rating', 'DESC')
+      .addOrderBy('content.created_at', 'DESC')
+      .limit(limit)
+      .getMany();
+
+    await this.cacheManager.set(cacheKey, content, 300);
+    return content;
+  }
+
+  async getFeatured(limit: number = 10): Promise<Content[]> {
+    const cacheKey = `content:featured:${limit}`;
+    const cached = await this.cacheManager.get<Content[]>(cacheKey);
+    if (cached) {
+      return cached;
+    }
+
+    const content = await this.contentRepository
+      .createQueryBuilder('content')
+      .where('content.status = :status', { status: ContentStatus.PUBLISHED })
+      .andWhere('content.featured = :featured', { featured: true })
+      .orderBy('content.priority', 'DESC')
+      .addOrderBy('content.rating', 'DESC')
+      .limit(limit)
+      .getMany();
+
+    await this.cacheManager.set(cacheKey, content, 300);
+    return content;
+  }
+
+  async searchContent(q: string, type?: ContentType, page: number = 1, limit: number = 20) {
+    const skip = (page - 1) * limit;
+    const queryBuilder = this.contentRepository
+      .createQueryBuilder('content')
+      .where('content.status = :status', { status: ContentStatus.PUBLISHED })
+      .andWhere(
+        '(content.title ILIKE :q OR content.description ILIKE :q OR content.original_title ILIKE :q OR content.director ILIKE :q)',
+        { q: `%${q}%` },
+      );
+
+    if (type) {
+      queryBuilder.andWhere('content.type = :type', { type });
+    }
+
+    const [items, total] = await queryBuilder
+      .orderBy('content.rating', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    return { items, total, page, limit, totalPages: Math.ceil(total / limit) };
   }
 
   async invalidateCache(contentId: string): Promise<void> {
