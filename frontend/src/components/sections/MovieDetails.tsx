@@ -1,7 +1,7 @@
 import { RatingBadge } from "@/components/interactive/RatingBadge";
 import { RatingControl } from "@/components/interactive/RatingControl";
 import { WatchlistButton } from "@/components/interactive/WatchlistButton";
-import { VideoPlayer } from "@/components/media/VideoPlayer";
+import { ExternalPlayerButton } from "@/components/media/ExternalPlayerButton";
 import { CommentsPanel } from "@/components/sections/CommentsPanel";
 import { formatMinutes } from "@/lib/formatters";
 import type { Movie } from "@/types/media";
@@ -14,12 +14,11 @@ export const MovieDetails = ({ movie }: MovieDetailsProps) => (
 	<section className="space-y-8">
 		<div className="grid gap-8 lg:grid-cols-3">
 			<div className="lg:col-span-2 space-y-4">
-				<VideoPlayer
-					mediaId={movie.id}
+				<ExternalPlayerButton
+					externalUrl={movie.externalPlayerUrl}
 					poster={movie.backdrop}
-					sources={movie.sources}
-					subtitles={movie.subtitles}
-					duration={movie.duration * 60}
+					title={movie.title}
+					variant="card"
 				/>
 				<div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-wide text-white/60">
 					<RatingBadge rating={movie.rating} />

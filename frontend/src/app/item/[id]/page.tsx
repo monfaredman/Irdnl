@@ -311,7 +311,12 @@ export default function ItemDetailPage() {
 									: "Series"
 						}
 						genres={data.genres || []}
-						onPlay={() => console.log("Play clicked")}
+						externalPlayerUrl={data.externalPlayerUrl}
+						onPlay={() => {
+							if (data.externalPlayerUrl) {
+								window.open(data.externalPlayerUrl, "_blank", "noopener,noreferrer");
+							}
+						}}
 						onAddToList={() => console.log("Add to list clicked")}
 						onShare={() => setShareDialogOpen(true)}
 					/>

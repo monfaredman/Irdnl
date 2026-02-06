@@ -4,7 +4,7 @@
 
 "use client";
 
-import { PlayArrow, Bookmark, Share, Add } from "@mui/icons-material";
+import { PlayArrow, Bookmark, Share, Add, OpenInNew } from "@mui/icons-material";
 import { Box, Button, Chip, Typography, IconButton } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
@@ -22,6 +22,7 @@ interface CinematicHeroProps {
 	rating: number;
 	duration?: number | string;
 	genres: string[];
+	externalPlayerUrl?: string;
 	onPlay?: () => void;
 	onAddToList?: () => void;
 	onShare?: () => void;
@@ -36,6 +37,7 @@ export function CinematicHero({
 	rating,
 	duration,
 	genres,
+	externalPlayerUrl,
 	onPlay,
 	onAddToList,
 	onShare,
@@ -232,10 +234,20 @@ export function CinematicHero({
 							variant="contained"
 							size="large"
 							startIcon={<PlayArrow />}
-							onClick={onPlay}
+							endIcon={externalPlayerUrl ? <OpenInNew sx={{ fontSize: "1rem !important" }} /> : undefined}
+							onClick={() => {
+								if (externalPlayerUrl) {
+									window.open(externalPlayerUrl, "_blank", "noopener,noreferrer");
+								} else if (onPlay) {
+									onPlay();
+								}
+							}}
+							disabled={!externalPlayerUrl && !onPlay}
 							sx={{
-								background: `linear-gradient(135deg, ${glassColors.gold.solid}, #D97706)`,
-								color: glassColors.black,
+								background: externalPlayerUrl
+									? `linear-gradient(135deg, ${glassColors.gold.solid}, #D97706)`
+									: glassColors.glass.mid,
+								color: externalPlayerUrl ? glassColors.black : glassColors.text.primary,
 								fontWeight: 700,
 								px: 4,
 								py: 1.5,
@@ -253,7 +265,9 @@ export function CinematicHero({
 									transition: "opacity 0.4s ease",
 								},
 								"&:hover": {
-									background: `linear-gradient(135deg, #FBBF24, ${glassColors.gold.solid})`,
+									background: externalPlayerUrl
+										? `linear-gradient(135deg, #FBBF24, ${glassColors.gold.solid})`
+										: glassColors.glass.strong,
 									transform: "translateY(-2px)",
 									boxShadow: `0 10px 30px ${glassColors.gold.glow}`,
 									"&::before": {
@@ -273,7 +287,7 @@ export function CinematicHero({
 								},
 							}}
 						>
-							پخش
+							{externalPlayerUrl ? "پخش آنلاین" : "پخش"}
 						</Button>
 
 						<IconButton

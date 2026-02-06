@@ -24,6 +24,7 @@ describe('ContentService', () => {
     rating: 8.5,
     status: ContentStatus.PUBLISHED,
     licenseInfo: null,
+    externalPlayerUrl: null,
     seo: null,
     createdAt: new Date(),
     updatedAt: new Date(),

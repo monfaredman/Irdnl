@@ -55,6 +55,7 @@ export interface Episode {
 	sources: StreamSource[];
 	subtitles: SubtitleTrack[];
 	downloads: DownloadLink[];
+	externalPlayerUrl?: string;
 }
 
 export interface Season {
@@ -86,12 +87,14 @@ export interface Movie extends MediaBase {
 	downloads: DownloadLink[];
 	subtitles: SubtitleTrack[];
 	featured?: boolean;
+	externalPlayerUrl?: string;
 }
 
 export interface Series extends MediaBase {
 	seasons: Season[];
 	ongoing: boolean;
 	featured?: boolean;
+	externalPlayerUrl?: string;
 }
 
 export interface TrendingItem {

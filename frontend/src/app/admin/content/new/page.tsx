@@ -23,6 +23,7 @@ export default function NewContentPage() {
 		description: "",
 		posterUrl: "",
 		bannerUrl: "",
+		externalPlayerUrl: "",
 		status: "draft" as "draft" | "published",
 	});
 
@@ -33,6 +34,7 @@ export default function NewContentPage() {
 			await contentApi.create({
 				...formData,
 				year: formData.year ? parseInt(formData.year) : undefined,
+				externalPlayerUrl: formData.externalPlayerUrl || undefined,
 			});
 			router.push("/admin/content");
 		} catch (error) {
@@ -140,6 +142,22 @@ export default function NewContentPage() {
 								className="w-full rounded-md border border-gray-300 px-3 py-2"
 								rows={4}
 							/>
+						</div>
+
+						<div className="space-y-2">
+							<Label htmlFor="externalPlayerUrl">External Player URL</Label>
+							<Input
+								id="externalPlayerUrl"
+								type="url"
+								placeholder="https://player.example.com/watch/..."
+								value={formData.externalPlayerUrl}
+								onChange={(e) =>
+									setFormData({ ...formData, externalPlayerUrl: e.target.value })
+								}
+							/>
+							<p className="text-xs text-gray-500">
+								URL to redirect users to the third-party player for watching this content
+							</p>
 						</div>
 
 						<div className="grid gap-4 md:grid-cols-2">

@@ -58,6 +58,11 @@ export class CreateContentDto {
   @IsString()
   bannerUrl?: string;
 
+  @ApiPropertyOptional({ example: 'https://player.example.com/watch/12345', description: 'External third-party player URL for this content' })
+  @IsOptional()
+  @IsString()
+  externalPlayerUrl?: string;
+
   @ApiPropertyOptional({ example: 8.5 })
   @IsOptional()
   @IsNumber()

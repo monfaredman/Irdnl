@@ -288,4 +288,13 @@ export class ContentController {
     const isAdmin = user?.role === UserRole.ADMIN;
     return this.contentService.getStreamInfo(id, isAdmin);
   }
+
+  @Get(':id/external-player')
+  @ApiOperation({ summary: 'Get external player URL for content (redirects to third-party provider)' })
+  @ApiResponse({ status: 200, description: 'External player URL retrieved' })
+  @ApiResponse({ status: 404, description: 'Content not found or no external URL configured' })
+  async getExternalPlayerUrl(@Param('id') id: string, @CurrentUser() user?: User) {
+    const isAdmin = user?.role === UserRole.ADMIN;
+    return this.contentService.getExternalPlayerUrl(id, isAdmin);
+  }
 }

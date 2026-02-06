@@ -31,6 +31,9 @@ export class Episode {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
+  @Column({ name: 'external_player_url', nullable: true })
+  externalPlayerUrl: string | null;
+
   @Column({ name: 'video_asset_id', nullable: true })
   videoAssetId: string | null;
 

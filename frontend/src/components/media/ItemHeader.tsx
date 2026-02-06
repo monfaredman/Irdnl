@@ -7,6 +7,7 @@ import {
 	Star,
 	ThumbDown,
 	ThumbUp,
+	OpenInNew,
 } from "@mui/icons-material";
 import { Box, Button, Chip, IconButton, Typography } from "@mui/material";
 import type { Movie, Series } from "@/types/media";
@@ -340,22 +341,36 @@ export function ItemHeader({ item, type }: ItemHeaderProps) {
 				<Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
 					<Button
 						startIcon={<PlayArrow />}
+						endIcon={item.externalPlayerUrl ? <OpenInNew sx={{ fontSize: "1rem !important" }} /> : undefined}
+						onClick={() => {
+							if (item.externalPlayerUrl) {
+								window.open(item.externalPlayerUrl, "_blank", "noopener,noreferrer");
+							}
+						}}
+						disabled={!item.externalPlayerUrl}
 						sx={{
 							...glassStyles.pillButton,
 							px: 4,
 							py: 1.5,
 							fontSize: "1rem",
 							fontWeight: 700,
-							background: `linear-gradient(135deg, ${glassColors.gold.light}, ${glassColors.gold.lighter})`,
-							border: `1px solid ${glassColors.persianGold}`,
+							background: item.externalPlayerUrl
+								? `linear-gradient(135deg, ${glassColors.gold.light}, ${glassColors.gold.lighter})`
+								: glassColors.glass.mid,
+							border: `1px solid ${item.externalPlayerUrl ? glassColors.persianGold : glassColors.glass.border}`,
 							color: glassColors.text.primary,
 							"&:hover": {
 								transform: "translateY(-4px)",
 								boxShadow: `0 12px 32px -8px ${glassColors.gold.glow}`,
 							},
+							"&:disabled": {
+								color: glassColors.text.muted,
+								background: glassColors.glass.base,
+								border: `1px solid ${glassColors.glass.border}`,
+							},
 						}}
 					>
-						Watch Now
+						{item.externalPlayerUrl ? "Watch Now" : "Not Available"}
 					</Button>
 
 					<IconButton

@@ -203,7 +203,7 @@ export default function WatchlistPage() {
 										}}
 									>
 										<Link
-											href={`/movies/${item.slug}`}
+											href={`/item/${item.id}`}
 											style={{ textDecoration: "none" }}
 										>
 											<Box

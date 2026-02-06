@@ -174,6 +174,21 @@ export default function ContentDetailPage() {
 								</p>
 							</div>
 						)}
+						<div>
+							<span className="font-medium">External Player URL:</span>
+							{content.externalPlayerUrl ? (
+								<a
+									href={content.externalPlayerUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="ml-2 text-sm text-blue-600 hover:underline"
+								>
+									{content.externalPlayerUrl}
+								</a>
+							) : (
+								<span className="ml-2 text-sm text-gray-400">Not set</span>
+							)}
+						</div>
 					</CardContent>
 				</Card>
 

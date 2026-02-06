@@ -48,6 +48,7 @@ function transformTMDBContent(data: any, mediaType: "movie" | "tv"): Movie | Ser
 			seasons: [],
 			ongoing: data.status === "Returning Series",
 			featured: false,
+			externalPlayerUrl: data.external_player_url || undefined,
 		};
 		return series;
 	} else {
@@ -58,6 +59,7 @@ function transformTMDBContent(data: any, mediaType: "movie" | "tv"): Movie | Ser
 			downloads: [],
 			subtitles: [],
 			featured: false,
+			externalPlayerUrl: data.external_player_url || undefined,
 		};
 		return movie;
 	}
@@ -88,6 +90,7 @@ function transformBackendContent(data: any): Movie | Series {
 			seasons: [],
 			ongoing: data.status === "published",
 			featured: false,
+			externalPlayerUrl: data.externalPlayerUrl || undefined,
 		};
 		return series;
 	} else {
@@ -99,6 +102,7 @@ function transformBackendContent(data: any): Movie | Series {
 			downloads: [],
 			subtitles: [],
 			featured: false,
+			externalPlayerUrl: data.externalPlayerUrl || undefined,
 		};
 		return movie;
 	}

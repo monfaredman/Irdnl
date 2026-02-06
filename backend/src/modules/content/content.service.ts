@@ -156,6 +156,18 @@ export class ContentService {
     }));
   }
 
+  async getExternalPlayerUrl(
+    contentId: string,
+    isAdmin: boolean = false,
+  ): Promise<{ externalPlayerUrl: string | null; contentId: string; title: string }> {
+    const content = await this.findOne(contentId, isAdmin);
+    return {
+      externalPlayerUrl: content.externalPlayerUrl,
+      contentId: content.id,
+      title: content.title,
+    };
+  }
+
   async getTrending(limit: number = 10): Promise<Content[]> {
     // Simple popularity metric based on watch history count
     // In production, this would use a more sophisticated algorithm

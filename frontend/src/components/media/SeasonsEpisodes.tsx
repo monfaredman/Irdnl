@@ -1,6 +1,6 @@
 "use client";
 
-import { ExpandMore, PlayArrow } from "@mui/icons-material";
+import { ExpandMore, PlayArrow, OpenInNew } from "@mui/icons-material";
 import {
 	Accordion,
 	AccordionDetails,
@@ -107,11 +107,19 @@ export function SeasonsEpisodes({ series }: SeasonsEpisodesProps) {
 								}}
 							>
 								{season.episodes.map((episode) => (
-									<Box key={episode.id}>
+									<Box
+										key={episode.id}
+										onClick={() => {
+											const url = episode.externalPlayerUrl || series.externalPlayerUrl;
+											if (url) {
+												window.open(url, "_blank", "noopener,noreferrer");
+											}
+										}}
+									>
 										<Card
 											sx={{
 												...glassStyles.card,
-												cursor: "pointer",
+												cursor: episode.externalPlayerUrl || series.externalPlayerUrl ? "pointer" : "default",
 												transition: glassAnimations.transition.spring,
 												position: "relative",
 												overflow: "hidden",
@@ -163,12 +171,16 @@ export function SeasonsEpisodes({ series }: SeasonsEpisodesProps) {
 															width: 56,
 															height: 56,
 															borderRadius: "50%",
-															background: `linear-gradient(135deg, ${glassColors.gold.light}, ${glassColors.gold.lighter})`,
-															border: `2px solid ${glassColors.persianGold}`,
+															background: (episode.externalPlayerUrl || series.externalPlayerUrl)
+																? `linear-gradient(135deg, ${glassColors.gold.light}, ${glassColors.gold.lighter})`
+																: glassColors.glass.mid,
+															border: `2px solid ${(episode.externalPlayerUrl || series.externalPlayerUrl) ? glassColors.persianGold : glassColors.glass.border}`,
 															display: "flex",
 															alignItems: "center",
 															justifyContent: "center",
-															boxShadow: `0 8px 24px -4px ${glassColors.gold.glow}`,
+															boxShadow: (episode.externalPlayerUrl || series.externalPlayerUrl)
+																? `0 8px 24px -4px ${glassColors.gold.glow}`
+																: "none",
 															transition: glassAnimations.transition.spring,
 															"&:hover": {
 																transform: "scale(1.1)",

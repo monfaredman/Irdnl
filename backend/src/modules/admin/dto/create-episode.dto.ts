@@ -24,4 +24,9 @@ export class CreateEpisodeDto {
   @IsOptional()
   @IsString()
   videoAssetId?: string;
+
+  @ApiPropertyOptional({ example: 'https://player.example.com/watch/ep1', description: 'External third-party player URL for this episode' })
+  @IsOptional()
+  @IsString()
+  externalPlayerUrl?: string;
 }

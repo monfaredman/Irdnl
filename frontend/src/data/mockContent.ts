@@ -116,6 +116,7 @@ export const movies: Movie[] = [
 		subtitles: subtitleTracks,
 		featured: true,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/midnight-silk",
 	},
 	{
 		id: "movie-2",
@@ -136,6 +137,7 @@ export const movies: Movie[] = [
 		downloads: downloadLinks,
 		subtitles: subtitleTracks,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/desert-sonata",
 	},
 	// Foreign movies
 	{
@@ -157,6 +159,7 @@ export const movies: Movie[] = [
 		downloads: downloadLinks,
 		subtitles: subtitleTracks,
 		origin: "foreign",
+		externalPlayerUrl: "https://player.example.com/watch/sherlock-holmes",
 	},
 	{
 		id: "movie-4",
@@ -177,6 +180,7 @@ export const movies: Movie[] = [
 		downloads: downloadLinks,
 		subtitles: subtitleTracks,
 		origin: "foreign",
+		externalPlayerUrl: "https://player.example.com/watch/alien",
 	},
 	{
 		id: "movie-5",
@@ -197,6 +201,7 @@ export const movies: Movie[] = [
 		downloads: downloadLinks,
 		subtitles: subtitleTracks,
 		origin: "foreign",
+		externalPlayerUrl: "https://player.example.com/watch/moonlight",
 	},
 	{
 		id: "movie-6",
@@ -218,6 +223,7 @@ export const movies: Movie[] = [
 		subtitles: subtitleTracks,
 		origin: "foreign",
 		featured: true,
+		externalPlayerUrl: "https://player.example.com/watch/dune-part-two",
 	},
 	// Iranian movies
 	{
@@ -238,6 +244,7 @@ export const movies: Movie[] = [
 		downloads: downloadLinks,
 		subtitles: subtitleTracks,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/hoolia",
 	},
 	{
 		id: "movie-8",
@@ -257,6 +264,7 @@ export const movies: Movie[] = [
 		downloads: downloadLinks,
 		subtitles: subtitleTracks,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/my-cabinets",
 	},
 	{
 		id: "movie-9",
@@ -276,6 +284,7 @@ export const movies: Movie[] = [
 		downloads: downloadLinks,
 		subtitles: subtitleTracks,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/my-special",
 	},
 	{
 		id: "movie-10",
@@ -295,6 +304,7 @@ export const movies: Movie[] = [
 		downloads: downloadLinks,
 		subtitles: subtitleTracks,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/everythingless",
 	},
 ];
 
@@ -317,6 +327,7 @@ export const series: Series[] = [
 		ongoing: true,
 		featured: true,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/shadows-of-isfahan",
 	},
 	{
 		id: "series-2",
@@ -335,6 +346,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: false,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/tehran-rhapsody",
 	},
 	// Foreign series
 	{
@@ -354,6 +366,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: true,
 		origin: "foreign",
+		externalPlayerUrl: "https://player.example.com/watch/the-last-of-us",
 	},
 	{
 		id: "series-4",
@@ -372,6 +385,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: true,
 		origin: "foreign",
+		externalPlayerUrl: "https://player.example.com/watch/fallout",
 	},
 	{
 		id: "series-5",
@@ -390,6 +404,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: true,
 		origin: "foreign",
+		externalPlayerUrl: "https://player.example.com/watch/house-of-the-dragon",
 	},
 	{
 		id: "series-6",
@@ -408,6 +423,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: true,
 		origin: "foreign",
+		externalPlayerUrl: "https://player.example.com/watch/shogun",
 	},
 	// Iranian series
 	{
@@ -426,6 +442,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: false,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/angels-sin",
 	},
 	{
 		id: "series-8",
@@ -443,6 +460,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: false,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/fossil",
 	},
 	{
 		id: "series-9",
@@ -460,6 +478,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: true,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/captain",
 	},
 	{
 		id: "series-10",
@@ -477,6 +496,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: true,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/coconut-2",
 	},
 	{
 		id: "series-11",
@@ -494,6 +514,7 @@ export const series: Series[] = [
 		seasons: sampleSeasons,
 		ongoing: false,
 		origin: "iranian",
+		externalPlayerUrl: "https://player.example.com/watch/night-guardian",
 	},
 ];
 

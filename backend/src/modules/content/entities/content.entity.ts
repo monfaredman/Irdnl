@@ -58,6 +58,9 @@ export class Content {
   })
   status: ContentStatus;
 
+  @Column({ name: 'external_player_url', nullable: true })
+  externalPlayerUrl: string | null;
+
   @Column({ name: 'license_info', type: 'jsonb', nullable: true })
   licenseInfo: Record<string, any> | null;
 
