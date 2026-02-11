@@ -115,7 +115,15 @@ export function ContentUploadWizard() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await contentApi.create(formData);
+      // Clean empty strings to null for optional URL fields
+      const cleanedData = { ...formData };
+      if (!cleanedData.externalPlayerUrl) cleanedData.externalPlayerUrl = undefined as any;
+      if (!cleanedData.posterUrl) cleanedData.posterUrl = undefined as any;
+      if (!cleanedData.bannerUrl) cleanedData.bannerUrl = undefined as any;
+      if (!cleanedData.thumbnailUrl) cleanedData.thumbnailUrl = undefined as any;
+      if (!cleanedData.backdropUrl) cleanedData.backdropUrl = undefined as any;
+      if (!cleanedData.logoUrl) cleanedData.logoUrl = undefined as any;
+      await contentApi.create(cleanedData);
       router.push("/admin/content");
     } catch (error) {
       console.error("Failed to create content:", error);

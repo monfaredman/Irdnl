@@ -647,13 +647,13 @@ export const GridOffersSection = ({ items }: GridOffersSectionProps) => {
 											textTransform: "capitalize",
 											position: "relative",
 											zIndex: 2,
-											pointerEvents: "none",
-										}}
-									>
-										{item.slug.replace(/-/g, " ")}
-									</Typography>
+										pointerEvents: "none",
+									}}
+								>
+									{item.slug ? item.slug.replace(/-/g, " ") : item.title}
+								</Typography>
 
-									{"rating" in item && item.rating && (
+								{"rating" in item && item.rating && (
 										<Box
 											sx={{
 												display: "flex",

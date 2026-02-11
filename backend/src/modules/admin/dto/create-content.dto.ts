@@ -12,6 +12,7 @@ import {
   IsBoolean,
   IsDateString,
   IsUrl,
+  ValidateIf,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
@@ -313,31 +314,32 @@ export class CreateContentDto {
   // Visual Assets
   @ApiPropertyOptional({ example: 'https://example.com/poster.jpg' })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   posterUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/banner.jpg' })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   bannerUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/thumbnail.jpg' })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   thumbnailUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/backdrop.jpg' })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   backdropUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/logo.png' })
   @IsOptional()
-  @IsUrl()
+  @IsString()
   logoUrl?: string;
 
   @ApiPropertyOptional({ example: 'https://player.example.com/watch/12345' })
   @IsOptional()
+  @ValidateIf((o) => o.externalPlayerUrl !== '' && o.externalPlayerUrl !== null)
   @IsUrl()
   externalPlayerUrl?: string;
 

@@ -40,6 +40,67 @@ export function MediaAssetsStep({ formData, updateFormData }: MediaAssetsStepPro
         </div>
       )}
 
+      {/* External Player URL Section */}
+      <div className="border-2 border-blue-200 bg-blue-50 rounded-lg p-4">
+        <h3 className="text-lg font-semibold mb-2 text-blue-900">
+          روش ۱: آدرس پخش‌کننده خارجی
+        </h3>
+        <p className="text-sm text-blue-800 mb-4">
+          اگر ویدیو شما در سرویس دیگری میزبانی می‌شود (مثل YouTube، Vimeo، یا سرور اختصاصی)، 
+          آدرس پخش‌کننده را اینجا وارد کنید. در این حالت نیازی به آپلود فایل ویدیو نیست.
+        </p>
+        <div className="space-y-2">
+          <Label htmlFor="externalPlayerUrl">
+            آدرس پخش‌کننده خارجی (External Player URL)
+          </Label>
+          <Input
+            id="externalPlayerUrl"
+            type="url"
+            placeholder="https://player.example.com/video/12345 یا https://youtube.com/embed/..."
+            value={formData.externalPlayerUrl || ""}
+            onChange={(e) => updateFormData({ externalPlayerUrl: e.target.value })}
+            className="font-mono text-sm"
+          />
+          {formData.externalPlayerUrl && (
+            <p className="text-xs text-green-600">
+              ✓ آدرس پخش‌کننده خارجی تنظیم شده است
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* Internal Video Upload Section */}
+      <div className="border-2 border-purple-200 bg-purple-50 rounded-lg p-4">
+        <h3 className="text-lg font-semibold mb-2 text-purple-900">
+          روش ۲: آپلود فایل ویدیو داخلی
+        </h3>
+        <p className="text-sm text-purple-800 mb-4">
+          اگر می‌خواهید فایل ویدیو را مستقیماً در سرور آپلود کنید، ابتدا به بخش{" "}
+          <a href="/admin/videos" className="underline font-semibold" target="_blank">
+            مدیریت ویدیوها
+          </a>{" "}
+          بروید و فایل‌های ویدیو را برای این محتوا آپلود کنید. سپس آدرس‌های ویدیو را در قسمت 
+          "کیفیت‌های ویدیو" زیر وارد کنید.
+        </p>
+        <div className="bg-white border border-purple-200 rounded p-3">
+          <p className="text-xs text-purple-700 mb-2">
+            💡 <strong>نکته:</strong> برای آپلود ویدیو، Content ID این محتوا را یادداشت کنید 
+            (پس از ذخیره محتوا دریافت می‌شود) و در بخش مدیریت ویدیوها هنگام آپلود وارد کنید.
+          </p>
+          {!formData.externalPlayerUrl && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => window.open("/admin/videos", "_blank")}
+              className="w-full mt-2"
+            >
+              🎬 رفتن به صفحه مدیریت ویدیوها
+            </Button>
+          )}
+        </div>
+      </div>
+
       <div>
         <h3 className="text-lg font-semibold mb-4">{t("admin.upload.mediaAssets.visualAssets")}</h3>
         <div className="grid gap-6 md:grid-cols-2">
@@ -170,7 +231,12 @@ export function MediaAssetsStep({ formData, updateFormData }: MediaAssetsStepPro
       </div>
 
       <div>
-        <h3 className="text-lg font-semibold mb-4">{t("admin.upload.mediaAssets.videoQualities")}</h3>
+        <h3 className="text-lg font-semibold mb-2">{t("admin.upload.mediaAssets.videoQualities")}</h3>
+        <p className="text-sm text-gray-600 mb-4">
+          {formData.externalPlayerUrl 
+            ? "⚠️ شما از پخش‌کننده خارجی استفاده می‌کنید. این بخش را خالی بگذارید."
+            : "آدرس‌های ویدیوی آپلود شده را از بخش مدیریت ویدیوها اینجا وارد کنید (روش ۲)."}
+        </p>
         <div className="space-y-4">
           {["sd", "hd", "fullHd", "uhd4k"].map((quality) => (
             <div key={quality} className="flex items-center gap-4">
@@ -185,6 +251,8 @@ export function MediaAssetsStep({ formData, updateFormData }: MediaAssetsStepPro
                     [quality]: { url: e.target.value },
                   },
                 })}
+                disabled={!!formData.externalPlayerUrl}
+                className={formData.externalPlayerUrl ? "opacity-50 cursor-not-allowed" : ""}
               />
             </div>
           ))}

@@ -23,6 +23,8 @@ interface CinematicHeroProps {
 	duration?: number | string;
 	genres: string[];
 	externalPlayerUrl?: string;
+	sources?: Array<{ quality: string; url: string; format?: string; type?: string }>;
+	contentId?: string;
 	onPlay?: () => void;
 	onAddToList?: () => void;
 	onShare?: () => void;
@@ -38,6 +40,8 @@ export function CinematicHero({
 	duration,
 	genres,
 	externalPlayerUrl,
+	sources,
+	contentId,
 	onPlay,
 	onAddToList,
 	onShare,
@@ -240,9 +244,11 @@ export function CinematicHero({
 									window.open(externalPlayerUrl, "_blank", "noopener,noreferrer");
 								} else if (onPlay) {
 									onPlay();
+								} else if (sources && sources.length > 0 && contentId) {
+									window.location.href = `/watch/${contentId}`;
 								}
 							}}
-							disabled={!externalPlayerUrl && !onPlay}
+							disabled={!externalPlayerUrl && !onPlay && (!sources || sources.length === 0)}
 							sx={{
 								background: externalPlayerUrl
 									? `linear-gradient(135deg, ${glassColors.gold.solid}, #D97706)`

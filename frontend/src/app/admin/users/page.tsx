@@ -1,6 +1,7 @@
 "use client";
 
-import { Ban, CheckCircle, Edit, Trash2 } from "lucide-react";
+import { Ban, CheckCircle, Edit, Eye, Trash2 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/admin/ui/button";
 import {
@@ -17,14 +18,41 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/admin/ui/table";
+import {
+	Snackbar,
+	Alert,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	DialogActions,
+	Button as MuiButton,
+} from "@mui/material";
 import { usersApi } from "@/lib/api/admin";
+import { useTranslation } from "@/i18n";
 
 export default function UsersManagementPage() {
+	const { t } = useTranslation();
 	const [users, setUsers] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(0);
 	const [search, setSearch] = useState("");
+	const [feedback, setFeedback] = useState<{
+		type: "success" | "error";
+		message: string;
+	} | null>(null);
+	const [confirmDialog, setConfirmDialog] = useState<{
+		open: boolean;
+		title: string;
+		message: string;
+		onConfirm: () => void;
+	}>({
+		open: false,
+		title: "",
+		message: "",
+		onConfirm: () => {},
+	});
 
 	const fetchUsers = async () => {
 		setLoading(true);
@@ -34,9 +62,39 @@ export default function UsersManagementPage() {
 			setTotal(response.total || 0);
 		} catch (error) {
 			console.error("Failed to fetch users:", error);
+			showFeedback("error", t("admin.users.fetchFailed"));
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const showFeedback = (type: "success" | "error", message: string) => {
+		setFeedback({ type, message });
+	};
+
+	const showConfirm = (
+		title: string,
+		message: string,
+		onConfirm: () => void,
+	) => {
+		setConfirmDialog({
+			open: true,
+			title,
+			message,
+			onConfirm,
+		});
+	};
+
+	const handleConfirmClose = (confirmed: boolean) => {
+		if (confirmed) {
+			confirmDialog.onConfirm();
+		}
+		setConfirmDialog({
+			open: false,
+			title: "",
+			message: "",
+			onConfirm: () => {},
+		});
 	};
 
 	useEffect(() => {
@@ -46,39 +104,47 @@ export default function UsersManagementPage() {
 	const handleToggleActive = async (id: string, isActive: boolean) => {
 		try {
 			await usersApi.update(id, { isActive: !isActive });
+			showFeedback("success", t("admin.users.updateSuccess"));
 			fetchUsers();
 		} catch (error) {
 			console.error("Failed to update user:", error);
+			showFeedback("error", t("admin.users.updateFailed"));
 		}
 	};
 
 	const handleDelete = async (id: string) => {
-		if (confirm("Are you sure you want to delete this user?")) {
-			try {
-				await usersApi.delete(id);
-				fetchUsers();
-			} catch (error) {
-				console.error("Failed to delete user:", error);
-			}
-		}
+		showConfirm(
+			t("admin.users.title"),
+			t("admin.users.confirmDelete"),
+			async () => {
+				try {
+					await usersApi.delete(id);
+					showFeedback("success", t("admin.users.deleteSuccess"));
+					fetchUsers();
+				} catch (error) {
+					console.error("Failed to delete user:", error);
+					showFeedback("error", t("admin.users.deleteFailed"));
+				}
+			},
+		);
 	};
 
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-				<p className="text-gray-600">Manage user accounts</p>
+				<h1 className="text-3xl font-bold text-gray-900">{t("admin.users.title")}</h1>
+				<p className="text-gray-600">{t("admin.users.description")}</p>
 			</div>
 
 			<Card>
 				<CardHeader>
-					<CardTitle>Users List</CardTitle>
+					<CardTitle>{t("admin.users.usersList")}</CardTitle>
 				</CardHeader>
 				<CardContent>
 					<div className="mb-4">
 						<input
 							type="text"
-							placeholder="Search users..."
+							placeholder={t("admin.users.searchPlaceholder")}
 							value={search}
 							onChange={(e) => {
 								setSearch(e.target.value);
@@ -88,17 +154,17 @@ export default function UsersManagementPage() {
 						/>
 					</div>
 					{loading ? (
-						<div className="p-6 text-center">Loading...</div>
+						<div className="p-6 text-center">{t("admin.messages.loading")}</div>
 					) : (
 						<>
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>Name</TableHead>
-										<TableHead>Email</TableHead>
-										<TableHead>Role</TableHead>
-										<TableHead>Status</TableHead>
-										<TableHead>Actions</TableHead>
+										<TableHead>{t("admin.users.name")}</TableHead>
+										<TableHead>{t("admin.users.email")}</TableHead>
+										<TableHead>{t("admin.users.role")}</TableHead>
+										<TableHead>{t("admin.users.status")}</TableHead>
+										<TableHead>{t("admin.users.actions")}</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -115,11 +181,16 @@ export default function UsersManagementPage() {
 															: "bg-red-100 text-red-800"
 													}`}
 												>
-													{user.isActive ? "Active" : "Blocked"}
+													{user.isActive ? t("admin.users.active") : t("admin.users.blocked")}
 												</span>
 											</TableCell>
 											<TableCell>
 												<div className="flex gap-2">
+													<Link href={`/admin/users/${user.id}`}>
+														<Button variant="outline" size="sm" title={t("admin.users.viewDetail")}>
+															<Eye className="h-4 w-4" />
+														</Button>
+													</Link>
 													<Button
 														variant="outline"
 														size="sm"
@@ -148,8 +219,8 @@ export default function UsersManagementPage() {
 							</Table>
 							<div className="mt-4 flex items-center justify-between">
 								<div className="text-sm text-gray-600">
-									Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, total)}{" "}
-									of {total}
+									{t("admin.users.showing")} {(page - 1) * 20 + 1} {t("admin.users.to")}{" "}
+									{Math.min(page * 20, total)} {t("admin.users.of")} {total}
 								</div>
 								<div className="flex gap-2">
 									<Button
@@ -157,14 +228,14 @@ export default function UsersManagementPage() {
 										onClick={() => setPage((p) => Math.max(1, p - 1))}
 										disabled={page === 1}
 									>
-										Previous
+										{t("admin.users.previous")}
 									</Button>
 									<Button
 										variant="outline"
 										onClick={() => setPage((p) => p + 1)}
 										disabled={page * 20 >= total}
 									>
-										Next
+										{t("admin.users.next")}
 									</Button>
 								</div>
 							</div>
@@ -172,6 +243,47 @@ export default function UsersManagementPage() {
 					)}
 				</CardContent>
 			</Card>
+
+			{/* Confirmation Dialog */}
+			<Dialog
+				open={confirmDialog.open}
+				onClose={() => handleConfirmClose(false)}
+				dir="rtl"
+			>
+				<DialogTitle>{confirmDialog.title}</DialogTitle>
+				<DialogContent>
+					<DialogContentText>{confirmDialog.message}</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<MuiButton onClick={() => handleConfirmClose(false)} color="inherit">
+						{t("admin.form.cancel")}
+					</MuiButton>
+					<MuiButton
+						onClick={() => handleConfirmClose(true)}
+						color="error"
+						variant="contained"
+					>
+						{t("admin.form.delete")}
+					</MuiButton>
+				</DialogActions>
+			</Dialog>
+
+			{/* Toast Notification */}
+			<Snackbar
+				open={!!feedback}
+				autoHideDuration={3000}
+				onClose={() => setFeedback(null)}
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+			>
+				<Alert
+					onClose={() => setFeedback(null)}
+					severity={feedback?.type === "success" ? "success" : "error"}
+					variant="filled"
+					sx={{ width: "100%" }}
+				>
+					{feedback?.message}
+				</Alert>
+			</Snackbar>
 		</div>
 	);
 }

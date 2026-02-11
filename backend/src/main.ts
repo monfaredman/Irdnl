@@ -1,22 +1,35 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   const configService = app.get(ConfigService);
   const port = configService.get<number>('PORT') || 3001;
   const apiPrefix = configService.get<string>('API_PREFIX') || 'api';
 
-  // Security
-  app.use(helmet());
+  // Security – relax cross-origin policies so the frontend on :3000
+  // can load video/image assets served from :3001/storage
+  app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: false,
+    contentSecurityPolicy: false,          // disable CSP for dev
+  }));
   app.enableCors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
+  });
+
+  // Serve uploaded files (videos, images) from ./storage at /storage
+  const storagePath = configService.get<string>('STORAGE_LOCAL_PATH') || './storage';
+  app.useStaticAssets(join(process.cwd(), storagePath), {
+    prefix: '/storage/',
   });
 
   // Global prefix

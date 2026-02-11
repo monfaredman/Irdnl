@@ -26,9 +26,34 @@ function transformBackendContent(data: any): Movie | Series {
 	};
 
 	if (data.type === "series") {
+		// Transform backend series.seasons data into the frontend Season[] format
+		const rawSeasons = data.series?.seasons || [];
+		const transformedSeasons = rawSeasons
+			.sort((a: any, b: any) => (a.number || 0) - (b.number || 0))
+			.map((season: any) => ({
+				id: season.id,
+				title: season.title || `فصل ${season.number}`,
+				seasonNumber: season.number || 1,
+				episodes: (season.episodes || [])
+					.sort((a: any, b: any) => (a.number || 0) - (b.number || 0))
+					.map((ep: any) => ({
+						id: ep.id,
+						number: ep.number || undefined,
+						title: ep.title || `قسمت ${ep.number}`,
+						synopsis: ep.description || "",
+						duration: ep.duration ? Math.floor(ep.duration / 60) : 0,
+						releaseDate: ep.createdAt || "",
+						thumbnail: ep.thumbnailUrl || "/images/movies/m_placeholder_1.jpg",
+						sources: [],
+						subtitles: [],
+						downloads: [],
+						externalPlayerUrl: ep.externalPlayerUrl || undefined,
+					})),
+			}));
+
 		const series: Series = {
 			...base,
-			seasons: [],
+			seasons: transformedSeasons,
 			ongoing: data.status === "published",
 			featured: data.featured || false,
 			externalPlayerUrl: data.externalPlayerUrl || undefined,
@@ -38,8 +63,8 @@ function transformBackendContent(data: any): Movie | Series {
 		const movie: Movie = {
 			...base,
 			duration: data.duration || 120,
-			sources: [],
-			downloads: [],
+			sources: data.sources || [],
+			downloads: data.downloads || [],
 			subtitles: (data.subtitles || []).map((s: any, i: number) => ({
 				id: `sub-${i}`,
 				language: s.language || "fa",
@@ -91,6 +116,15 @@ export async function GET(
 
 		const data = await response.json();
 		const transformed = transformBackendContent(data);
+
+		// Rewrite absolute backend URLs to same-origin proxy paths
+		// e.g. http://localhost:3001/storage/... → /storage/...
+		if ('sources' in transformed && Array.isArray((transformed as any).sources)) {
+			(transformed as any).sources = (transformed as any).sources.map((s: any) => ({
+				...s,
+				url: s.url ? s.url.replace(/^https?:\/\/[^/]+\/storage\//, '/storage/') : s.url,
+			}));
+		}
 
 		return NextResponse.json(transformed, { status: 200 });
 	} catch (error) {

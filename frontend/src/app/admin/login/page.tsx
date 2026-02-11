@@ -14,10 +14,12 @@ import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { authApi } from "@/lib/api/admin";
 import { useAdminAuth } from "@/store/admin-auth";
+import { useTranslation } from "@/i18n";
 
 export default function AdminLoginPage() {
 	const router = useRouter();
 	const { setAuth } = useAdminAuth();
+	const { t } = useTranslation();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState("");
@@ -34,7 +36,7 @@ export default function AdminLoginPage() {
 			router.push("/admin/dashboard");
 		} catch (err: any) {
 			setError(
-				err.response?.data?.message || "Login failed. Please try again.",
+				err.response?.data?.message || t("admin.login.loginFailed"),
 			);
 		} finally {
 			setLoading(false);
@@ -42,29 +44,29 @@ export default function AdminLoginPage() {
 	};
 
 	return (
-		<div className="flex min-h-screen items-center justify-center bg-gray-50">
+		<div className="flex min-h-screen items-center justify-center bg-gray-50" dir="rtl">
 			<Card className="w-full max-w-md">
 				<CardHeader>
-					<CardTitle className="text-2xl">Admin Login</CardTitle>
+					<CardTitle className="text-2xl">{t("admin.login.title")}</CardTitle>
 					<CardDescription>
-						Enter your credentials to access the admin panel
+						{t("admin.login.description")}
 					</CardDescription>
 				</CardHeader>
 				<CardContent>
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="email">Email</Label>
+							<Label htmlFor="email">{t("admin.login.email")}</Label>
 							<Input
 								id="email"
 								type="email"
-								placeholder="admin@example.com"
+								placeholder={t("admin.login.emailPlaceholder")}
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
 								required
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="password">Password</Label>
+							<Label htmlFor="password">{t("admin.login.password")}</Label>
 							<Input
 								id="password"
 								type="password"
@@ -79,7 +81,7 @@ export default function AdminLoginPage() {
 							</div>
 						)}
 						<Button type="submit" className="w-full" disabled={loading}>
-							{loading ? "Logging in..." : "Login"}
+							{loading ? t("admin.login.loggingIn") : t("admin.login.loginButton")}
 						</Button>
 					</form>
 				</CardContent>

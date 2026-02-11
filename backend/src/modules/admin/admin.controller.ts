@@ -13,8 +13,10 @@ import {
   UploadedFile,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import {
   ApiTags,
   ApiOperation,
@@ -29,11 +31,17 @@ import { TMDBService } from '../content/tmdb.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
 import { ListContentDto } from './dto/list-content.dto';
-import { CreateSeasonDto } from './dto/create-season.dto';
-import { CreateEpisodeDto } from './dto/create-episode.dto';
+import { CreateSeasonDto, UpdateSeasonDto } from './dto/create-season.dto';
+import { CreateEpisodeDto, UpdateEpisodeDto } from './dto/create-episode.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { MarkTranscodedDto } from './dto/mark-transcoded.dto';
+import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import { CreateGenreDto, UpdateGenreDto } from './dto/genre.dto';
+import { CreateSliderDto, UpdateSliderDto } from './dto/slider.dto';
+import { CreateOfferDto, UpdateOfferDto } from './dto/offer.dto';
+import { CreatePinDto, UpdatePinDto } from './dto/pin.dto';
+import { CreateCollectionDto, UpdateCollectionDto } from './dto/collection.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -78,9 +86,9 @@ export class AdminController {
   }
 
   @Post('videos/upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Upload video file (admin only)' })
+  @ApiOperation({ summary: 'Upload video file for content or episode (admin only)' })
   @ApiBody({
     schema: {
       type: 'object',
@@ -91,6 +99,11 @@ export class AdminController {
         },
         contentId: {
           type: 'string',
+          description: 'Content ID (required for movies, optional for series episodes)',
+        },
+        episodeId: {
+          type: 'string',
+          description: 'Episode ID (for series episodes)',
         },
         quality: {
           type: 'string',
@@ -100,13 +113,23 @@ export class AdminController {
     },
   })
   @ApiResponse({ status: 201, description: 'Video uploaded' })
-  @ApiResponse({ status: 404, description: 'Content not found' })
+  @ApiResponse({ status: 404, description: 'Content/Episode not found' })
   async uploadVideo(
     @UploadedFile() file: Express.Multer.File,
     @Body('contentId') contentId: string,
+    @Body('episodeId') episodeId: string,
     @Body('quality') quality: string,
   ) {
-    return this.adminService.uploadVideo(contentId, file, quality);
+    try {
+      return await this.adminService.uploadVideo(contentId, file, quality, episodeId);
+    } catch (error) {
+      // Log full error for local debugging
+      console.error('Error in admin.uploadVideo:', error);
+      // Return a clearer server error response
+      throw new InternalServerErrorException(
+        'Video upload failed: ' + (error?.message || 'unknown error'),
+      );
+    }
   }
 
   @Get('content')
@@ -149,6 +172,15 @@ export class AdminController {
     return this.adminService.getVideoAsset(id);
   }
 
+  @Delete('videos/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete video asset (admin only)' })
+  @ApiResponse({ status: 204, description: 'Video asset deleted' })
+  @ApiResponse({ status: 404, description: 'Video asset not found' })
+  async deleteVideoAsset(@Param('id') id: string) {
+    await this.adminService.deleteVideoAsset(id);
+  }
+
   @Post('seasons')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create season (admin only)' })
@@ -163,6 +195,42 @@ export class AdminController {
   @ApiResponse({ status: 201, description: 'Episode created' })
   async createEpisode(@Body() createEpisodeDto: CreateEpisodeDto) {
     return this.adminService.createEpisode(createEpisodeDto);
+  }
+
+  @Put('seasons/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update season (admin only)' })
+  @ApiResponse({ status: 200, description: 'Season updated' })
+  @ApiResponse({ status: 404, description: 'Season not found' })
+  async updateSeason(@Param('id') id: string, @Body() updateSeasonDto: UpdateSeasonDto) {
+    return this.adminService.updateSeason(id, updateSeasonDto);
+  }
+
+  @Delete('seasons/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete season and its episodes (admin only)' })
+  @ApiResponse({ status: 204, description: 'Season deleted' })
+  @ApiResponse({ status: 404, description: 'Season not found' })
+  async deleteSeason(@Param('id') id: string) {
+    await this.adminService.deleteSeason(id);
+  }
+
+  @Put('episodes/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update episode (admin only)' })
+  @ApiResponse({ status: 200, description: 'Episode updated' })
+  @ApiResponse({ status: 404, description: 'Episode not found' })
+  async updateEpisode(@Param('id') id: string, @Body() updateEpisodeDto: UpdateEpisodeDto) {
+    return this.adminService.updateEpisode(id, updateEpisodeDto);
+  }
+
+  @Delete('episodes/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete episode (admin only)' })
+  @ApiResponse({ status: 204, description: 'Episode deleted' })
+  @ApiResponse({ status: 404, description: 'Episode not found' })
+  async deleteEpisode(@Param('id') id: string) {
+    await this.adminService.deleteEpisode(id);
   }
 
   @Get('users')
@@ -196,7 +264,7 @@ export class AdminController {
   }
 
   @Post('images/upload')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload image (poster/banner) (admin only)' })
   @ApiBody({
@@ -220,6 +288,268 @@ export class AdminController {
     @Body('type') type: 'poster' | 'banner',
   ) {
     return this.adminService.uploadImage(file, type);
+  }
+
+  // ========================================================================
+  // CATEGORIES CRUD
+  // ========================================================================
+
+  @Get('categories')
+  @ApiOperation({ summary: 'List all categories (admin only)' })
+  @ApiResponse({ status: 200, description: 'Categories list' })
+  async listCategories() {
+    return this.adminService.listCategories();
+  }
+
+  @Get('categories/:id')
+  @ApiOperation({ summary: 'Get category by ID (admin only)' })
+  @ApiResponse({ status: 200, description: 'Category details' })
+  async getCategory(@Param('id') id: string) {
+    return this.adminService.getCategory(id);
+  }
+
+  @Post('categories')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create category (admin only)' })
+  @ApiResponse({ status: 201, description: 'Category created' })
+  async createCategory(@Body() dto: CreateCategoryDto) {
+    return this.adminService.createCategory(dto);
+  }
+
+  @Put('categories/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update category (admin only)' })
+  @ApiResponse({ status: 200, description: 'Category updated' })
+  async updateCategory(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {
+    return this.adminService.updateCategory(id, dto);
+  }
+
+  @Delete('categories/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete category (admin only)' })
+  @ApiResponse({ status: 204, description: 'Category deleted' })
+  async deleteCategory(@Param('id') id: string) {
+    await this.adminService.deleteCategory(id);
+  }
+
+  // ========================================================================
+  // GENRES CRUD
+  // ========================================================================
+
+  @Get('genres')
+  @ApiOperation({ summary: 'List all genres (admin only)' })
+  @ApiQuery({ name: 'categorySlug', required: false })
+  @ApiResponse({ status: 200, description: 'Genres list' })
+  async listGenres(@Query('categorySlug') categorySlug?: string) {
+    return this.adminService.listGenres(categorySlug);
+  }
+
+  @Get('genres/:id')
+  @ApiOperation({ summary: 'Get genre by ID (admin only)' })
+  @ApiResponse({ status: 200, description: 'Genre details' })
+  async getGenre(@Param('id') id: string) {
+    return this.adminService.getGenre(id);
+  }
+
+  @Post('genres')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create genre (admin only)' })
+  @ApiResponse({ status: 201, description: 'Genre created' })
+  async createGenre(@Body() dto: CreateGenreDto) {
+    return this.adminService.createGenre(dto);
+  }
+
+  @Put('genres/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update genre (admin only)' })
+  @ApiResponse({ status: 200, description: 'Genre updated' })
+  async updateGenre(@Param('id') id: string, @Body() dto: UpdateGenreDto) {
+    return this.adminService.updateGenre(id, dto);
+  }
+
+  @Delete('genres/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete genre (admin only)' })
+  @ApiResponse({ status: 204, description: 'Genre deleted' })
+  async deleteGenre(@Param('id') id: string) {
+    await this.adminService.deleteGenre(id);
+  }
+
+  // ========================================================================
+  // SLIDERS CRUD
+  // ========================================================================
+
+  @Get('sliders')
+  @ApiOperation({ summary: 'List all sliders (admin only)' })
+  @ApiQuery({ name: 'section', required: false })
+  @ApiResponse({ status: 200, description: 'Sliders list' })
+  async listSliders(@Query('section') section?: string) {
+    return this.adminService.listSliders(section);
+  }
+
+  @Get('sliders/:id')
+  @ApiOperation({ summary: 'Get slider by ID (admin only)' })
+  @ApiResponse({ status: 200, description: 'Slider details' })
+  async getSlider(@Param('id') id: string) {
+    return this.adminService.getSlider(id);
+  }
+
+  @Post('sliders')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create slider (admin only)' })
+  @ApiResponse({ status: 201, description: 'Slider created' })
+  async createSlider(@Body() dto: CreateSliderDto) {
+    return this.adminService.createSlider(dto);
+  }
+
+  @Put('sliders/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update slider (admin only)' })
+  @ApiResponse({ status: 200, description: 'Slider updated' })
+  async updateSlider(@Param('id') id: string, @Body() dto: UpdateSliderDto) {
+    return this.adminService.updateSlider(id, dto);
+  }
+
+  @Delete('sliders/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete slider (admin only)' })
+  @ApiResponse({ status: 204, description: 'Slider deleted' })
+  async deleteSlider(@Param('id') id: string) {
+    await this.adminService.deleteSlider(id);
+  }
+
+  // ========================================================================
+  // OFFERS CRUD
+  // ========================================================================
+
+  @Get('offers')
+  @ApiOperation({ summary: 'List all offers (admin only)' })
+  @ApiResponse({ status: 200, description: 'Offers list' })
+  async listOffers() {
+    return this.adminService.listOffers();
+  }
+
+  @Get('offers/:id')
+  @ApiOperation({ summary: 'Get offer by ID (admin only)' })
+  @ApiResponse({ status: 200, description: 'Offer details' })
+  async getOffer(@Param('id') id: string) {
+    return this.adminService.getOffer(id);
+  }
+
+  @Post('offers')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create offer (admin only)' })
+  @ApiResponse({ status: 201, description: 'Offer created' })
+  async createOffer(@Body() dto: CreateOfferDto) {
+    return this.adminService.createOffer(dto);
+  }
+
+  @Put('offers/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update offer (admin only)' })
+  @ApiResponse({ status: 200, description: 'Offer updated' })
+  async updateOffer(@Param('id') id: string, @Body() dto: UpdateOfferDto) {
+    return this.adminService.updateOffer(id, dto);
+  }
+
+  @Delete('offers/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete offer (admin only)' })
+  @ApiResponse({ status: 204, description: 'Offer deleted' })
+  async deleteOffer(@Param('id') id: string) {
+    await this.adminService.deleteOffer(id);
+  }
+
+  // ========================================================================
+  // PINS CRUD
+  // ========================================================================
+
+  @Get('pins')
+  @ApiOperation({ summary: 'List all pins (admin only)' })
+  @ApiQuery({ name: 'section', required: false })
+  @ApiResponse({ status: 200, description: 'Pins list' })
+  async listPins(@Query('section') section?: string) {
+    return this.adminService.listPins(section);
+  }
+
+  @Get('pins/:id')
+  @ApiOperation({ summary: 'Get pin by ID (admin only)' })
+  @ApiResponse({ status: 200, description: 'Pin details' })
+  async getPin(@Param('id') id: string) {
+    return this.adminService.getPin(id);
+  }
+
+  @Post('pins')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create pin (admin only)' })
+  @ApiResponse({ status: 201, description: 'Pin created' })
+  async createPin(@Body() dto: CreatePinDto) {
+    return this.adminService.createPin(dto);
+  }
+
+  @Put('pins/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update pin (admin only)' })
+  @ApiResponse({ status: 200, description: 'Pin updated' })
+  async updatePin(@Param('id') id: string, @Body() dto: UpdatePinDto) {
+    return this.adminService.updatePin(id, dto);
+  }
+
+  @Delete('pins/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete pin (admin only)' })
+  @ApiResponse({ status: 204, description: 'Pin deleted' })
+  async deletePin(@Param('id') id: string) {
+    await this.adminService.deletePin(id);
+  }
+
+  // ========================================================================
+  // Collections (Admin Only)
+  // ========================================================================
+
+  @Get('collections')
+  @ApiOperation({ summary: 'List collections (admin only)' })
+  @ApiQuery({ name: 'page', type: Number, required: false })
+  @ApiQuery({ name: 'limit', type: Number, required: false })
+  @ApiResponse({ status: 200, description: 'Collections list' })
+  async listCollections(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 20,
+  ) {
+    return await this.adminService.listCollections(page, limit);
+  }
+
+  @Get('collections/:id')
+  @ApiOperation({ summary: 'Get collection by ID (admin only)' })
+  @ApiResponse({ status: 200, description: 'Collection details' })
+  async getCollection(@Param('id') id: string) {
+    return await this.adminService.getCollection(id);
+  }
+
+  @Post('collections')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create collection (admin only)' })
+  @ApiResponse({ status: 201, description: 'Collection created' })
+  async createCollection(@Body() dto: CreateCollectionDto) {
+    return await this.adminService.createCollection(dto);
+  }
+
+  @Put('collections/:id')
+  @ApiOperation({ summary: 'Update collection (admin only)' })
+  @ApiResponse({ status: 200, description: 'Collection updated' })
+  async updateCollection(
+    @Param('id') id: string,
+    @Body() dto: UpdateCollectionDto,
+  ) {
+    return await this.adminService.updateCollection(id, dto);
+  }
+
+  @Delete('collections/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete collection (admin only)' })
+  @ApiResponse({ status: 204, description: 'Collection deleted' })
+  async deleteCollection(@Param('id') id: string) {
+    await this.adminService.deleteCollection(id);
   }
 
   // ========================================================================
@@ -368,6 +698,57 @@ export class AdminController {
       // TV-specific
       ...(mediaType === 'tv' && data.number_of_seasons ? { numberOfSeasons: data.number_of_seasons } : {}),
       ...(mediaType === 'tv' && data.number_of_episodes ? { numberOfEpisodes: data.number_of_episodes } : {}),
+      // Include raw seasons list for TV shows
+      ...(mediaType === 'tv' && data.seasons ? {
+        seasons: (data.seasons || []).map((s: any) => ({
+          id: s.id,
+          name: s.name || '',
+          seasonNumber: s.season_number,
+          episodeCount: s.episode_count || 0,
+          overview: s.overview || '',
+          posterUrl: s.poster_path ? `https://image.tmdb.org/t/p/w300${s.poster_path}` : '',
+          airDate: s.air_date || '',
+        })),
+      } : {}),
+    };
+  }
+
+  // ========================================================================
+  // TMDB Season & Episode Endpoints (Admin Only) - Used for auto-fill
+  // ========================================================================
+
+  @Get('tmdb/tv/:id/season/:seasonNumber')
+  @ApiOperation({ summary: 'Get episodes for a TV season from TMDB (admin auto-fill)' })
+  @ApiQuery({ name: 'language', enum: ['en', 'fa'], required: false })
+  @ApiResponse({ status: 200, description: 'TMDB season episodes for auto-fill' })
+  async tmdbTVSeasonEpisodes(
+    @Param('id') id: string,
+    @Param('seasonNumber') seasonNumber: string,
+    @Query('language') language: 'en' | 'fa' = 'fa',
+  ) {
+    const data = await this.tmdbService.getTVSeasonDetails(
+      id,
+      parseInt(seasonNumber),
+      language,
+    );
+
+    const episodes = (data.episodes || []).map((ep: any) => ({
+      episodeNumber: ep.episode_number,
+      name: ep.name || '',
+      overview: ep.overview || '',
+      runtime: ep.runtime || null, // minutes
+      stillUrl: ep.still_path ? `https://image.tmdb.org/t/p/w500${ep.still_path}` : '',
+      airDate: ep.air_date || '',
+      voteAverage: ep.vote_average || 0,
+    }));
+
+    return {
+      seasonNumber: data.season_number,
+      name: data.name || '',
+      overview: data.overview || '',
+      posterUrl: data.poster_path ? `https://image.tmdb.org/t/p/w300${data.poster_path}` : '',
+      airDate: data.air_date || '',
+      episodes,
     };
   }
 }

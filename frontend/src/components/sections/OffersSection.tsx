@@ -197,14 +197,14 @@ export const OffersSection = ({ items }: OffersSectionProps) => {
 										sx={{
 											color: glassColors.text.secondary,
 											fontSize: "0.875rem",
-											mb: 1,
-										}}
-									>
-										{item.slug.replace(/-/g, " ")}
-									</Typography>
+										mb: 1,
+									}}
+								>
+									{item.slug ? item.slug.replace(/-/g, " ") : item.title}
+								</Typography>
 
-									{/* IMDb Score */}
-									{"rating" in item && item.rating && (
+								{/* IMDb Score */}
+								{"rating" in item && item.rating && (
 										<Box
 											sx={{
 												display: "flex",

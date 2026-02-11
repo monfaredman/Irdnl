@@ -1,21 +1,27 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAdminAuth } from "@/store/admin-auth";
 import { AdminSidebar } from "./AdminSidebar";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
 	const { isAuthenticated } = useAdminAuth();
 	const router = useRouter();
+	const [mounted, setMounted] = useState(false);
 
 	useEffect(() => {
-		if (!isAuthenticated) {
+		setMounted(true);
+	}, []);
+
+	useEffect(() => {
+		if (mounted && !isAuthenticated) {
 			router.push("/admin/login");
 		}
-	}, [isAuthenticated, router]);
+	}, [mounted, isAuthenticated, router]);
 
-	if (!isAuthenticated) {
+	// During SSR and initial client render, show nothing to avoid hydration mismatch
+	if (!mounted || !isAuthenticated) {
 		return null;
 	}
 

@@ -5,6 +5,16 @@ import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { TMDBFieldButton } from "../TMDBFieldButton";
 import type { ContentFormData } from "../types";
+import { useState, useEffect } from "react";
+import { collectionsApi } from "@/lib/api/admin";
+import {
+  FormControlLabel,
+  Switch,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 
 interface BasicInfoStepProps {
   formData: ContentFormData;
@@ -15,6 +25,13 @@ export function BasicInfoStep({ formData, updateFormData }: BasicInfoStepProps) 
   const { t } = useTranslation();
   const tmdbId = formData.tmdbId || "";
   const mediaType = formData.type === "series" ? "series" : "movie";
+  const [collections, setCollections] = useState<any[]>([]);
+
+  useEffect(() => {
+    collectionsApi.list({ page: 1, limit: 100 }).then((res) => {
+      setCollections(res.collections || []);
+    }).catch(console.error);
+  }, []);
 
   return (
     <div className="space-y-6">
@@ -211,6 +228,57 @@ export function BasicInfoStep({ formData, updateFormData }: BasicInfoStepProps) 
             <option value="draft">{t("admin.content.status.draft")}</option>
             <option value="published">{t("admin.content.status.published")}</option>
           </select>
+        </div>
+      </div>
+
+      {/* Content Flags & Collection */}
+      <div className="space-y-4 border-t pt-4">
+        <h3 className="font-medium text-sm text-gray-700">دسته‌بندی و ویژگی‌ها</h3>
+        
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="flex items-center">
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isKids || false}
+                  onChange={(e) => updateFormData({ isKids: e.target.checked })}
+                />
+              }
+              label="محتوای کودکان"
+            />
+          </div>
+
+          <div className="flex items-center">
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={formData.isComingSoon || false}
+                  onChange={(e) => updateFormData({ isComingSoon: e.target.checked })}
+                />
+              }
+              label="به زودی"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <FormControl fullWidth size="small">
+              <InputLabel>کالکشن</InputLabel>
+              <Select
+                value={formData.collectionId || ""}
+                onChange={(e) => updateFormData({ collectionId: e.target.value || undefined })}
+                label="کالکشن"
+              >
+                <MenuItem value="">
+                  <em>بدون کالکشن</em>
+                </MenuItem>
+                {collections.map((collection) => (
+                  <MenuItem key={collection.id} value={collection.id}>
+                    {collection.titleFa || collection.title}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
         </div>
       </div>
     </div>

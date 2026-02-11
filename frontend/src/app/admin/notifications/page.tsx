@@ -19,9 +19,12 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/admin/ui/table";
+import { Snackbar, Alert } from "@mui/material";
 import { notificationsApi } from "@/lib/api/admin";
+import { useTranslation } from "@/i18n";
 
 export default function NotificationsPage() {
+	const { t } = useTranslation();
 	const [notifications, setNotifications] = useState<any[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [sending, setSending] = useState(false);
@@ -31,6 +34,10 @@ export default function NotificationsPage() {
 		type: "push" as "push" | "email",
 		userId: "",
 	});
+	const [feedback, setFeedback] = useState<{
+		type: "success" | "error";
+		message: string;
+	} | null>(null);
 
 	const fetchNotifications = async () => {
 		setLoading(true);
@@ -39,9 +46,14 @@ export default function NotificationsPage() {
 			setNotifications(response.data || []);
 		} catch (error) {
 			console.error("Failed to fetch notifications:", error);
+			showFeedback("error", t("admin.notifications.fetchFailed"));
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const showFeedback = (type: "success" | "error", message: string) => {
+		setFeedback({ type, message });
 	};
 
 	useEffect(() => {
@@ -55,10 +67,10 @@ export default function NotificationsPage() {
 			await notificationsApi.create(formData);
 			setFormData({ title: "", message: "", type: "push", userId: "" });
 			fetchNotifications();
-			alert("Notification sent successfully!");
+			showFeedback("success", t("admin.notifications.sendSuccess"));
 		} catch (error) {
 			console.error("Failed to send notification:", error);
-			alert("Failed to send notification");
+			showFeedback("error", t("admin.notifications.sendFailed"));
 		} finally {
 			setSending(false);
 		}
@@ -67,19 +79,19 @@ export default function NotificationsPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900">Notifications</h1>
-				<p className="text-gray-600">Send and manage notifications</p>
+				<h1 className="text-3xl font-bold text-gray-900">{t("admin.notifications.title")}</h1>
+				<p className="text-gray-600">{t("admin.notifications.description")}</p>
 			</div>
 
 			<div className="grid gap-6 md:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle>Send Notification</CardTitle>
+						<CardTitle>{t("admin.notifications.sendNotification")}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<form onSubmit={handleSend} className="space-y-4">
 							<div className="space-y-2">
-								<Label htmlFor="title">Title</Label>
+								<Label htmlFor="title">{t("admin.notifications.notificationTitle")}</Label>
 								<Input
 									id="title"
 									value={formData.title}
@@ -90,7 +102,7 @@ export default function NotificationsPage() {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="message">Message</Label>
+								<Label htmlFor="message">{t("admin.notifications.message")}</Label>
 								<textarea
 									id="message"
 									value={formData.message}
@@ -103,7 +115,7 @@ export default function NotificationsPage() {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="type">Type</Label>
+								<Label htmlFor="type">{t("admin.notifications.type")}</Label>
 								<select
 									id="type"
 									value={formData.type}
@@ -115,24 +127,24 @@ export default function NotificationsPage() {
 									}
 									className="w-full rounded-md border border-gray-300 px-3 py-2"
 								>
-									<option value="push">Push Notification</option>
-									<option value="email">Email</option>
+									<option value="push">{t("admin.notifications.pushNotification")}</option>
+									<option value="email">{t("admin.notifications.email")}</option>
 								</select>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="userId">User ID (optional)</Label>
+								<Label htmlFor="userId">{t("admin.notifications.userId")}</Label>
 								<Input
 									id="userId"
 									value={formData.userId}
 									onChange={(e) =>
 										setFormData({ ...formData, userId: e.target.value })
 									}
-									placeholder="Leave empty for all users"
+									placeholder={t("admin.notifications.userIdPlaceholder")}
 								/>
 							</div>
 							<Button type="submit" className="w-full" disabled={sending}>
 								<Send className="mr-2 h-4 w-4" />
-								{sending ? "Sending..." : "Send Notification"}
+								{sending ? t("admin.notifications.sending") : t("admin.notifications.sendNotificationBtn")}
 							</Button>
 						</form>
 					</CardContent>
@@ -140,16 +152,16 @@ export default function NotificationsPage() {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Notification History</CardTitle>
+						<CardTitle>{t("admin.notifications.notificationHistory")}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						{loading ? (
-							<div className="p-6 text-center">Loading...</div>
+							<div className="p-6 text-center">{t("admin.messages.loading")}</div>
 						) : (
 							<div className="space-y-2">
 								{notifications.length === 0 ? (
 									<p className="text-center text-gray-500">
-										No notifications sent yet
+										{t("admin.notifications.noNotifications")}
 									</p>
 								) : (
 									notifications.slice(0, 10).map((notification) => (
@@ -168,7 +180,10 @@ export default function NotificationsPage() {
 													{notification.message}
 												</p>
 												<p className="mt-1 text-xs text-gray-500">
-													{new Date(notification.createdAt).toLocaleString()}
+													{t("admin.notifications.sentAt")}: {new Date(notification.createdAt).toLocaleString()}
+												</p>
+												<p className="text-xs text-gray-500">
+													{t("admin.notifications.sentTo")}: {notification.userId || t("admin.notifications.allUsers")}
 												</p>
 											</div>
 										</div>
@@ -179,6 +194,23 @@ export default function NotificationsPage() {
 					</CardContent>
 				</Card>
 			</div>
+
+			{/* Toast Notification */}
+			<Snackbar
+				open={!!feedback}
+				autoHideDuration={3000}
+				onClose={() => setFeedback(null)}
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+			>
+				<Alert
+					onClose={() => setFeedback(null)}
+					severity={feedback?.type === "success" ? "success" : "error"}
+					variant="filled"
+					sx={{ width: "100%" }}
+				>
+					{feedback?.message}
+				</Alert>
+			</Snackbar>
 		</div>
 	);
 }

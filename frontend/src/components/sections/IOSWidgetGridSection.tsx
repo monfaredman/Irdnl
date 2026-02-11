@@ -327,7 +327,7 @@ const WidgetContent = memo(function WidgetContent({
 						pointerEvents: "none",
 					}}
 				>
-					{item.slug.replace(/-/g, " ")}
+					{item.slug ? item.slug.replace(/-/g, " ") : item.title}
 				</Typography>
 
 				{"rating" in item && item.rating && (

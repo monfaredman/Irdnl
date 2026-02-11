@@ -3,6 +3,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  UpdateDateColumn,
   ManyToOne,
   JoinColumn,
   OneToOne,
@@ -31,6 +32,12 @@ export class Episode {
   @Column({ type: 'text', nullable: true })
   description: string | null;
 
+  @Column({ type: 'int', nullable: true })
+  duration: number | null; // in seconds
+
+  @Column({ name: 'thumbnail_url', nullable: true })
+  thumbnailUrl: string | null;
+
   @Column({ name: 'external_player_url', nullable: true })
   externalPlayerUrl: string | null;
 
@@ -43,4 +50,7 @@ export class Episode {
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

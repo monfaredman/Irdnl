@@ -273,16 +273,25 @@ export default function ItemDetailPage() {
 						}
 						genres={data.genres || []}
 						externalPlayerUrl={data.externalPlayerUrl}
+						sources={type === "movie" ? (data as Movie).sources : undefined}
+						contentId={id}
 						onPlay={() => {
+							// Handle external player URL
 							if (data.externalPlayerUrl) {
 								window.open(data.externalPlayerUrl, "_blank", "noopener,noreferrer");
+								return;
+							}
+							
+							// Handle internal video sources
+							const movie = data as Movie;
+							if (movie.sources && movie.sources.length > 0) {
+								// Redirect to watch page with the content ID
+								window.location.href = `/watch/${id}`;
 							}
 						}}
 						onAddToList={() => console.log("Add to list clicked")}
 						onShare={() => setShareDialogOpen(true)}
-					/>
-
-					<Container maxWidth="lg" sx={{ pb: 8 }}>
+					/>					<Container maxWidth="lg" sx={{ pb: 8 }}>
 						{/* B. Visual Details Strip */}
 						{visualImages.length > 0 && (
 							<VisualDetailsStrip images={visualImages} />

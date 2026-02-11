@@ -28,7 +28,8 @@ export interface SubtitleTrack {
 export interface StreamSource {
 	quality: string;
 	url: string;
-	format: "HLS" | "DASH";
+	format?: "HLS" | "DASH" | "MP4";
+	type?: "hls" | "dash" | "mp4";
 	drm?: "widevine" | "fairplay" | "playready";
 }
 
@@ -47,6 +48,7 @@ export interface MediaPerson {
 
 export interface Episode {
 	id: string;
+	number?: number;
 	title: string;
 	synopsis: string;
 	duration: number;

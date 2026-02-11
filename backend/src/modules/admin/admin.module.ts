@@ -9,12 +9,21 @@ import { Episode } from '../content/entities/episode.entity';
 import { VideoAsset } from '../video-assets/entities/video-asset.entity';
 import { Job } from '../jobs/entities/job.entity';
 import { User } from '../users/entities/user.entity';
+import { Category } from '../content/entities/category.entity';
+import { Genre } from '../content/entities/genre.entity';
+import { Slider } from '../content/entities/slider.entity';
+import { Offer } from '../content/entities/offer.entity';
+import { Pin } from '../content/entities/pin.entity';
+import { Collection } from '../content/entities/collection.entity';
 import { ContentModule } from '../content/content.module';
 import { VideoAssetsModule } from '../video-assets/video-assets.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Content, Series, Season, Episode, VideoAsset, Job, User]),
+    TypeOrmModule.forFeature([
+      Content, Series, Season, Episode, VideoAsset, Job, User,
+      Category, Genre, Slider, Offer, Pin, Collection,
+    ]),
     ContentModule,
     VideoAssetsModule,
   ],

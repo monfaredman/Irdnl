@@ -21,8 +21,10 @@ import {
 	CardTitle,
 } from "@/components/admin/ui/card";
 import { analyticsApi } from "@/lib/api/admin";
+import { useTranslation } from "@/i18n";
 
 export default function FinancePage() {
+	const { t } = useTranslation();
 	const [data, setData] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
 
@@ -41,11 +43,11 @@ export default function FinancePage() {
 	}, []);
 
 	if (loading) {
-		return <div className="p-6">Loading...</div>;
+		return <div className="p-6">{t("admin.messages.loading")}</div>;
 	}
 
 	if (!data) {
-		return <div className="p-6">Failed to load finance data</div>;
+		return <div className="p-6">{t("admin.messages.error")}</div>;
 	}
 
 	const revenue = data.subscriptions?.revenue || 0;
@@ -56,53 +58,53 @@ export default function FinancePage() {
 		<div className="space-y-6">
 			<div>
 				<h1 className="text-3xl font-bold text-gray-900">
-					Finance & Analytics
+					{t("admin.finance.title")}
 				</h1>
-				<p className="text-gray-600">Financial overview and analytics</p>
+				<p className="text-gray-600">{t("admin.finance.description")}</p>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+						<CardTitle className="text-sm font-medium">{t("admin.finance.totalRevenue")}</CardTitle>
 						<DollarSign className="h-4 w-4 text-gray-500" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">${revenue.toFixed(2)}</div>
-						<p className="text-xs text-green-600">+12% from last month</p>
+						<p className="text-xs text-green-600">{t("admin.finance.revenueGrowth")}</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Active Subscriptions
+							{t("admin.finance.activeSubscribers")}
 						</CardTitle>
 						<TrendingUp className="h-4 w-4 text-gray-500" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{activeSubs}</div>
-						<p className="text-xs text-green-600">+5% from last month</p>
+						<p className="text-xs text-green-600">+5% {t("admin.dashboard.fromLastMonth")}</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Total Subscriptions
+							{t("admin.finance.totalSubscribers")}
 						</CardTitle>
 						<Users className="h-4 w-4 text-gray-500" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{totalSubs}</div>
-						<p className="text-xs text-gray-600">All time</p>
+						<p className="text-xs text-gray-600">{t("admin.finance.allTime")}</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">
-							Bandwidth Usage
+							{t("admin.finance.bandwidthUsage")}
 						</CardTitle>
 						<Film className="h-4 w-4 text-gray-500" />
 					</CardHeader>
@@ -110,7 +112,7 @@ export default function FinancePage() {
 						<div className="text-2xl font-bold">
 							{data.bandwidth?.total || 0} GB
 						</div>
-						<p className="text-xs text-gray-600">Total storage</p>
+						<p className="text-xs text-gray-600">{t("admin.finance.totalStorage")}</p>
 					</CardContent>
 				</Card>
 			</div>
@@ -118,7 +120,7 @@ export default function FinancePage() {
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle>Monthly Growth</CardTitle>
+						<CardTitle>{t("admin.finance.monthlyGrowth")}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<ResponsiveContainer width="100%" height={300}>
@@ -132,7 +134,7 @@ export default function FinancePage() {
 									type="monotone"
 									dataKey="count"
 									stroke="#3b82f6"
-									name="Users"
+									name={t("admin.finance.users")}
 								/>
 							</LineChart>
 						</ResponsiveContainer>
@@ -141,7 +143,7 @@ export default function FinancePage() {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Content Growth</CardTitle>
+						<CardTitle>{t("admin.finance.contentGrowth")}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<ResponsiveContainer width="100%" height={300}>
@@ -151,7 +153,7 @@ export default function FinancePage() {
 								<YAxis />
 								<Tooltip />
 								<Legend />
-								<Bar dataKey="count" fill="#3b82f6" name="Content" />
+								<Bar dataKey="count" fill="#3b82f6" name={t("admin.finance.content")} />
 							</BarChart>
 						</ResponsiveContainer>
 					</CardContent>

@@ -13,20 +13,65 @@ export class ContentController {
   constructor(
     private readonly contentService: ContentService,
   ) {}
+  
+  /**
+   * Transform videoAssets to sources format for frontend.
+   * Supports both HLS streams (.m3u8) and direct video files (.mp4, .webm, etc.)
+   */
+  private transformContentWithSources(content: any) {
+    const sources = (content.videoAssets || [])
+      .filter(asset => asset.status === 'ready')
+      .map(asset => {
+        // Determine URL: prefer hlsUrl, then construct from stored file path
+        let url = asset.hlsUrl;
+        let type = 'hls';
+
+        if (url && !url.startsWith('http')) {
+          // Relative path – make it absolute
+          url = `${process.env.BACKEND_URL || 'http://localhost:3001'}${url.startsWith('/') ? '' : '/'}${url}`;
+        }
+
+        // Detect format from URL
+        if (url) {
+          if (url.endsWith('.m3u8')) {
+            type = 'hls';
+          } else if (url.endsWith('.mpd')) {
+            type = 'dash';
+          } else {
+            type = 'mp4';
+          }
+        }
+
+        return url ? { quality: asset.quality, url, type } : null;
+      })
+      .filter(Boolean);
+    
+    return {
+      ...content,
+      sources,
+      videoAssets: undefined,
+    };
+  }
 
   @Get()
   @ApiOperation({ summary: 'List content with pagination and filters (from database)' })
   @ApiResponse({ status: 200, description: 'Content list retrieved' })
   async findAll(@Query() query: ContentQueryDto, @CurrentUser() user?: User) {
     const isAdmin = user?.role === UserRole.ADMIN;
-    return this.contentService.findAll(query, isAdmin);
+    const result = await this.contentService.findAll(query, isAdmin);
+    
+    return {
+      ...result,
+      items: result.items.map(item => this.transformContentWithSources(item)),
+    };
   }
 
   @Get('trending')
   @ApiOperation({ summary: 'Get trending content (from database)' })
   @ApiResponse({ status: 200, description: 'Trending content retrieved' })
   async getTrending(@Query('limit') limit?: number) {
-    return this.contentService.getTrending(limit ? parseInt(limit.toString()) : 10);
+    const items = await this.contentService.getTrending(limit ? parseInt(limit.toString()) : 10);
+    return items.map(item => this.transformContentWithSources(item));
   }
 
   @Get('popular')
@@ -38,10 +83,11 @@ export class ContentController {
     @Query('type') type?: ContentType,
     @Query('limit') limit?: number,
   ) {
-    return this.contentService.getPopular(
+    const items = await this.contentService.getPopular(
       type,
       limit ? parseInt(limit.toString()) : 20,
     );
+    return items.map(item => this.transformContentWithSources(item));
   }
 
   @Get('featured')
@@ -49,7 +95,8 @@ export class ContentController {
   @ApiQuery({ name: 'limit', type: Number, required: false })
   @ApiResponse({ status: 200, description: 'Featured content retrieved' })
   async getFeatured(@Query('limit') limit?: number) {
-    return this.contentService.getFeatured(limit ? parseInt(limit.toString()) : 10);
+    const items = await this.contentService.getFeatured(limit ? parseInt(limit.toString()) : 10);
+    return items.map(item => this.transformContentWithSources(item));
   }
 
   @Get('search')
@@ -83,7 +130,8 @@ export class ContentController {
   @ApiResponse({ status: 404, description: 'Content not found' })
   async findOne(@Param('id') id: string, @CurrentUser() user?: User) {
     const isAdmin = user?.role === UserRole.ADMIN;
-    return this.contentService.findOne(id, isAdmin);
+    const content = await this.contentService.findOne(id, isAdmin);
+    return this.transformContentWithSources(content);
   }
 
   @Get(':id/episodes')

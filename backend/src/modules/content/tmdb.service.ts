@@ -369,6 +369,17 @@ export class TMDBService {
     const cacheKey = `tmdb:tv:details:${tmdbId}:${language}`;
     return this.fetchFromTMDB<any>(
       `/tv/${encodeURIComponent(tmdbId)}`,
+      { language: language === 'fa' ? 'fa-IR' : 'en-US', append_to_response: 'credits' },
+      cacheKey,
+      3600,
+    );
+  }
+
+  async getTVSeasonDetails(tvId: string | number, seasonNumber: number, language: 'en' | 'fa' = 'fa') {
+    const tmdbTvId = String(tvId);
+    const cacheKey = `tmdb:tv:${tmdbTvId}:season:${seasonNumber}:${language}`;
+    return this.fetchFromTMDB<any>(
+      `/tv/${encodeURIComponent(tmdbTvId)}/season/${seasonNumber}`,
       { language: language === 'fa' ? 'fa-IR' : 'en-US' },
       cacheKey,
       3600,

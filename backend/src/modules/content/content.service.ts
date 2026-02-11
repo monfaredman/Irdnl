@@ -88,6 +88,9 @@ export class ContentService {
     };
     const sortColumn = allowedSorts[sortField] || 'content.created_at';
     queryBuilder.orderBy(sortColumn, sortOrder as 'ASC' | 'DESC');
+    
+    // Load video assets relation
+    queryBuilder.leftJoinAndSelect('content.videoAssets', 'videoAssets');
 
     const [items, total] = await queryBuilder
       .skip(skip)
@@ -127,8 +130,27 @@ export class ContentService {
     if (content.type === ContentType.SERIES) {
       const series = await this.seriesRepository.findOne({
         where: { contentId: content.id },
-        relations: ['seasons', 'seasons.episodes', 'seasons.episodes.videoAsset'],
+        relations: ['seasons', 'seasons.episodes'],
       });
+      // Safely load videoAsset per episode to avoid FK crashes on dangling references
+      if (series?.seasons) {
+        for (const season of series.seasons) {
+          if (season.episodes) {
+            for (const episode of season.episodes) {
+              try {
+                if ((episode as any).video_asset_id || (episode as any).videoAssetId) {
+                  const va = await this.videoAssetRepository.findOne({
+                    where: { id: (episode as any).video_asset_id || (episode as any).videoAssetId },
+                  });
+                  episode.videoAsset = va || null;
+                }
+              } catch {
+                episode.videoAsset = null;
+              }
+            }
+          }
+        }
+      }
       (content as any).series = series;
     }
 
@@ -149,11 +171,29 @@ export class ContentService {
 
     const series = await this.seriesRepository.findOne({
       where: { contentId },
-      relations: ['seasons', 'seasons.episodes', 'seasons.episodes.videoAsset'],
+      relations: ['seasons', 'seasons.episodes'],
     });
 
     if (!series) {
       return [];
+    }
+
+    // Safely load videoAsset per episode
+    for (const season of series.seasons) {
+      if (season.episodes) {
+        for (const episode of season.episodes) {
+          try {
+            if ((episode as any).video_asset_id || (episode as any).videoAssetId) {
+              const va = await this.videoAssetRepository.findOne({
+                where: { id: (episode as any).video_asset_id || (episode as any).videoAssetId },
+              });
+              episode.videoAsset = va || null;
+            }
+          } catch {
+            episode.videoAsset = null;
+          }
+        }
+      }
     }
 
     const episodes: Episode[] = [];
@@ -215,9 +255,11 @@ export class ContentService {
 
     const content = await this.contentRepository
       .createQueryBuilder('content')
+      .leftJoinAndSelect('content.videoAssets', 'videoAssets')
       .leftJoin('content.watchHistory', 'watchHistory')
       .where('content.status = :status', { status: ContentStatus.PUBLISHED })
       .groupBy('content.id')
+      .addGroupBy('videoAssets.id')
       .orderBy('COUNT(watchHistory.id)', 'DESC')
       .addOrderBy('content.rating', 'DESC')
       .limit(limit)
@@ -237,6 +279,7 @@ export class ContentService {
 
     const queryBuilder = this.contentRepository
       .createQueryBuilder('content')
+      .leftJoinAndSelect('content.videoAssets', 'videoAssets')
       .where('content.status = :status', { status: ContentStatus.PUBLISHED });
 
     if (type) {
@@ -263,6 +306,7 @@ export class ContentService {
 
     const content = await this.contentRepository
       .createQueryBuilder('content')
+      .leftJoinAndSelect('content.videoAssets', 'videoAssets')
       .where('content.status = :status', { status: ContentStatus.PUBLISHED })
       .andWhere('content.featured = :featured', { featured: true })
       .orderBy('content.priority', 'DESC')

@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
 		// Bypass Next.js image optimization to avoid private IP blocking
 		unoptimized: true,
 	},
+	// Proxy /storage/* to the backend so video/image assets are same-origin
+	async rewrites() {
+		return [
+			{
+				source: "/storage/:path*",
+				destination: "http://localhost:3001/storage/:path*",
+			},
+		];
+	},
 	async redirects() {
 		return [
 			// Old genre-based routes to new structure

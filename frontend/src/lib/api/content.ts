@@ -31,29 +31,63 @@ export interface ContentQueryParams {
 	limit?: number;
 }
 
+/**
+ * Transform backend response to frontend format
+ * Maps posterUrl -> poster, backdropUrl -> backdrop, etc.
+ */
+function transformContent(content: any): Movie | Series {
+	// Generate slug from title if not present
+	const slug = content.slug || content.title
+		?.toLowerCase()
+		.replace(/[^a-z0-9\s-]/g, '')
+		.replace(/\s+/g, '-')
+		.replace(/-+/g, '-')
+		.trim() || content.id;
+	
+	return {
+		...content,
+		slug,
+		poster: content.posterUrl || content.poster || "",
+		backdrop: content.backdropUrl || content.bannerUrl || content.backdrop || "",
+	};
+}
+
+/**
+ * Transform array of content items
+ */
+function transformContentList(items: any[]): (Movie | Series)[] {
+	return items.map(transformContent);
+}
+
 export const contentApi = {
 	/**
 	 * Get list of content with pagination and filters (from database)
 	 */
 	async getContent(params?: ContentQueryParams): Promise<ContentListResponse> {
-		return apiClient.get<ContentListResponse>("/content", params);
+		const response = await apiClient.get<any>("/content", params);
+		return {
+			...response,
+			items: transformContentList(response.items),
+		};
 	},
 
 	/**
 	 * Get content by ID (from database)
 	 */
 	async getContentById(id: string): Promise<Movie | Series> {
-		return apiClient.get<Movie | Series>(`/content/${id}`);
+		const content = await apiClient.get<any>(`/content/${id}`);
+		return transformContent(content);
 	},
 
 	/**
 	 * Get trending content (from database - based on watch history)
 	 */
 	async getTrending(limit?: number): Promise<(Movie | Series)[]> {
-		return apiClient.get<(Movie | Series)[]>(
+		const items = await apiClient.get<any[]>(
 			"/content/trending",
 			limit ? { limit } : undefined,
 		);
+		return transformContentList(items);
 	},
 
 	/**
@@ -63,7 +97,8 @@ export const contentApi = {
 		const params: Record<string, string | number> = {};
 		if (type) params.type = type;
 		if (limit) params.limit = limit;
-		return apiClient.get<(Movie | Series)[]>("/content/popular", params);
+		const items = await apiClient.get<any[]>("/content/popular", params);
+		return transformContentList(items);
 	},
 
 	/**
@@ -94,10 +129,11 @@ export const contentApi = {
 	 * Get featured content (from database)
 	 */
 	async getFeatured(limit?: number): Promise<(Movie | Series)[]> {
-		return apiClient.get<(Movie | Series)[]>(
+		const items = await apiClient.get<any[]>(
 			"/content/featured",
 			limit ? { limit } : undefined,
 		);
+		return transformContentList(items);
 	},
 
 	/**
@@ -109,7 +145,11 @@ export const contentApi = {
 		page?: number;
 		limit?: number;
 	}): Promise<ContentListResponse> {
-		return apiClient.get<ContentListResponse>("/content/search", params);
+		const response = await apiClient.get<any>("/content/search", params);
+		return {
+			...response,
+			items: transformContentList(response.items),
+		};
 	},
 
 	/**
@@ -139,11 +179,15 @@ export const contentApi = {
 		page?: number;
 		limit?: number;
 	}): Promise<ContentListResponse> {
-		return apiClient.get<ContentListResponse>("/content", {
+		const response = await apiClient.get<any>("/content", {
 			...params,
 			sort: "rating",
 			order: "DESC",
 		});
+		return {
+			...response,
+			items: transformContentList(response.items),
+		};
 	},
 
 	/**

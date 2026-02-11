@@ -87,6 +87,9 @@ export interface ContentFormData {
   shortDescription?: string;
   duration?: number;
   status: "draft" | "published";
+  isKids?: boolean;
+  isComingSoon?: boolean;
+  collectionId?: string;
 
   // Visual Assets
   posterUrl?: string;
@@ -127,6 +130,7 @@ export interface ContentFormData {
   audioTracks?: AudioTrack[];
   subtitles?: Subtitle[];
   trailers?: Trailer[];
+  isDubbed?: boolean;
 
   // Technical
   technicalSpecs?: TechnicalSpecs;

@@ -21,8 +21,10 @@ import {
 	CardTitle,
 } from "@/components/admin/ui/card";
 import { analyticsApi } from "@/lib/api/admin";
+import { useTranslation } from "@/i18n";
 
 export default function AdminDashboardPage() {
+	const { t } = useTranslation();
 	const [data, setData] = useState<any>(null);
 	const [loading, setLoading] = useState(true);
 
@@ -41,34 +43,34 @@ export default function AdminDashboardPage() {
 	}, []);
 
 	if (loading) {
-		return <div className="p-6">Loading...</div>;
+		return <div className="p-6">{t("admin.messages.loading")}</div>;
 	}
 
 	if (!data) {
-		return <div className="p-6">Failed to load dashboard data</div>;
+		return <div className="p-6">{t("admin.messages.error")}</div>;
 	}
 
 	const stats = [
 		{
-			title: "Total Users",
+			title: t("admin.dashboard.totalUsers"),
 			value: data.users?.total || 0,
 			icon: Users,
 			change: "+12%",
 		},
 		{
-			title: "Total Content",
+			title: t("admin.dashboard.totalContent"),
 			value: data.content?.total || 0,
 			icon: Film,
 			change: "+5%",
 		},
 		{
-			title: "Revenue",
+			title: t("admin.dashboard.revenue"),
 			value: `$${data.subscriptions?.revenue?.toFixed(2) || "0.00"}`,
 			icon: DollarSign,
 			change: "+8%",
 		},
 		{
-			title: "Active Subscriptions",
+			title: t("admin.dashboard.activeSubscriptions"),
 			value: data.subscriptions?.active || 0,
 			icon: TrendingUp,
 			change: "+3%",
@@ -78,8 +80,8 @@ export default function AdminDashboardPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-				<p className="text-gray-600">Welcome to the admin dashboard</p>
+				<h1 className="text-3xl font-bold text-gray-900">{t("admin.dashboard.title")}</h1>
+				<p className="text-gray-600">{t("admin.dashboard.welcome")}</p>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -96,7 +98,7 @@ export default function AdminDashboardPage() {
 							<CardContent>
 								<div className="text-2xl font-bold">{stat.value}</div>
 								<p className="text-xs text-green-600">
-									{stat.change} from last month
+									{stat.change} {t("admin.dashboard.fromLastMonth")}
 								</p>
 							</CardContent>
 						</Card>
@@ -107,7 +109,7 @@ export default function AdminDashboardPage() {
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle>Daily Active Users</CardTitle>
+						<CardTitle>{t("admin.dashboard.dailyActiveUsers")}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<ResponsiveContainer width="100%" height={300}>
@@ -125,7 +127,7 @@ export default function AdminDashboardPage() {
 
 				<Card>
 					<CardHeader>
-						<CardTitle>Top Performing Content</CardTitle>
+						<CardTitle>{t("admin.dashboard.topPerformingContent")}</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<ResponsiveContainer width="100%" height={300}>

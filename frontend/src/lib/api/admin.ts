@@ -140,6 +140,13 @@ export const seasonsApi = {
 		const response = await adminApi.post("/seasons", data);
 		return response.data;
 	},
+	update: async (id: string, data: { number?: number; title?: string }) => {
+		const response = await adminApi.put(`/seasons/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/seasons/${id}`);
+	},
 };
 
 export const episodesApi = {
@@ -148,10 +155,31 @@ export const episodesApi = {
 		title: string;
 		number: number;
 		description?: string;
+		duration?: number;
+		thumbnailUrl?: string;
 		videoAssetId?: string;
+		externalPlayerUrl?: string;
 	}) => {
 		const response = await adminApi.post("/episodes", data);
 		return response.data;
+	},
+	update: async (
+		id: string,
+		data: {
+			title?: string;
+			number?: number;
+			description?: string;
+			duration?: number;
+			thumbnailUrl?: string;
+			videoAssetId?: string;
+			externalPlayerUrl?: string;
+		},
+	) => {
+		const response = await adminApi.put(`/episodes/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/episodes/${id}`);
 	},
 };
 
@@ -175,15 +203,34 @@ export const videosApi = {
 		});
 		return response.data;
 	},
+	uploadForEpisode: async (
+		file: File,
+		contentId: string,
+		episodeId: string,
+		quality: string,
+	) => {
+		const formData = new FormData();
+		formData.append("file", file);
+		formData.append("contentId", contentId);
+		formData.append("episodeId", episodeId);
+		formData.append("quality", quality);
+		const response = await adminApi.post("/videos/upload", formData, {
+			headers: { "Content-Type": "multipart/form-data" },
+		});
+		return response.data;
+	},
 	markTranscoded: async (
 		assetId: string,
-		data: { hlsUrl: string; duration: number },
+		data: { hlsUrl: string; duration: number; status?: string },
 	) => {
 		const response = await adminApi.post(
 			`/videos/${assetId}/mark-transcoded`,
 			data,
 		);
 		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/videos/${id}`);
 	},
 };
 
@@ -208,6 +255,194 @@ export const analyticsApi = {
 	},
 };
 
+// ========================================================================
+// CATEGORIES API
+// ========================================================================
+export const categoriesApi = {
+	list: async () => {
+		const response = await adminApi.get("/categories");
+		return response.data;
+	},
+	get: async (id: string) => {
+		const response = await adminApi.get(`/categories/${id}`);
+		return response.data;
+	},
+	create: async (data: {
+		slug: string;
+		nameEn: string;
+		nameFa: string;
+		contentType?: string;
+		descriptionEn?: string;
+		descriptionFa?: string;
+		gradientColors?: string[];
+		icon?: string;
+		imageUrl?: string;
+		tmdbParams?: Record<string, any>;
+		showEpisodes?: boolean;
+		isActive?: boolean;
+		sortOrder?: number;
+	}) => {
+		const response = await adminApi.post("/categories", data);
+		return response.data;
+	},
+	update: async (id: string, data: any) => {
+		const response = await adminApi.put(`/categories/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/categories/${id}`);
+	},
+};
+
+// ========================================================================
+// GENRES API
+// ========================================================================
+export const genresApi = {
+	list: async (categorySlug?: string) => {
+		const response = await adminApi.get("/genres", {
+			params: categorySlug ? { categorySlug } : {},
+		});
+		return response.data;
+	},
+	get: async (id: string) => {
+		const response = await adminApi.get(`/genres/${id}`);
+		return response.data;
+	},
+	create: async (data: {
+		slug: string;
+		nameEn: string;
+		nameFa: string;
+		tmdbGenreId?: string;
+		categorySlugs?: string[];
+		isActive?: boolean;
+		sortOrder?: number;
+	}) => {
+		const response = await adminApi.post("/genres", data);
+		return response.data;
+	},
+	update: async (id: string, data: any) => {
+		const response = await adminApi.put(`/genres/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/genres/${id}`);
+	},
+};
+
+// ========================================================================
+// SLIDERS API
+// ========================================================================
+export const slidersApi = {
+	list: async (section?: string) => {
+		const response = await adminApi.get("/sliders", {
+			params: section ? { section } : {},
+		});
+		return response.data;
+	},
+	get: async (id: string) => {
+		const response = await adminApi.get(`/sliders/${id}`);
+		return response.data;
+	},
+	create: async (data: {
+		title: string;
+		titleFa?: string;
+		description?: string;
+		descriptionFa?: string;
+		imageUrl?: string;
+		linkUrl?: string;
+		contentId?: string;
+		section?: string;
+		isActive?: boolean;
+		sortOrder?: number;
+		startDate?: string;
+		endDate?: string;
+	}) => {
+		const response = await adminApi.post("/sliders", data);
+		return response.data;
+	},
+	update: async (id: string, data: any) => {
+		const response = await adminApi.put(`/sliders/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/sliders/${id}`);
+	},
+};
+
+// ========================================================================
+// OFFERS API
+// ========================================================================
+export const offersApi = {
+	list: async () => {
+		const response = await adminApi.get("/offers");
+		return response.data;
+	},
+	get: async (id: string) => {
+		const response = await adminApi.get(`/offers/${id}`);
+		return response.data;
+	},
+	create: async (data: {
+		title: string;
+		titleFa?: string;
+		description?: string;
+		descriptionFa?: string;
+		imageUrl?: string;
+		linkUrl?: string;
+		discountPercent?: number;
+		discountCode?: string;
+		originalPrice?: number;
+		offerPrice?: number;
+		isActive?: boolean;
+		sortOrder?: number;
+		startDate?: string;
+		endDate?: string;
+	}) => {
+		const response = await adminApi.post("/offers", data);
+		return response.data;
+	},
+	update: async (id: string, data: any) => {
+		const response = await adminApi.put(`/offers/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/offers/${id}`);
+	},
+};
+
+// ========================================================================
+// PINS API
+// ========================================================================
+export const pinsApi = {
+	list: async (section?: string) => {
+		const response = await adminApi.get("/pins", {
+			params: section ? { section } : {},
+		});
+		return response.data;
+	},
+	get: async (id: string) => {
+		const response = await adminApi.get(`/pins/${id}`);
+		return response.data;
+	},
+	create: async (data: {
+		contentId: string;
+		section: string;
+		label?: string;
+		labelFa?: string;
+		isActive?: boolean;
+		sortOrder?: number;
+	}) => {
+		const response = await adminApi.post("/pins", data);
+		return response.data;
+	},
+	update: async (id: string, data: any) => {
+		const response = await adminApi.put(`/pins/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/pins/${id}`);
+	},
+};
+
 // Notifications API
 export const notificationsApi = {
 	list: async (params?: { page?: number; limit?: number; type?: string }) => {
@@ -226,6 +461,40 @@ export const notificationsApi = {
 	}) => {
 		const response = await adminApi.post("/notifications", data);
 		return response.data;
+	},
+};
+
+// Collections API
+export const collectionsApi = {
+	list: async (params?: { page?: number; limit?: number }) => {
+		const response = await adminApi.get("/collections", { params });
+		return response.data;
+	},
+	get: async (id: string) => {
+		const response = await adminApi.get(`/collections/${id}`);
+		return response.data;
+	},
+	create: async (data: {
+		slug: string;
+		title: string;
+		titleFa?: string;
+		description?: string;
+		descriptionFa?: string;
+		posterUrl?: string;
+		backdropUrl?: string;
+		contentIds?: string[];
+		isActive?: boolean;
+		sortOrder?: number;
+	}) => {
+		const response = await adminApi.post("/collections", data);
+		return response.data;
+	},
+	update: async (id: string, data: any) => {
+		const response = await adminApi.put(`/collections/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/collections/${id}`);
 	},
 };
 
@@ -282,6 +551,36 @@ export interface TMDBContentDetails {
 	imdbId: string;
 	numberOfSeasons?: number;
 	numberOfEpisodes?: number;
+	seasons?: TMDBSeasonSummary[];
+}
+
+export interface TMDBSeasonSummary {
+	id: number;
+	name: string;
+	seasonNumber: number;
+	episodeCount: number;
+	overview: string;
+	posterUrl: string;
+	airDate: string;
+}
+
+export interface TMDBEpisode {
+	episodeNumber: number;
+	name: string;
+	overview: string;
+	runtime: number | null;
+	stillUrl: string;
+	airDate: string;
+	voteAverage: number;
+}
+
+export interface TMDBSeasonDetail {
+	seasonNumber: number;
+	name: string;
+	overview: string;
+	posterUrl: string;
+	airDate: string;
+	episodes: TMDBEpisode[];
 }
 
 export const tmdbApi = {
@@ -322,6 +621,21 @@ export const tmdbApi = {
 		const response = await adminApi.get(`/tmdb/details/tv/${tmdbId}`, {
 			params: { language },
 		});
+		return response.data;
+	},
+
+	/**
+	 * Get episodes for a specific TV season from TMDB
+	 */
+	getTVSeasonEpisodes: async (
+		tmdbId: string,
+		seasonNumber: number,
+		language: "en" | "fa" = "fa",
+	): Promise<TMDBSeasonDetail> => {
+		const response = await adminApi.get(
+			`/tmdb/tv/${tmdbId}/season/${seasonNumber}`,
+			{ params: { language } },
+		);
 		return response.data;
 	},
 };

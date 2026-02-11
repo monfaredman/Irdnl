@@ -207,7 +207,7 @@ export function SeasonsEpisodes({ series }: SeasonsEpisodesProps) {
 													}}
 													dir="rtl"
 												>
-													قسمت {episode.id.split("-")[1]} - {episode.title}
+													{episode.number ? `قسمت ${episode.number}` : ""}{episode.number ? " - " : ""}{episode.title}
 												</Typography>
 
 												<Typography

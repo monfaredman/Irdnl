@@ -205,24 +205,24 @@ export const LiquidGlassSlider = ({
 										inset: 0,
 										background:
 											"linear-gradient(to top, rgba(10,10,10,0.95) 0%, transparent 60%)",
-										zIndex: 1,
-									},
+								zIndex: 1,
+							},
+						}}
+					>
+						{(item.backdrop || item.poster) && (
+							<Image
+								src={item.backdrop || item.poster}
+								alt={item.title}
+								fill
+								style={{
+									objectFit: "cover",
 								}}
-							>
-								<Image
-									src={item.backdrop || item.poster}
-									alt={item.title}
-									fill
-									style={{
-										objectFit: "cover",
-									}}
-									sizes="100vw"
-									priority={index === 0}
-									loading={index === 0 ? "eager" : "lazy"}
-								/>
-							</Box>
-
-							{/* Content Overlay */}
+								sizes="100vw"
+								priority={index === 0}
+								loading={index === 0 ? "eager" : "lazy"}
+							/>
+						)}
+					</Box>							{/* Content Overlay */}
 							<Container
 								maxWidth="xl"
 								sx={{

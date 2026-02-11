@@ -14,6 +14,12 @@ import { Subscription } from '../modules/users/entities/subscription.entity';
 import { Job } from '../modules/jobs/entities/job.entity';
 import { Watchlist } from '../modules/watchlist/entities/watchlist.entity';
 import { Notification } from '../modules/notifications/entities/notification.entity';
+import { Category } from '../modules/content/entities/category.entity';
+import { Genre } from '../modules/content/entities/genre.entity';
+import { Slider } from '../modules/content/entities/slider.entity';
+import { Offer } from '../modules/content/entities/offer.entity';
+import { Pin } from '../modules/content/entities/pin.entity';
+import { Collection } from '../modules/content/entities/collection.entity';
 
 loadEnvConfig();
 loadEnvConfig({ path: '.env.local', override: true });
@@ -30,6 +36,12 @@ const ENTITIES = [
   Job,
   Watchlist,
   Notification,
+  Category,
+  Genre,
+  Slider,
+  Offer,
+  Pin,
+  Collection,
 ];
 
 type ConfigLike = {

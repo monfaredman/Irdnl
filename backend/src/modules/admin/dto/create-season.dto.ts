@@ -16,3 +16,16 @@ export class CreateSeasonDto {
   @IsString()
   title?: string;
 }
+
+export class UpdateSeasonDto {
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  number?: number;
+
+  @ApiPropertyOptional({ example: 'Season 1' })
+  @IsOptional()
+  @IsString()
+  title?: string;
+}

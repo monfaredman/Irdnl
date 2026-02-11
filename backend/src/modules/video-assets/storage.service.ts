@@ -22,7 +22,16 @@ export class LocalStorageAdapter implements StorageAdapter {
     const fileName = file.originalname;
     const filePath = path.join(uploadDir, fileName);
 
-    await fs.writeFile(filePath, file.buffer);
+    if (file.buffer) {
+      // Memory storage: write buffer to file
+      await fs.writeFile(filePath, file.buffer);
+    } else if (file.path) {
+      // Disk storage: move/copy temp file to destination
+      await fs.copyFile(file.path, filePath);
+      await fs.unlink(file.path).catch(() => {});
+    } else {
+      throw new Error('No file data available');
+    }
 
     return filePath;
   }

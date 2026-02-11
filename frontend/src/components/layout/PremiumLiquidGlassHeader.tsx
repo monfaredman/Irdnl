@@ -154,9 +154,12 @@ export function PremiumLiquidGlassHeader() {
 	const pathname = usePathname();
 	const router = useRouter();
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down("md"), {
-		noSsr: true,
-	});
+	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
 
 	// State management
 	const [scrolled, setScrolled] = useState(false);
@@ -512,7 +515,7 @@ export function PremiumLiquidGlassHeader() {
 						</Link>
 
 						{/* Desktop Navigation - Glass Pills */}
-						{!isMobile && (
+						{mounted && !isMobile && (
 							<Box
 								sx={{
 									display: "flex",
@@ -647,7 +650,7 @@ export function PremiumLiquidGlassHeader() {
 							</Box>
 
 							{/* User Avatar - Desktop Only */}
-							{!isMobile && (
+							{mounted && !isMobile && (
 								<Avatar
 									sx={avatarStyle}
 									onClick={handleUserMenuOpen}
@@ -662,7 +665,7 @@ export function PremiumLiquidGlassHeader() {
 							)}
 
 							{/* Mobile Hamburger */}
-							{isMobile && (
+							{mounted && isMobile && (
 								<IconButton
 									onClick={handleMobileToggle}
 									sx={{

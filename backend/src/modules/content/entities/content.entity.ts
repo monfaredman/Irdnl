@@ -214,6 +214,18 @@ export class Content {
   @Column({ type: 'boolean', default: false })
   featured: boolean;
 
+  @Column({ type: 'boolean', default: false, name: 'is_kids' })
+  isKids: boolean;
+
+  @Column({ type: 'boolean', default: false, name: 'is_coming_soon' })
+  isComingSoon: boolean;
+
+  @Column({ type: 'boolean', default: false, name: 'is_dubbed' })
+  isDubbed: boolean;
+
+  @Column({ name: 'collection_id', nullable: true })
+  collectionId: string | null;
+
   @Column({ type: 'int', default: 0 })
   priority: number;
 
