@@ -24,6 +24,7 @@
       "notifications": "اعلان‌ها",
       "finance": "مالی",
       "settings": "تنظیمات",
+      "upera": "همکاری اوپرا",
       "logout": "خروج"
     },
     "dashboard": {
@@ -417,6 +418,166 @@
       "confirmDelete": "آیا مطمئن هستید که می‌خواهید حذف کنید؟",
       "uploadSuccess": "فایل با موفقیت آپلود شد",
       "uploadError": "خطا در آپلود فایل"
+    },
+    "upera": {
+      "title": "همکاری اوپرا",
+      "description": "مدیریت محتوای دریافتی از اوپرا (Seeko)",
+      "tabs": {
+        "browse": "جستجو در اوپرا",
+        "local": "محتوای ذخیره شده",
+        "purchase": "خرید و پرداخت",
+        "screening": "اکران خانگی",
+        "discover": "کشف محتوا"
+      },
+      "browse": {
+        "title": "جستجوی محتوا در اوپرا",
+        "movies": "فیلم‌ها",
+        "series": "سریال‌ها",
+        "searchPlaceholder": "جستجو در عنوان فارسی...",
+        "trending": "مرتب‌سازی",
+        "trendingOptions": {
+          "lastUpdated": "آخرین به‌روزرسانی",
+          "lastCreated": "جدیدترین",
+          "productYear": "سال تولید",
+          "imdbRate": "امتیاز IMDb",
+          "likes": "پسندیده‌ترین"
+        },
+        "genre": "ژانر",
+        "genreAll": "همه",
+        "freeFilter": "وضعیت قیمت",
+        "freeOptions": {
+          "all": "همه",
+          "free": "رایگان",
+          "nonFree": "غیررایگان"
+        },
+        "country": "کشور",
+        "countryOptions": {
+          "all": "همه",
+          "iran": "ایرانی",
+          "nonIran": "غیرایرانی"
+        },
+        "persian": "زبان",
+        "persianOptions": {
+          "all": "همه",
+          "dubbed": "دوبله یا ایرانی"
+        },
+        "fetch": "دریافت",
+        "fetching": "در حال دریافت...",
+        "saveToLocal": "ذخیره در محلی",
+        "saveAll": "ذخیره همه",
+        "savingToLocal": "در حال ذخیره...",
+        "savedSuccess": "با موفقیت ذخیره شد",
+        "viewEpisodes": "مشاهده قسمت‌ها",
+        "affiliateLinks": "لینک‌های وابسته",
+        "noResults": "نتیجه‌ای یافت نشد",
+        "results": "نتیجه"
+      },
+      "local": {
+        "title": "محتوای ذخیره شده اوپرا",
+        "importToDb": "وارد کردن به دیتابیس",
+        "importing": "در حال وارد کردن...",
+        "importSuccess": "با موفقیت به دیتابیس وارد شد",
+        "importFailed": "خطا در وارد کردن",
+        "delete": "حذف",
+        "deleteConfirm": "آیا مطمئن هستید؟",
+        "deleteSuccess": "با موفقیت حذف شد",
+        "deleteFailed": "خطا در حذف",
+        "status": {
+          "pending": "در انتظار",
+          "imported": "وارد شده",
+          "failed": "ناموفق"
+        },
+        "filterType": "نوع",
+        "filterStatus": "وضعیت",
+        "all": "همه"
+      },
+      "purchase": {
+        "title": "خرید محتوا از اوپرا",
+        "contentId": "شناسه محتوا",
+        "contentType": "نوع محتوا",
+        "movie": "فیلم",
+        "episode": "قسمت",
+        "qualityId": "شناسه کیفیت",
+        "paymentMethod": "روش پرداخت",
+        "mobile": "شماره موبایل",
+        "callbackUrl": "آدرس بازگشت",
+        "getPaymentUrl": "دریافت لینک پرداخت",
+        "getLink": "دریافت لینک دانلود",
+        "paymentCallback": "بررسی پرداخت",
+        "paymentId": "شناسه پرداخت",
+        "refNum": "شماره مرجع"
+      },
+      "screening": {
+        "title": "اکران خانگی",
+        "movieId": "شناسه فیلم",
+        "mobile": "شماره موبایل",
+        "buy": "خرید سانس",
+        "watch": "تماشا (شروع ۸ ساعت)",
+        "checkScreening": "بررسی وضعیت اکران",
+        "remainingTime": "زمان باقی‌مانده",
+        "screeningInfo": "اطلاعات اکران"
+      },
+      "discover": {
+        "title": "کشف محتوای سایت اوپرا",
+        "description": "مشاهده محتوای صفحه اصلی، اسلایدرها، پیشنهادات، ژانرها و پلن‌های اشتراک سایت اوپرا",
+        "sections": {
+          "discover": "صفحه کشف",
+          "sliders": "اسلایدرها",
+          "offers": "پیشنهادات ویژه",
+          "genres": "ژانرها",
+          "plans": "پلن‌های اشتراک"
+        },
+        "age": "رده سنی",
+        "ageOptions": {
+          "all": "همه",
+          "G": "عمومی (G)",
+          "PG": "با نظارت والدین (PG)",
+          "PG-13": "بالای ۱۳ سال (PG-13)",
+          "R": "بزرگسال (R)",
+          "X": "ممنوع (X)"
+        },
+        "country": "کشور",
+        "countryOptions": {
+          "all": "همه",
+          "IR": "ایرانی",
+          "noIR": "غیرایرانی"
+        },
+        "contentType": "نوع محتوا",
+        "contentTypeOptions": {
+          "all": "همه",
+          "movie": "فیلم",
+          "series": "سریال"
+        },
+        "kids": "محتوای کودکان",
+        "kidsOptions": {
+          "off": "خاموش",
+          "on": "روشن"
+        },
+        "language": "زبان",
+        "languageOptions": {
+          "all": "همه",
+          "persian": "فارسی",
+          "nopersian": "غیرفارسی"
+        },
+        "sortBy": "مرتب‌سازی",
+        "sortByOptions": {
+          "created": "جدیدترین",
+          "oldest": "قدیمی‌ترین",
+          "imdb": "امتیاز IMDb"
+        },
+        "page": "صفحه",
+        "mediaType": "نوع رسانه",
+        "location": "موقعیت",
+        "ref": "مرجع",
+        "fetch": "دریافت",
+        "fetching": "در حال دریافت...",
+        "noResults": "نتیجه‌ای یافت نشد",
+        "results": "نتیجه",
+        "planName": "نام پلن",
+        "planPrice": "قیمت",
+        "planDuration": "مدت زمان",
+        "totalItems": "تعداد کل"
+      }
     }
   }
 }

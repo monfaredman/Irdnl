@@ -17,6 +17,8 @@ import { JobsModule } from './modules/jobs/jobs.module';
 import { HealthModule } from './modules/health/health.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { PublicModule } from './modules/public/public.module';
+import { UperaModule } from './modules/upera/upera.module';
 
 @Module({
   imports: [
@@ -81,6 +83,8 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     HealthModule,
     NotificationsModule,
     AnalyticsModule,
+    PublicModule,
+    UperaModule,
   ],
 })
 export class AppModule {}

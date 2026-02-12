@@ -651,4 +651,220 @@ export const tmdbApi = {
 	},
 };
 
+// Upera API (Gateway calls to Seeko/Upera)
+export const uperaApi = {
+	// Browse content from Upera
+	browseMovies: async (params?: {
+		trending?: number;
+		genre?: string;
+		free?: number;
+		country?: number;
+		persian?: number;
+		query?: string;
+		page?: number;
+	}) => {
+		const response = await adminApi.post("/upera/browse/movies", null, {
+			params,
+		});
+		return response.data;
+	},
+
+	browseSeries: async (params?: {
+		trending?: number;
+		genre?: string;
+		free?: number;
+		country?: number;
+		persian?: number;
+		query?: string;
+		page?: number;
+	}) => {
+		const response = await adminApi.post("/upera/browse/series", null, {
+			params,
+		});
+		return response.data;
+	},
+
+	getSeriesEpisodes: async (seriesId: string) => {
+		const response = await adminApi.get(
+			`/upera/browse/series/${seriesId}/episodes`,
+		);
+		return response.data;
+	},
+
+	getAffiliateLinks: async (params: {
+		id: string;
+		type: string;
+		ref?: number;
+		traffic?: number;
+		token?: string;
+	}) => {
+		const response = await adminApi.post(
+			"/upera/browse/affiliate-links",
+			null,
+			{ params },
+		);
+		return response.data;
+	},
+
+	// Purchase
+	getPaymentUrl: async (data: {
+		qualityId: number;
+		episodeId?: string;
+		movieId?: string;
+		paymentMethod: string;
+		mobile: string;
+		callbackUrl: string;
+		refid?: string;
+		token?: string;
+		paymentId?: string;
+	}) => {
+		const response = await adminApi.post("/upera/buy/payment-url", data);
+		return response.data;
+	},
+
+	paymentCallback: async (data: {
+		paymentId: string;
+		refNum: string;
+		checkItAgain?: number;
+		token?: string;
+	}) => {
+		const response = await adminApi.post("/upera/buy/callback", data);
+		return response.data;
+	},
+
+	getLink: async (data: {
+		id: string;
+		type: string;
+		mobile: string;
+		token?: string;
+	}) => {
+		const response = await adminApi.post("/upera/buy/get-link", data);
+		return response.data;
+	},
+
+	// Home Screening
+	homeScreeningBuy: async (data: {
+		cart: Array<{ id: string }>;
+		paymentMethod: string;
+		mobile: number;
+		token?: string;
+		callbackUrl?: string;
+		ekran: boolean;
+	}) => {
+		const response = await adminApi.post("/upera/screening/buy", data);
+		return response.data;
+	},
+
+	watchMovieHls: async (
+		movieId: string,
+		mobile: number,
+		token?: string,
+		ip?: string,
+	) => {
+		const response = await adminApi.get(
+			`/upera/screening/watch/${movieId}`,
+			{ params: { mobile, token, ip } },
+		);
+		return response.data;
+	},
+
+	getEkranToken: async (
+		movieId: string,
+		mobile: string,
+		token?: string,
+	) => {
+		const response = await adminApi.get(
+			`/upera/screening/ekran/${movieId}`,
+			{ params: { mobile, token } },
+		);
+		return response.data;
+	},
+
+	// Local Storage & Import
+	saveMoviesToLocal: async (items: any[]) => {
+		const response = await adminApi.post("/upera/local/save-movies", {
+			items,
+		});
+		return response.data;
+	},
+
+	saveSeriesToLocal: async (items: any[]) => {
+		const response = await adminApi.post("/upera/local/save-series", {
+			items,
+		});
+		return response.data;
+	},
+
+	getLocalContent: async (params?: {
+		page?: number;
+		limit?: number;
+		type?: string;
+		status?: string;
+		search?: string;
+	}) => {
+		const response = await adminApi.get("/upera/local", { params });
+		return response.data;
+	},
+
+	getLocalContentById: async (id: string) => {
+		const response = await adminApi.get(`/upera/local/${id}`);
+		return response.data;
+	},
+
+	importToDatabase: async (uperaContentId: string) => {
+		const response = await adminApi.post("/upera/local/import", {
+			uperaContentId,
+		});
+		return response.data;
+	},
+
+	deleteLocalContent: async (id: string) => {
+		await adminApi.delete(`/upera/local/${id}`);
+	},
+
+	// Upera Site Content (api.upera.tv)
+	getDiscover: async (params?: {
+		age?: string;
+		country?: string;
+		discover_page?: number;
+		f_type?: string;
+		kids?: number;
+		lang?: string;
+		sortby?: string;
+	}) => {
+		const response = await adminApi.get("/upera/site/discover", { params });
+		return response.data;
+	},
+
+	getSliders: async (params?: {
+		age?: string;
+		media_type?: string;
+		location?: string;
+		ref?: string;
+	}) => {
+		const response = await adminApi.get("/upera/site/sliders", { params });
+		return response.data;
+	},
+
+	getOffers: async (params?: {
+		age?: string;
+		media_type?: string;
+	}) => {
+		const response = await adminApi.get("/upera/site/offers", { params });
+		return response.data;
+	},
+
+	getGenres: async (params?: {
+		age?: string;
+	}) => {
+		const response = await adminApi.get("/upera/site/genres", { params });
+		return response.data;
+	},
+
+	getPlans: async () => {
+		const response = await adminApi.get("/upera/site/plans");
+		return response.data;
+	},
+};
+
 export default adminApi;

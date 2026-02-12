@@ -20,6 +20,7 @@ import { Slider } from '../modules/content/entities/slider.entity';
 import { Offer } from '../modules/content/entities/offer.entity';
 import { Pin } from '../modules/content/entities/pin.entity';
 import { Collection } from '../modules/content/entities/collection.entity';
+import { UperaContent } from '../modules/upera/entities/upera-content.entity';
 
 loadEnvConfig();
 loadEnvConfig({ path: '.env.local', override: true });
@@ -42,6 +43,7 @@ const ENTITIES = [
   Offer,
   Pin,
   Collection,
+  UperaContent,
 ];
 
 type ConfigLike = {

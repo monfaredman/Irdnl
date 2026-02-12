@@ -44,6 +44,12 @@ import {
 	glassBorderRadius,
 	glassColors,
 } from "@/theme/glass-design-system";
+import {
+	categoriesApi as publicCategoriesApi,
+	genresApi as publicGenresApi,
+	type Category as PublicCategory,
+	type Genre as PublicGenre,
+} from "@/lib/api/public";
 
 type UserMenuAction =
 	| { type: "navigate"; href: string }
@@ -56,6 +62,7 @@ interface NavItem {
 	href: string;
 	icon?: React.ReactNode;
 	submenu?: SubMenuItem[];
+	isActive?: boolean;
 }
 
 interface SubMenuItem {
@@ -64,89 +71,18 @@ interface SubMenuItem {
 	href: string;
 }
 
-const navItems: NavItem[] = [
-	{
-		label: "Foreign Movies",
-		labelFa: "فیلم خارجی",
-		href: "/movies/foreign",
-		icon: <Movie />,
-		submenu: [
-			{ label: "Action", labelFa: "اکشن", href: "/movies/foreign/action" },
-			{ label: "Drama", labelFa: "درام", href: "/movies/foreign/drama" },
-			{ label: "Comedy", labelFa: "کمدی", href: "/movies/foreign/comedy" },
-			{
-				label: "Thriller",
-				labelFa: "هیجان‌انگیز",
-				href: "/movies/foreign/thriller",
-			},
-			{ label: "Horror", labelFa: "ترسناک", href: "/movies/foreign/horror" },
-			{ label: "Sci-Fi", labelFa: "علمی‌تخیلی", href: "/movies/foreign/scifi" },
-		],
-	},
-	{
-		label: "Iranian Movies",
-		labelFa: "فیلم ایرانی",
-		href: "/movies/iranian",
-		icon: <Movie />,
-		submenu: [
-			{ label: "Drama", labelFa: "درام", href: "/movies/iranian/drama" },
-			{ label: "Comedy", labelFa: "کمدی", href: "/movies/iranian/comedy" },
-			{ label: "Family", labelFa: "خانوادگی", href: "/movies/iranian/family" },
-		],
-	},
-	{
-		label: "Series",
-		labelFa: "سریال",
-		href: "/series",
-		icon: <Tv />,
-		submenu: [
-			{
-				label: "Foreign Series",
-				labelFa: "سریال خارجی",
-				href: "/series/foreign",
-			},
-			{
-				label: "Iranian Series",
-				labelFa: "سریال ایرانی",
-				href: "/series/iranian",
-			},
-		],
-	},
-	{
-		label: "Animation",
-		labelFa: "انیمیشن",
-		href: "/animation",
-		icon: <Category />,
-	},
-	{
-		label: "Persian Dubbed",
-		labelFa: "دوبله فارسی",
-		href: "/dubbed",
-		icon: <Movie />,
-	},
-	{
-		label: "Anime",
-		labelFa: "انیمه",
-		href: "/anime",
-		icon: <Tv />,
-	},
-	{
-		label: "Other",
-		labelFa: "سایر",
-		href: "/category",
-		icon: <Category />,
-		submenu: [
-			{ label: "Coming Soon", labelFa: "به‌زودی", href: "/category/coming-soon" },
-			{ label: "Collections", labelFa: "مجموعه‌ها", href: "/category/collections" },
-			{ label: "Kids Zone", labelFa: "کودکان", href: "/category/kids" },
-		],
-	},
-	{
-		label: "Account",
-		labelFa: "حساب کاربری",
-		href: "/account",
-		icon: <Person />,
-	},
+// Menu structure configuration - defines order and which items have submenus
+const MENU_CONFIG = [
+	{ slug: "movies-foreign", hasSubmenu: true, icon: <Movie /> },
+	{ slug: "movies-iranian", hasSubmenu: false, icon: <Movie /> },
+	{ slug: "series-foreign", hasSubmenu: true, icon: <Tv /> },
+	{ slug: "animation", hasSubmenu: false, icon: <Category /> },
+	{ slug: "dubbed", hasSubmenu: false, icon: <Movie /> },
+	{ slug: "anime", hasSubmenu: true, icon: <Tv /> },
+	// Special static items
+	{ slug: "other", hasSubmenu: false, icon: <Category />, static: true, labelEn: "Other", labelFa: "سایر", href: "/category" },
+	{ slug: "top-250", hasSubmenu: false, icon: <Movie />, static: true, labelEn: "Top 250", labelFa: "250 فیلم برتر IMDb", href: "/top-250" },
+	{ slug: "collections", hasSubmenu: false, icon: <Category />, static: true, labelEn: "Collections", labelFa: "کالکشن", href: "/collections" },
 ];
 
 export function PremiumLiquidGlassHeader() {
@@ -156,9 +92,114 @@ export function PremiumLiquidGlassHeader() {
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 	const [mounted, setMounted] = useState(false);
+	
+	// Dynamic navigation state
+	const [navItems, setNavItems] = useState<NavItem[]>([]);
+	const [navLoading, setNavLoading] = useState(true);
 
 	useEffect(() => {
 		setMounted(true);
+	}, []);
+
+	// Fetch categories and genres from backend and build menu based on MENU_CONFIG
+	useEffect(() => {
+		const fetchNavigation = async () => {
+			try {
+				const [categoriesResponse, genresResponse] = await Promise.all([
+					publicCategoriesApi.list(),
+					publicGenresApi.list(),
+				]);
+
+				const categories = categoriesResponse.data;
+				const genres = genresResponse.data;
+
+				// Build navigation items based on MENU_CONFIG order
+				const dynamicNavItems: NavItem[] = [];
+
+				for (const config of MENU_CONFIG) {
+					// Handle static items (not from backend)
+					if (config.static) {
+						dynamicNavItems.push({
+							label: config.labelEn!,
+							labelFa: config.labelFa!,
+							href: config.href!,
+							icon: config.icon,
+							isActive: true,
+						});
+						continue;
+					}
+
+					// Find category from backend by slug
+					const category = categories.find((cat) => cat.slug === config.slug);
+					
+					// Skip if category not found or not active
+					if (!category || !category.isActive) {
+						continue;
+					}
+
+					// Build submenu if configured
+					let submenu: SubMenuItem[] | undefined;
+					if (config.hasSubmenu) {
+						const categoryGenres = genres.filter(
+							(genre) =>
+								genre.isActive &&
+								genre.categorySlugs?.includes(category.slug)
+						);
+
+						if (categoryGenres.length > 0) {
+							submenu = categoryGenres.map((genre) => ({
+								label: genre.nameEn,
+								labelFa: genre.nameFa,
+								href: `/${category.slug}/${genre.slug}`,
+							}));
+						}
+					}
+
+					dynamicNavItems.push({
+						label: category.nameEn,
+						labelFa: category.nameFa,
+						href: `/${category.slug}`,
+						icon: config.icon,
+						submenu,
+						isActive: category.isActive,
+					});
+				}
+
+				// Add Account link at the end
+				dynamicNavItems.push({
+					label: "Account",
+					labelFa: "حساب کاربری",
+					href: "/account",
+					icon: <Person />,
+					isActive: true,
+				});
+
+				setNavItems(dynamicNavItems);
+			} catch (error) {
+				console.error("Failed to fetch navigation data:", error);
+				// Fallback to minimal navigation if API fails
+				setNavItems([
+					{
+						label: "Home",
+						labelFa: "خانه",
+						href: "/",
+						icon: <Movie />,
+						isActive: true,
+					},
+					{
+						label: "Account",
+						labelFa: "حساب کاربری",
+						href: "/account",
+						icon: <Person />,
+						isActive: true,
+					},
+				]);
+			} finally {
+				setNavLoading(false);
+			}
+		};
+
+		fetchNavigation();
 	}, []);
 
 	// State management
