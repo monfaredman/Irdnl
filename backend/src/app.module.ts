@@ -20,6 +20,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { PublicModule } from './modules/public/public.module';
 import { UperaModule } from './modules/upera/upera.module';
 import { TMDBAdminModule } from './modules/tmdb/tmdb-admin.module';
+import { CommentsModule } from './modules/comments/comments.module';
 
 @Module({
   imports: [
@@ -87,6 +88,7 @@ import { TMDBAdminModule } from './modules/tmdb/tmdb-admin.module';
     PublicModule,
     UperaModule,
     TMDBAdminModule,
+    CommentsModule,
   ],
 })
 export class AppModule {}

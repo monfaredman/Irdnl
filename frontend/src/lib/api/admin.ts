@@ -978,4 +978,76 @@ export const uperaApi = {
 	},
 };
 
+// Comments API
+export const commentsApi = {
+	// Get all comments with filters
+	list: async (params?: {
+		page?: number;
+		limit?: number;
+		status?: string;
+		type?: string;
+		contentId?: string;
+		userId?: string;
+		search?: string;
+		sortBy?: string;
+		sortOrder?: "ASC" | "DESC";
+	}) => {
+		const response = await adminApi.get("/comments", { params });
+		return response.data;
+	},
+
+	// Get comment statistics
+	getStats: async () => {
+		const response = await adminApi.get("/comments/stats");
+		return response.data;
+	},
+
+	// Get single comment
+	getById: async (id: string) => {
+		const response = await adminApi.get(`/comments/${id}`);
+		return response.data;
+	},
+
+	// Update comment
+	update: async (id: string, data: {
+		text?: string;
+		status?: string;
+		adminReply?: string;
+		isPinned?: boolean;
+		rating?: number;
+	}) => {
+		const response = await adminApi.put(`/comments/${id}`, data);
+		return response.data;
+	},
+
+	// Delete comment
+	delete: async (id: string) => {
+		await adminApi.delete(`/comments/${id}`);
+	},
+
+	// Approve comment
+	approve: async (id: string) => {
+		const response = await adminApi.post(`/comments/${id}/approve`);
+		return response.data;
+	},
+
+	// Reject comment
+	reject: async (id: string) => {
+		const response = await adminApi.post(`/comments/${id}/reject`);
+		return response.data;
+	},
+
+	// Mark as spam
+	markAsSpam: async (id: string) => {
+		const response = await adminApi.post(`/comments/${id}/spam`);
+		return response.data;
+	},
+
+	// Bulk action
+	bulkAction: async (ids: string[], action: "approve" | "reject" | "delete" | "spam") => {
+		const response = await adminApi.post("/comments/bulk-action", { ids, action });
+		return response.data;
+	},
+};
+
 export default adminApi;

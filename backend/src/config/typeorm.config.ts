@@ -22,6 +22,7 @@ import { Pin } from '../modules/content/entities/pin.entity';
 import { Collection } from '../modules/content/entities/collection.entity';
 import { UperaContent } from '../modules/upera/entities/upera-content.entity';
 import { TMDBSavedContent } from '../modules/tmdb/entities/tmdb-saved-content.entity';
+import { Comment } from '../modules/comments/entities/comment.entity';
 
 loadEnvConfig();
 loadEnvConfig({ path: '.env.local', override: true });
@@ -46,6 +47,7 @@ const ENTITIES = [
   Collection,
   UperaContent,
   TMDBSavedContent,
+  Comment,
 ];
 
 type ConfigLike = {

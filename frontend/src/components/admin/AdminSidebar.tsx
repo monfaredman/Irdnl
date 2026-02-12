@@ -16,6 +16,7 @@ import {
 	ChevronDown,
 	ChevronRight,
 	Upload,
+	MessageSquare,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -45,8 +46,10 @@ const menuItems: MenuItem[] = [
 			{ href: "/admin/videos", labelKey: "admin.menu.videos", icon: Video },
 		],
 	},
+	{ href: "/admin/users", labelKey: "admin.menu.users", icon: LayoutDashboard },
 	{ href: "/admin/finance", labelKey: "admin.menu.finance", icon: BarChart3 },
 	{ href: "/admin/notifications", labelKey: "admin.menu.notifications", icon: Bell },
+	{ href: "/admin/comments", labelKey: "admin.comments.title", icon: MessageSquare },
 	{ href: "/admin/upera", labelKey: "admin.menu.upera", icon: Globe },
 	{ href: "/admin/tmdb", labelKey: "admin.menu.tmdb", icon: Database },
 ];
