@@ -222,13 +222,75 @@ export function BasicInfoStep({ formData, updateFormData }: BasicInfoStepProps) 
           <select
             id="status"
             value={formData.status}
-            onChange={(e) => updateFormData({ status: e.target.value as "draft" | "published" })}
+            onChange={(e) => updateFormData({ status: e.target.value as any })}
             className="w-full rounded-md border border-gray-300 px-3 py-2"
           >
             <option value="draft">{t("admin.content.status.draft")}</option>
+            <option value="scheduled">{t("admin.content.status.scheduled")}</option>
             <option value="published">{t("admin.content.status.published")}</option>
+            <option value="unpublished">{t("admin.content.status.unpublished")}</option>
           </select>
         </div>
+      </div>
+
+      {/* Scheduling Section */}
+      <div className="space-y-4 border-t pt-4">
+        <h3 className="font-medium text-sm text-gray-700">
+          {t("admin.upload.basicInfo.scheduling")}
+        </h3>
+        
+        <div className="grid gap-4 md:grid-cols-3">
+          <div className="space-y-2">
+            <Label htmlFor="publishDate">
+              {t("admin.upload.basicInfo.publishDate")}
+            </Label>
+            <Input
+              id="publishDate"
+              type="datetime-local"
+              value={formData.publishDate ? new Date(formData.publishDate).toISOString().slice(0, 16) : ""}
+              onChange={(e) => updateFormData({ publishDate: e.target.value ? new Date(e.target.value) : null })}
+            />
+            <p className="text-xs text-gray-500">
+              {formData.status === 'scheduled' ? 'محتوا در این تاریخ منتشر می‌شود' : 'تاریخ انتشار (اختیاری)'}
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="availabilityStart">
+              {t("admin.upload.basicInfo.availabilityStart")}
+            </Label>
+            <Input
+              id="availabilityStart"
+              type="datetime-local"
+              value={formData.availabilityStart ? new Date(formData.availabilityStart).toISOString().slice(0, 16) : ""}
+              onChange={(e) => updateFormData({ availabilityStart: e.target.value ? new Date(e.target.value) : null })}
+            />
+            <p className="text-xs text-gray-500">
+              شروع دسترسی (اختیاری)
+            </p>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="availabilityEnd">
+              {t("admin.upload.basicInfo.availabilityEnd")}
+            </Label>
+            <Input
+              id="availabilityEnd"
+              type="datetime-local"
+              value={formData.availabilityEnd ? new Date(formData.availabilityEnd).toISOString().slice(0, 16) : ""}
+              onChange={(e) => updateFormData({ availabilityEnd: e.target.value ? new Date(e.target.value) : null })}
+            />
+            <p className="text-xs text-gray-500">
+              پایان دسترسی (اختیاری)
+            </p>
+          </div>
+        </div>
+
+        {formData.status === 'scheduled' && !formData.publishDate && (
+          <div className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded px-3 py-2">
+            ⚠️ برای محتوای زمان‌بندی شده، تنظیم تاریخ انتشار الزامی است
+          </div>
+        )}
       </div>
 
       {/* Content Flags & Collection */}

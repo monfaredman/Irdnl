@@ -86,7 +86,7 @@ export interface ContentFormData {
   description?: string;
   shortDescription?: string;
   duration?: number;
-  status: "draft" | "published";
+  status: "draft" | "scheduled" | "published" | "unpublished";
   isKids?: boolean;
   isComingSoon?: boolean;
   collectionId?: string;

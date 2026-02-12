@@ -41,6 +41,16 @@
       "dailyActiveUsers": "کاربران فعال روزانه",
       "topPerformingContent": "محتوای برتر"
     },
+    "content": {
+      "movie": "فیلم",
+      "series": "سریال",
+      "status": {
+        "draft": "پیش‌نویس",
+        "scheduled": "زمان‌بندی شده",
+        "published": "منتشر شده",
+        "unpublished": "منتشر نشده"
+      }
+    },
     "users": {
       "title": "مدیریت کاربران",
       "description": "مدیریت حساب‌های کاربری",
@@ -150,7 +160,7 @@
       "users": "کاربران",
       "content": "محتوا"
     },
-    "content": {
+    "contentManagement": {
       "title": "مدیریت محتوا",
       "createNew": "افزودن محتوای جدید",
       "editContent": "ویرایش محتوا",
@@ -302,7 +312,11 @@
         "tagline": "شعار",
         "duration": "مدت زمان",
         "status": "وضعیت",
-        "externalPlayerUrl": "آدرس پخش‌کننده خارجی"
+        "externalPlayerUrl": "آدرس پخش‌کننده خارجی",
+        "scheduling": "زمان‌بندی انتشار",
+        "publishDate": "تاریخ انتشار",
+        "availabilityStart": "شروع دسترسی",
+        "availabilityEnd": "پایان دسترسی"
       },
       "mediaAssets": {
         "videoFile": "فایل ویدیو",

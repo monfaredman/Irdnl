@@ -19,7 +19,9 @@ export enum ContentType {
 
 export enum ContentStatus {
   DRAFT = 'draft',
+  SCHEDULED = 'scheduled',
   PUBLISHED = 'published',
+  UNPUBLISHED = 'unpublished',
 }
 
 @Entity('content')
