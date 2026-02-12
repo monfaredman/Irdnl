@@ -649,6 +649,117 @@ export const tmdbApi = {
 		);
 		return response.data;
 	},
+
+	// ========================================================================
+	// TMDB Admin Module - New dedicated endpoints for TMDB management
+	// ========================================================================
+
+	// Discover movies/TV with filters
+	discover: async (params?: {
+		type?: "movie" | "tv";
+		language?: "en" | "fa";
+		genre?: string;
+		withGenres?: string;
+		year?: number;
+		certification?: string;
+		country?: string;
+		page?: number;
+	}) => {
+		const response = await adminApi.get("/tmdb/discover", { params });
+		return response.data;
+	},
+
+	// Get popular content
+	getPopular: async (params?: {
+		type?: "movie" | "tv";
+		language?: "en" | "fa";
+		page?: number;
+	}) => {
+		const response = await adminApi.get("/tmdb/popular", { params });
+		return response.data;
+	},
+
+	// Get trending content
+	getTrending: async (params?: {
+		language?: "en" | "fa";
+		mediaType?: "all" | "movie" | "tv";
+		timeWindow?: "day" | "week";
+		page?: number;
+	}) => {
+		const response = await adminApi.get("/tmdb/trending", { params });
+		return response.data;
+	},
+
+	// Get full details (unified endpoint)
+	getDetails: async (params: {
+		id: string;
+		type?: "movie" | "tv";
+		language?: "en" | "fa";
+	}) => {
+		const response = await adminApi.get("/tmdb/details", { params });
+		return response.data;
+	},
+
+	// Get season details (new unified endpoint)
+	getSeasonDetails: async (params: {
+		tvId: string;
+		seasonNumber: number;
+		language?: "en" | "fa";
+	}) => {
+		const response = await adminApi.get("/tmdb/season-details", { params });
+		return response.data;
+	},
+
+	// Save content locally for later import
+	saveContent: async (data: {
+		tmdbId: string;
+		mediaType: "movie" | "tv";
+		rawData?: any;
+	}) => {
+		const response = await adminApi.post("/tmdb/saved", data);
+		return response.data;
+	},
+
+	// Save multiple items at once
+	saveBulkContent: async (items: Array<{
+		tmdbId: string;
+		mediaType: "movie" | "tv";
+		rawData?: any;
+	}>) => {
+		const response = await adminApi.post("/tmdb/saved/bulk", items);
+		return response.data;
+	},
+
+	// Get saved content list
+	getSavedContent: async (params?: {
+		page?: number;
+		limit?: number;
+		mediaType?: string;
+		status?: string;
+		search?: string;
+	}) => {
+		const response = await adminApi.get("/tmdb/saved", { params });
+		return response.data;
+	},
+
+	// Get single saved content by ID
+	getSavedContentById: async (id: string) => {
+		const response = await adminApi.get(`/tmdb/saved/${id}`);
+		return response.data;
+	},
+
+	// Import saved content to main database
+	importToDatabase: async (savedContentId: string) => {
+		const response = await adminApi.post("/tmdb/saved/import", {
+			savedContentId,
+		});
+		return response.data;
+	},
+
+	// Delete saved content
+	deleteSavedContent: async (id: string) => {
+		await adminApi.delete(`/tmdb/saved/${id}`);
+	},
 };
 
 // Upera API (Gateway calls to Seeko/Upera)

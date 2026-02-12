@@ -14,6 +14,7 @@ import {
 	Users,
 	Video,
 	Globe,
+	Database,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -34,6 +35,7 @@ const menuItems = [
 	{ href: "/admin/notifications", labelKey: "admin.menu.notifications", icon: Bell },
 	{ href: "/admin/finance", labelKey: "admin.menu.finance", icon: BarChart3 },
 	{ href: "/admin/upera", labelKey: "admin.menu.upera", icon: Globe },
+	{ href: "/admin/tmdb", labelKey: "admin.menu.tmdb", icon: Database },
 ];
 
 export function AdminSidebar() {

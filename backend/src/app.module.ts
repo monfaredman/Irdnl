@@ -19,6 +19,7 @@ import { NotificationsModule } from './modules/notifications/notifications.modul
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { PublicModule } from './modules/public/public.module';
 import { UperaModule } from './modules/upera/upera.module';
+import { TMDBAdminModule } from './modules/tmdb/tmdb-admin.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { UperaModule } from './modules/upera/upera.module';
     AnalyticsModule,
     PublicModule,
     UperaModule,
+    TMDBAdminModule,
   ],
 })
 export class AppModule {}

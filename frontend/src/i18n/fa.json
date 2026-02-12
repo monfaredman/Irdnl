@@ -24,7 +24,8 @@
       "notifications": "اعلان‌ها",
       "finance": "مالی",
       "settings": "تنظیمات",
-      "upera": "همکاری اوپرا",
+      "upera": "آپرا",
+      "tmdb": "TMDB",
       "logout": "خروج"
     },
     "dashboard": {
@@ -420,17 +421,17 @@
       "uploadError": "خطا در آپلود فایل"
     },
     "upera": {
-      "title": "همکاری اوپرا",
-      "description": "مدیریت محتوای دریافتی از اوپرا (Seeko)",
+      "title": "آپرا",
+      "description": "مدیریت محتوای دریافتی از آپرا (Seeko)",
       "tabs": {
-        "browse": "جستجو در اوپرا",
+        "browse": "جستجو در آپرا",
         "local": "محتوای ذخیره شده",
         "purchase": "خرید و پرداخت",
         "screening": "اکران خانگی",
         "discover": "کشف محتوا"
       },
       "browse": {
-        "title": "جستجوی محتوا در اوپرا",
+        "title": "جستجوی محتوا در آپرا",
         "movies": "فیلم‌ها",
         "series": "سریال‌ها",
         "searchPlaceholder": "جستجو در عنوان فارسی...",
@@ -473,7 +474,7 @@
         "results": "نتیجه"
       },
       "local": {
-        "title": "محتوای ذخیره شده اوپرا",
+        "title": "محتوای ذخیره شده آپرا",
         "importToDb": "وارد کردن به دیتابیس",
         "importing": "در حال وارد کردن...",
         "importSuccess": "با موفقیت به دیتابیس وارد شد",
@@ -492,7 +493,7 @@
         "all": "همه"
       },
       "purchase": {
-        "title": "خرید محتوا از اوپرا",
+        "title": "خرید محتوا از آپرا",
         "contentId": "شناسه محتوا",
         "contentType": "نوع محتوا",
         "movie": "فیلم",
@@ -518,8 +519,8 @@
         "screeningInfo": "اطلاعات اکران"
       },
       "discover": {
-        "title": "کشف محتوای سایت اوپرا",
-        "description": "مشاهده محتوای صفحه اصلی، اسلایدرها، پیشنهادات، ژانرها و پلن‌های اشتراک سایت اوپرا",
+        "title": "کشف محتوای سایت آپرا",
+        "description": "مشاهده محتوای صفحه اصلی، اسلایدرها، پیشنهادات، ژانرها و پلن‌های اشتراک سایت آپرا",
         "sections": {
           "discover": "صفحه کشف",
           "sliders": "اسلایدرها",
@@ -577,6 +578,104 @@
         "planPrice": "قیمت",
         "planDuration": "مدت زمان",
         "totalItems": "تعداد کل"
+      }
+    },
+    "tmdb": {
+      "title": "مدیریت TMDB",
+      "description": "جستجو، کشف و مدیریت محتوای The Movie Database",
+      "tabs": {
+        "browse": "جستجو و کشف",
+        "saved": "محتوای ذخیره شده"
+      },
+      "browse": {
+        "title": "جستجو و کشف TMDB",
+        "search": "جستجو",
+        "discover": "کشف",
+        "popular": "محبوب",
+        "trending": "ترند",
+        "searchPlaceholder": "جستجوی فیلم یا سریال...",
+        "searchButton": "جستجو",
+        "searching": "در حال جستجو...",
+        "discoverButton": "کشف محتوا",
+        "discovering": "در حال کشف...",
+        "popularButton": "محبوب‌ترین‌ها",
+        "trendingButton": "ترندها",
+        "loading": "در حال بارگذاری...",
+        "noResults": "نتیجه‌ای یافت نشد",
+        "results": "نتیجه",
+        "saveToLocal": "ذخیره محلی",
+        "saveAll": "ذخیره همه",
+        "saving": "در حال ذخیره...",
+        "savedSuccess": "با موفقیت ذخیره شد",
+        "viewDetails": "مشاهده جزئیات",
+        "language": "زبان",
+        "languageOptions": {
+          "fa": "فارسی",
+          "en": "انگلیسی"
+        },
+        "type": "نوع",
+        "typeOptions": {
+          "movie": "فیلم",
+          "tv": "سریال"
+        },
+        "genre": "ژانر",
+        "genreAll": "همه",
+        "year": "سال",
+        "certification": "رده سنی",
+        "certificationOptions": {
+          "all": "همه",
+          "g": "عمومی (G)",
+          "pg": "والدین (PG)",
+          "pg13": "بالای ۱۳ سال",
+          "r": "بزرگسال (R)",
+          "nc17": "۱۷+ (NC-17)"
+        },
+        "country": "کشور",
+        "countryOptions": {
+          "all": "همه",
+          "us": "آمریکا",
+          "uk": "انگلستان",
+          "ir": "ایران",
+          "fr": "فرانسه",
+          "de": "آلمان",
+          "jp": "ژاپن",
+          "kr": "کره جنوبی"
+        },
+        "page": "صفحه",
+        "timeWindow": "بازه زمانی",
+        "timeWindowOptions": {
+          "day": "روز",
+          "week": "هفته"
+        },
+        "mediaType": "نوع رسانه",
+        "mediaTypeOptions": {
+          "all": "همه",
+          "movie": "فیلم",
+          "tv": "سریال"
+        }
+      },
+      "saved": {
+        "title": "محتوای ذخیره شده TMDB",
+        "description": "مدیریت محتوای ذخیره شده از TMDB",
+        "importToDb": "وارد کردن به دیتابیس",
+        "importing": "در حال وارد کردن...",
+        "importSuccess": "با موفقیت به دیتابیس وارد شد",
+        "importFailed": "خطا در وارد کردن",
+        "delete": "حذف",
+        "deleteConfirm": "آیا مطمئن هستید؟",
+        "deleteSuccess": "با موفقیت حذف شد",
+        "deleteFailed": "خطا در حذف",
+        "status": {
+          "pending": "در انتظار",
+          "imported": "وارد شده",
+          "failed": "ناموفق"
+        },
+        "filterType": "نوع",
+        "filterStatus": "وضعیت",
+        "all": "همه",
+        "searchPlaceholder": "جستجوی عنوان...",
+        "noSavedContent": "محتوای ذخیره شده‌ای وجود ندارد",
+        "totalSaved": "تعداد کل ذخیره شده"
       }
     }
   }
