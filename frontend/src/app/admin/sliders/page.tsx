@@ -2,6 +2,10 @@
 
 import { Edit, Plus, Trash2, Image } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import type { ColDef } from "ag-grid-community";
 import { Button } from "@/components/admin/ui/button";
 import {
 	Card,
@@ -195,6 +199,114 @@ export default function SlidersPage() {
 	const getSectionLabel = (val: string) =>
 		SECTIONS.find((s) => s.value === val)?.label || val;
 
+	// AG Grid column definitions
+	const columnDefs: ColDef[] = [
+		{
+			field: "sortOrder",
+			headerName: "ترتیب",
+			width: 100,
+			sortable: true,
+		},
+		{
+			field: "imageUrl",
+			headerName: "تصویر",
+			width: 120,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const imageUrl = params.value;
+				return imageUrl ? (
+					<img
+						src={imageUrl}
+						alt="Slider"
+						className="w-16 h-10 object-cover rounded"
+					/>
+				) : (
+					<div className="w-16 h-10 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400">
+						—
+					</div>
+				);
+			},
+		},
+		{
+			field: "title",
+			headerName: "عنوان",
+			flex: 1,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => {
+				const slider = params.data;
+				return (
+					<div>
+						<p className="font-medium">{slider.titleFa || slider.title}</p>
+						{slider.titleFa && (
+							<p className="text-xs text-gray-400">{slider.title}</p>
+						)}
+					</div>
+				);
+			},
+		},
+		{
+			field: "section",
+			headerName: "بخش",
+			width: 180,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => {
+				return <Chip label={getSectionLabel(params.value)} size="small" />;
+			},
+		},
+		{
+			field: "contentId",
+			headerName: "محتوا",
+			width: 150,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const slider = params.data;
+				const text = slider.content?.title || (slider.contentId ? slider.contentId.slice(0, 8) + "..." : "—");
+				return <span className="text-xs">{text}</span>;
+			},
+		},
+		{
+			field: "isActive",
+			headerName: "وضعیت",
+			width: 100,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => {
+				const slider = params.data;
+				return (
+					<Switch
+						size="small"
+						checked={params.value}
+						onChange={() => handleToggleActive(slider)}
+					/>
+				);
+			},
+		},
+		{
+			field: "actions",
+			headerName: "عملیات",
+			width: 120,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const slider = params.data;
+				return (
+					<div className="flex gap-1">
+						<Button variant="ghost" size="sm" onClick={() => openEditForm(slider)}>
+							<Edit className="h-4 w-4" />
+						</Button>
+						<Button variant="ghost" size="sm" onClick={() => handleDelete(slider)}>
+							<Trash2 className="h-4 w-4 text-red-500" />
+						</Button>
+					</div>
+				);
+			},
+		},
+	];
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -251,70 +363,26 @@ export default function SlidersPage() {
 					) : sliders.length === 0 ? (
 						<p className="text-center py-8 text-gray-500">اسلایدری یافت نشد</p>
 					) : (
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>ترتیب</TableHead>
-									<TableHead>تصویر</TableHead>
-									<TableHead>عنوان</TableHead>
-									<TableHead>بخش</TableHead>
-									<TableHead>محتوا</TableHead>
-									<TableHead>وضعیت</TableHead>
-									<TableHead>عملیات</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{sliders.map((s) => (
-									<TableRow key={s.id}>
-										<TableCell>{s.sortOrder}</TableCell>
-										<TableCell>
-											{s.imageUrl ? (
-												<img
-													src={s.imageUrl}
-													alt={s.title}
-													className="w-16 h-10 object-cover rounded"
-												/>
-											) : (
-												<div className="w-16 h-10 bg-gray-200 rounded flex items-center justify-center text-xs text-gray-400">
-													—
-												</div>
-											)}
-										</TableCell>
-										<TableCell>
-											<div>
-												<p className="font-medium">{s.titleFa || s.title}</p>
-												{s.titleFa && (
-													<p className="text-xs text-gray-400">{s.title}</p>
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<Chip label={getSectionLabel(s.section)} size="small" />
-										</TableCell>
-										<TableCell className="text-xs">
-											{s.content?.title || (s.contentId ? s.contentId.slice(0, 8) + "..." : "—")}
-										</TableCell>
-										<TableCell>
-											<Switch
-												size="small"
-												checked={s.isActive}
-												onChange={() => handleToggleActive(s)}
-											/>
-										</TableCell>
-										<TableCell>
-											<div className="flex gap-1">
-												<Button variant="ghost" size="sm" onClick={() => openEditForm(s)}>
-													<Edit className="h-4 w-4" />
-												</Button>
-												<Button variant="ghost" size="sm" onClick={() => handleDelete(s)}>
-													<Trash2 className="h-4 w-4 text-red-500" />
-												</Button>
-											</div>
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+						<div className="ag-theme-alpine" style={{ height: 600, width: "100%" }} dir="rtl">
+							<AgGridReact
+								rowData={sliders}
+								columnDefs={columnDefs}
+								pagination={true}
+								paginationPageSize={20}
+								paginationPageSizeSelector={[10, 20, 50, 100]}
+								domLayout="normal"
+								enableRtl={true}
+								suppressMovableColumns={false}
+								animateRows={true}
+								rowHeight={70}
+								headerHeight={56}
+								defaultColDef={{
+									resizable: true,
+									sortable: true,
+									filter: true,
+								}}
+							/>
+						</div>
 					)}
 				</CardContent>
 			</Card>

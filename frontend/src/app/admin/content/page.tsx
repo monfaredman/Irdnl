@@ -2,7 +2,7 @@
 
 import { Edit, Plus, Trash2, Film, Tv, Image, MapPin, Gift, MoreVertical } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/admin/ui/button";
 import {
 	Card,
@@ -10,14 +10,6 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/admin/ui/card";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/admin/ui/table";
 import {
 	Snackbar,
 	Alert,
@@ -36,7 +28,12 @@ import {
 	ListItemIcon,
 	ListItemText,
 	IconButton,
+	Chip,
 } from "@mui/material";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import { ColDef, GridReadyEvent } from "ag-grid-community";
 import { contentApi, slidersApi, pinsApi, offersApi } from "@/lib/api/admin";
 import { useTranslation } from "@/i18n";
 
@@ -282,6 +279,149 @@ export default function ContentManagementPage() {
 		}
 	};
 
+	// ── AG Grid Cell Renderers ──
+	const PosterRenderer = useCallback((params: any) => {
+		const item = params.data;
+		if (item.posterUrl) {
+			return (
+				<img
+					src={item.posterUrl}
+					alt={item.title}
+					className="h-12 w-9 rounded object-cover"
+				/>
+			);
+		}
+		return (
+			<div className="flex h-12 w-9 items-center justify-center rounded bg-gray-100">
+				{item.type === "movie" ? (
+					<Film className="h-4 w-4 text-gray-400" />
+				) : (
+					<Tv className="h-4 w-4 text-gray-400" />
+				)}
+			</div>
+		);
+	}, []);
+
+	const TitleRenderer = useCallback((params: any) => {
+		return (
+			<Link
+				href={`/admin/content/${params.data.id}`}
+				className="hover:text-blue-600 hover:underline font-medium"
+			>
+				{params.value}
+			</Link>
+		);
+	}, []);
+
+	const TypeRenderer = useCallback((params: any) => {
+		return (
+			<Chip
+				icon={params.value === "movie" ? <Film className="h-3.5 w-3.5" /> : <Tv className="h-3.5 w-3.5" />}
+				label={t(`admin.content.${params.value}`) || params.value}
+				size="small"
+				variant="outlined"
+				color={params.value === "movie" ? "primary" : "secondary"}
+			/>
+		);
+	}, [t]);
+
+	const StatusRenderer = useCallback((params: any) => {
+		const item = params.data;
+		const isToggling = togglingId === item.id;
+		return (
+			<Chip
+				label={isToggling ? "..." : (t(`admin.content.status.${item.status}`) || item.status)}
+				size="small"
+				color={item.status === "published" ? "success" : item.status === "archived" ? "default" : "warning"}
+				onClick={() => !isToggling && handleToggleStatus(item.id, item.status)}
+				title={item.status === "published" ? "کلیک برای پیش‌نویس" : "کلیک برای انتشار"}
+				style={{ cursor: isToggling ? "not-allowed" : "pointer" }}
+			/>
+		);
+	}, [togglingId, t]);
+
+	const ActionsRenderer = useCallback((params: any) => {
+		const item = params.data;
+		return (
+			<div className="flex gap-1 items-center">
+				<Link href={`/admin/content/${item.id}`}>
+					<Button variant="outline" size="sm">
+						<Edit className="h-4 w-4" />
+					</Button>
+				</Link>
+				<Button
+					variant="destructive"
+					size="sm"
+					onClick={() => handleDelete(item.id)}
+				>
+					<Trash2 className="h-4 w-4" />
+				</Button>
+				<IconButton
+					size="small"
+					onClick={(e) => openActionMenu(e, item)}
+					title="عملیات بیشتر"
+				>
+					<MoreVertical className="h-4 w-4" />
+				</IconButton>
+			</div>
+		);
+	}, []);
+
+	// ── AG Grid Column Definitions ──
+	const columnDefs = useMemo<ColDef[]>(() => [
+		{
+			field: "posterUrl",
+			headerName: t("admin.content.poster"),
+			cellRenderer: PosterRenderer,
+			width: 80,
+			sortable: false,
+			filter: false,
+			pinned: "right",
+		},
+		{
+			field: "title",
+			headerName: t("admin.upload.basicInfo.title"),
+			cellRenderer: TitleRenderer,
+			sortable: true,
+			filter: "agTextColumnFilter",
+			flex: 2,
+			minWidth: 200,
+		},
+		{
+			field: "type",
+			headerName: t("admin.upload.basicInfo.type"),
+			cellRenderer: TypeRenderer,
+			sortable: true,
+			filter: "agSetColumnFilter",
+			width: 140,
+		},
+		{
+			field: "status",
+			headerName: t("admin.content.detail.status"),
+			cellRenderer: StatusRenderer,
+			sortable: true,
+			filter: "agSetColumnFilter",
+			width: 150,
+		},
+		{
+			field: "year",
+			headerName: t("admin.content.year"),
+			sortable: true,
+			filter: "agNumberColumnFilter",
+			width: 100,
+			valueFormatter: (params) => params.value || "-",
+		},
+		{
+			field: "actions",
+			headerName: t("admin.content.actions"),
+			cellRenderer: ActionsRenderer,
+			width: 180,
+			sortable: false,
+			filter: false,
+			pinned: "left",
+		},
+	], [t, PosterRenderer, TitleRenderer, TypeRenderer, StatusRenderer, ActionsRenderer]);
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -345,125 +485,26 @@ export default function ContentManagementPage() {
 					{loading ? (
 						<div className="p-6 text-center">{t("admin.messages.loading")}</div>
 					) : (
-						<>
-							<Table>
-								<TableHeader>
-									<TableRow>
-										<TableHead className="w-16">{t("admin.content.poster")}</TableHead>
-										<TableHead>{t("admin.upload.basicInfo.title")}</TableHead>
-										<TableHead>{t("admin.upload.basicInfo.type")}</TableHead>
-										<TableHead>{t("admin.content.detail.status")}</TableHead>
-										<TableHead>{t("admin.content.year")}</TableHead>
-										<TableHead>{t("admin.content.actions")}</TableHead>
-									</TableRow>
-								</TableHeader>
-								<TableBody>
-									{content.map((item) => (
-										<TableRow key={item.id}>
-											{/* Poster Thumbnail */}
-											<TableCell>
-												{item.posterUrl ? (
-													<img
-														src={item.posterUrl}
-														alt={item.title}
-														className="h-12 w-9 rounded object-cover"
-													/>
-												) : (
-													<div className="flex h-12 w-9 items-center justify-center rounded bg-gray-100">
-														{item.type === "movie" ? (
-															<Film className="h-4 w-4 text-gray-400" />
-														) : (
-															<Tv className="h-4 w-4 text-gray-400" />
-														)}
-													</div>
-												)}
-											</TableCell>
-											<TableCell className="font-medium">
-												<Link
-													href={`/admin/content/${item.id}`}
-													className="hover:text-blue-600 hover:underline"
-												>
-													{item.title}
-												</Link>
-											</TableCell>
-											<TableCell>
-												<span className="inline-flex items-center gap-1 text-sm">
-													{item.type === "movie" ? (
-														<Film className="h-3.5 w-3.5" />
-													) : (
-														<Tv className="h-3.5 w-3.5" />
-													)}
-													{t(`admin.content.${item.type}`) || item.type}
-												</span>
-											</TableCell>
-											<TableCell>
-												<button
-													type="button"
-													onClick={() => handleToggleStatus(item.id, item.status)}
-													disabled={togglingId === item.id}
-													className={`cursor-pointer rounded-full px-2 py-1 text-xs font-medium transition-all hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 ${
-														item.status === "published"
-															? "bg-green-100 text-green-800"
-															: item.status === "archived"
-																? "bg-gray-100 text-gray-800"
-																: "bg-yellow-100 text-yellow-800"
-													}`}
-													title={item.status === "published" ? "کلیک برای پیش‌نویس" : "کلیک برای انتشار"}
-												>
-													{togglingId === item.id ? "..." : (t(`admin.content.status.${item.status}`) || item.status)}
-												</button>
-											</TableCell>
-											<TableCell>{item.year || "-"}</TableCell>
-											<TableCell>
-												<div className="flex gap-1 items-center">
-													<Link href={`/admin/content/${item.id}`}>
-														<Button variant="outline" size="sm">
-															<Edit className="h-4 w-4" />
-														</Button>
-													</Link>
-													<Button
-														variant="destructive"
-														size="sm"
-														onClick={() => handleDelete(item.id)}
-													>
-														<Trash2 className="h-4 w-4" />
-													</Button>
-													<IconButton
-														size="small"
-														onClick={(e) => openActionMenu(e, item)}
-														title="عملیات بیشتر"
-													>
-														<MoreVertical className="h-4 w-4" />
-													</IconButton>
-												</div>
-											</TableCell>
-										</TableRow>
-									))}
-								</TableBody>
-							</Table>
-							<div className="mt-4 flex items-center justify-between">
-								<div className="text-sm text-gray-600">
-									{t("admin.content.showing")} {(page - 1) * 20 + 1} {t("admin.content.to")}{" "}
-									{Math.min(page * 20, total)} {t("admin.content.of")} {total}
-								</div>
-								<div className="flex gap-2">
-									<Button
-										variant="outline"
-										onClick={() => setPage((p) => Math.max(1, p - 1))}
-										disabled={page === 1}
-									>
-										{t("admin.content.previous")}
-									</Button>
-									<Button
-										variant="outline"
-										onClick={() => setPage((p) => p + 1)}
-										disabled={page * 20 >= total}
-									>
-										{t("admin.content.next")}
-									</Button>
-								</div>
-							</div>
-						</>
+						<div className="ag-theme-alpine" style={{ height: 650, width: "100%" }} dir="rtl">
+							<AgGridReact
+								columnDefs={columnDefs}
+								rowData={content}
+								pagination={true}
+								paginationPageSize={20}
+								paginationPageSizeSelector={[10, 20, 50, 100]}
+								suppressRowClickSelection={true}
+								enableRtl={true}
+								loading={loading}
+								animateRows={true}
+								rowHeight={70}
+								headerHeight={56}
+								defaultColDef={{
+									resizable: true,
+									sortable: true,
+									filter: true,
+								}}
+							/>
+						</div>
 					)}
 				</CardContent>
 			</Card>

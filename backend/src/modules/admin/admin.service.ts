@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { Content, ContentType, ContentStatus } from '../content/entities/content.entity';
 import { Series } from '../content/entities/series.entity';
 import { Season } from '../content/entities/season.entity';
@@ -22,6 +23,7 @@ import { CreateSeasonDto, UpdateSeasonDto } from './dto/create-season.dto';
 import { CreateEpisodeDto, UpdateEpisodeDto } from './dto/create-episode.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 import { CreateGenreDto, UpdateGenreDto } from './dto/genre.dto';
 import { CreateSliderDto, UpdateSliderDto } from './dto/slider.dto';
@@ -370,6 +372,33 @@ export class AdminService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return user;
+  }
+
+  async createUser(createUserDto: CreateUserDto): Promise<User> {
+    // Check if email already exists
+    const existingUser = await this.userRepository.findOne({
+      where: { email: createUserDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(createUserDto.password, saltRounds);
+
+    // Create new user
+    const user = this.userRepository.create({
+      email: createUserDto.email,
+      name: createUserDto.name,
+      passwordHash,
+      role: createUserDto.role || 'user' as any,
+      avatarUrl: createUserDto.avatarUrl || null,
+      isActive: createUserDto.isActive !== undefined ? createUserDto.isActive : true,
+    });
+
+    return this.userRepository.save(user);
   }
 
   async updateUser(id: string, updateUserDto: UpdateUserDto): Promise<User> {

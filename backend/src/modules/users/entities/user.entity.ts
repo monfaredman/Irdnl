@@ -12,8 +12,10 @@ import { Subscription } from './subscription.entity';
 import { Watchlist } from '../../watchlist/entities/watchlist.entity';
 
 export enum UserRole {
+  USER = 'user',
   VIEWER = 'viewer',
-  MODERATOR = 'moderator',
+  CONTENT_MANAGER = 'content_manager',
+  FINANCE = 'finance',
   ADMIN = 'admin',
 }
 
@@ -34,7 +36,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.VIEWER,
+    default: UserRole.USER,
   })
   role: UserRole;
 

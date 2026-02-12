@@ -121,6 +121,17 @@ export const usersApi = {
 		const response = await adminApi.get(`/users/${id}`);
 		return response.data;
 	},
+	create: async (data: {
+		email: string;
+		password: string;
+		name: string;
+		role?: string;
+		avatarUrl?: string;
+		isActive?: boolean;
+	}) => {
+		const response = await adminApi.post("/users", data);
+		return response.data;
+	},
 	update: async (id: string, data: any) => {
 		const response = await adminApi.patch(`/users/${id}`, data);
 		return response.data;

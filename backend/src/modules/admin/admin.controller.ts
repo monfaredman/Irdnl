@@ -247,6 +247,15 @@ export class AdminController {
     return this.adminService.getUser(id);
   }
 
+  @Post('users')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create new user (admin only)' })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ status: 409, description: 'User with this email already exists' })
+  async createUser(@Body() createUserDto: any) {
+    return this.adminService.createUser(createUserDto);
+  }
+
   @Patch('users/:id')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update user (admin only)' })

@@ -4,6 +4,7 @@ import "./globals.css";
 import { PremiumLiquidGlassLayout } from "@/components/layout/PremiumLiquidGlassLayout";
 import { LanguageProvider } from "@/providers/language-provider";
 import { AuthProvider } from "@/providers/auth-provider";
+import { AGGridProvider } from "@/components/AGGridProvider";
 
 const geistSans = Geist({
 	variable: "--font-geist-sans",
@@ -58,11 +59,13 @@ export default function RootLayout({
 				className={`${geistSans.variable} ${geistMono.variable} ${vazirmatn.variable} antialiased`}
 				suppressHydrationWarning
 			>
-				<LanguageProvider>
-					<AuthProvider>
-						<PremiumLiquidGlassLayout>{children}</PremiumLiquidGlassLayout>
-					</AuthProvider>
-				</LanguageProvider>
+				<AGGridProvider>
+					<LanguageProvider>
+						<AuthProvider>
+							<PremiumLiquidGlassLayout>{children}</PremiumLiquidGlassLayout>
+						</AuthProvider>
+					</LanguageProvider>
+				</AGGridProvider>
 			</body>
 		</html>
 	);

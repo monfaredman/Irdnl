@@ -101,9 +101,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Check if user is admin or moderator
-    if (user.role !== UserRole.ADMIN && user.role !== UserRole.MODERATOR) {
-      throw new ForbiddenException('Access denied. Admin or moderator role required.');
+    // Check if user has admin panel access (admin, content_manager, finance, or viewer roles)
+    const allowedRoles = [UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.FINANCE, UserRole.VIEWER];
+    if (!allowedRoles.includes(user.role)) {
+      throw new ForbiddenException('Access denied. Admin panel access required.');
     }
 
     const isPasswordValid = await bcrypt.compare(loginDto.password, user.passwordHash);
@@ -137,9 +138,10 @@ export class AuthService {
         throw new UnauthorizedException();
       }
 
-      // Check if user is admin or moderator
-      if (user.role !== UserRole.ADMIN && user.role !== UserRole.MODERATOR) {
-        throw new ForbiddenException('Access denied. Admin or moderator role required.');
+      // Check if user has admin panel access
+      const allowedRoles = [UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.FINANCE, UserRole.VIEWER];
+      if (!allowedRoles.includes(user.role)) {
+        throw new ForbiddenException('Access denied. Admin panel access required.');
       }
 
       const tokens = await this.generateTokens(user);
@@ -162,8 +164,11 @@ export class AuthService {
       return { message: 'If the email exists, a password reset link has been sent.' };
     }
 
-    if (isAdmin && user.role !== UserRole.ADMIN && user.role !== UserRole.MODERATOR) {
-      throw new ForbiddenException('Access denied. Admin or moderator role required.');
+    if (isAdmin) {
+      const allowedRoles = [UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.FINANCE, UserRole.VIEWER];
+      if (!allowedRoles.includes(user.role)) {
+        throw new ForbiddenException('Access denied. Admin panel access required.');
+      }
     }
 
     // TODO: Generate reset token and send email

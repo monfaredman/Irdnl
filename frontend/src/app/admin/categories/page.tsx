@@ -2,6 +2,10 @@
 
 import { Edit, Plus, Trash2, FolderTree } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import type { ColDef } from "ag-grid-community";
 import { Button } from "@/components/admin/ui/button";
 import {
 	Card,
@@ -204,6 +208,122 @@ export default function CategoriesPage() {
 		}
 	};
 
+	// AG Grid column definitions
+	const columnDefs: ColDef[] = [
+		{
+			field: "sortOrder",
+			headerName: "ترتیب",
+			width: 100,
+			sortable: true,
+		},
+		{
+			field: "slug",
+			headerName: "نامک (Slug)",
+			width: 150,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => (
+				<span className="font-mono text-xs">{params.value}</span>
+			),
+		},
+		{
+			field: "nameFa",
+			headerName: "نام فارسی",
+			flex: 1,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => (
+				<span className="font-medium">{params.value}</span>
+			),
+		},
+		{
+			field: "nameEn",
+			headerName: "نام انگلیسی",
+			flex: 1,
+			sortable: true,
+			filter: true,
+		},
+		{
+			field: "contentType",
+			headerName: "نوع محتوا",
+			width: 130,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => (
+				<Chip
+					label={params.value}
+					size="small"
+					color={
+						params.value === "movie"
+							? "primary"
+							: params.value === "series"
+								? "secondary"
+								: "default"
+					}
+				/>
+			),
+		},
+		{
+			field: "gradientColors",
+			headerName: "رنگ‌ها",
+			width: 150,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const colors = params.value || [];
+				return (
+					<div className="flex gap-1">
+						{colors.map((c: string, i: number) => (
+							<div
+								key={i}
+								className="w-5 h-5 rounded border"
+								style={{ backgroundColor: c }}
+								title={c}
+							/>
+						))}
+					</div>
+				);
+			},
+		},
+		{
+			field: "isActive",
+			headerName: "وضعیت",
+			width: 100,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => {
+				const category = params.data;
+				return (
+					<Switch
+						size="small"
+						checked={params.value}
+						onChange={() => handleToggleActive(category)}
+					/>
+				);
+			},
+		},
+		{
+			field: "actions",
+			headerName: "عملیات",
+			width: 120,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const category = params.data;
+				return (
+					<div className="flex gap-1">
+						<Button variant="ghost" size="sm" onClick={() => openEditForm(category)}>
+							<Edit className="h-4 w-4" />
+						</Button>
+						<Button variant="ghost" size="sm" onClick={() => handleDelete(category)}>
+							<Trash2 className="h-4 w-4 text-red-500" />
+						</Button>
+					</div>
+				);
+			},
+		},
+	];
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -234,82 +354,26 @@ export default function CategoriesPage() {
 							دسته‌بندی یافت نشد
 						</p>
 					) : (
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>ترتیب</TableHead>
-									<TableHead>نامک (Slug)</TableHead>
-									<TableHead>نام فارسی</TableHead>
-									<TableHead>نام انگلیسی</TableHead>
-									<TableHead>نوع محتوا</TableHead>
-									<TableHead>رنگ‌ها</TableHead>
-									<TableHead>وضعیت</TableHead>
-									<TableHead>عملیات</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{categories.map((cat) => (
-									<TableRow key={cat.id}>
-										<TableCell>{cat.sortOrder}</TableCell>
-										<TableCell className="font-mono text-xs">
-											{cat.slug}
-										</TableCell>
-										<TableCell className="font-medium">{cat.nameFa}</TableCell>
-										<TableCell>{cat.nameEn}</TableCell>
-										<TableCell>
-											<Chip
-												label={cat.contentType}
-												size="small"
-												color={
-													cat.contentType === "movie"
-														? "primary"
-														: cat.contentType === "series"
-															? "secondary"
-															: "default"
-												}
-											/>
-										</TableCell>
-										<TableCell>
-											<div className="flex gap-1">
-												{(cat.gradientColors || []).map((c, i) => (
-													<div
-														key={i}
-														className="w-5 h-5 rounded border"
-														style={{ backgroundColor: c }}
-														title={c}
-													/>
-												))}
-											</div>
-										</TableCell>
-										<TableCell>
-											<Switch
-												size="small"
-												checked={cat.isActive}
-												onChange={() => handleToggleActive(cat)}
-											/>
-										</TableCell>
-										<TableCell>
-											<div className="flex gap-1">
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => openEditForm(cat)}
-												>
-													<Edit className="h-4 w-4" />
-												</Button>
-												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => handleDelete(cat)}
-												>
-													<Trash2 className="h-4 w-4 text-red-500" />
-												</Button>
-											</div>
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+						<div className="ag-theme-alpine" style={{ height: 600, width: "100%" }} dir="rtl">
+							<AgGridReact
+								rowData={categories}
+								columnDefs={columnDefs}
+								pagination={true}
+								paginationPageSize={20}
+								paginationPageSizeSelector={[10, 20, 50, 100]}
+								domLayout="normal"
+								enableRtl={true}
+								suppressMovableColumns={false}
+								animateRows={true}
+								rowHeight={70}
+								headerHeight={56}
+								defaultColDef={{
+									resizable: true,
+									sortable: true,
+									filter: true,
+								}}
+							/>
+						</div>
 					)}
 				</CardContent>
 			</Card>

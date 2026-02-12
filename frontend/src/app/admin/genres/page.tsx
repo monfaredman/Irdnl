@@ -2,6 +2,10 @@
 
 import { Edit, Plus, Trash2, Tags } from "lucide-react";
 import { useEffect, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css";
+import type { ColDef } from "ag-grid-community";
 import { Button } from "@/components/admin/ui/button";
 import {
 	Card,
@@ -190,6 +194,114 @@ export default function GenresPage() {
 		}
 	};
 
+	// AG Grid column definitions
+	const columnDefs: ColDef[] = [
+		{
+			field: "sortOrder",
+			headerName: "ترتیب",
+			width: 100,
+			sortable: true,
+		},
+		{
+			field: "slug",
+			headerName: "نامک",
+			width: 150,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => (
+				<span className="font-mono text-xs">{params.value}</span>
+			),
+		},
+		{
+			field: "nameFa",
+			headerName: "نام فارسی",
+			flex: 1,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => (
+				<span className="font-medium">{params.value}</span>
+			),
+		},
+		{
+			field: "nameEn",
+			headerName: "نام انگلیسی",
+			flex: 1,
+			sortable: true,
+			filter: true,
+		},
+		{
+			field: "tmdbGenreId",
+			headerName: "TMDB ID",
+			width: 120,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => (
+				<span className="font-mono text-xs">{params.value || "—"}</span>
+			),
+		},
+		{
+			field: "categorySlugs",
+			headerName: "دسته‌بندی‌ها",
+			width: 220,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const slugs = params.value || [];
+				return (
+					<div className="flex flex-wrap gap-1 max-w-[200px]">
+						{slugs.slice(0, 3).map((slug: string) => (
+							<Chip key={slug} label={slug} size="small" variant="outlined" />
+						))}
+						{slugs.length > 3 && (
+							<Chip
+								label={`+${slugs.length - 3}`}
+								size="small"
+								variant="outlined"
+							/>
+						)}
+					</div>
+				);
+			},
+		},
+		{
+			field: "isActive",
+			headerName: "وضعیت",
+			width: 100,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => {
+				const genre = params.data;
+				return (
+					<Switch
+						size="small"
+						checked={params.value}
+						onChange={() => handleToggleActive(genre)}
+					/>
+				);
+			},
+		},
+		{
+			field: "actions",
+			headerName: "عملیات",
+			width: 120,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const genre = params.data;
+				return (
+					<div className="flex gap-1">
+						<Button variant="ghost" size="sm" onClick={() => openEditForm(genre)}>
+							<Edit className="h-4 w-4" />
+						</Button>
+						<Button variant="ghost" size="sm" onClick={() => handleDelete(genre)}>
+							<Trash2 className="h-4 w-4 text-red-500" />
+						</Button>
+					</div>
+				);
+			},
+		},
+	];
+
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
@@ -246,64 +358,26 @@ export default function GenresPage() {
 					) : genres.length === 0 ? (
 						<p className="text-center py-8 text-gray-500">ژانری یافت نشد</p>
 					) : (
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>ترتیب</TableHead>
-									<TableHead>نامک</TableHead>
-									<TableHead>نام فارسی</TableHead>
-									<TableHead>نام انگلیسی</TableHead>
-									<TableHead>TMDB ID</TableHead>
-									<TableHead>دسته‌بندی‌ها</TableHead>
-									<TableHead>وضعیت</TableHead>
-									<TableHead>عملیات</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{genres.map((g) => (
-									<TableRow key={g.id}>
-										<TableCell>{g.sortOrder}</TableCell>
-										<TableCell className="font-mono text-xs">{g.slug}</TableCell>
-										<TableCell className="font-medium">{g.nameFa}</TableCell>
-										<TableCell>{g.nameEn}</TableCell>
-										<TableCell className="font-mono text-xs">
-											{g.tmdbGenreId || "—"}
-										</TableCell>
-										<TableCell>
-											<div className="flex flex-wrap gap-1 max-w-[200px]">
-												{(g.categorySlugs || []).slice(0, 3).map((slug) => (
-													<Chip key={slug} label={slug} size="small" variant="outlined" />
-												))}
-												{(g.categorySlugs || []).length > 3 && (
-													<Chip
-														label={`+${(g.categorySlugs || []).length - 3}`}
-														size="small"
-														variant="outlined"
-													/>
-												)}
-											</div>
-										</TableCell>
-										<TableCell>
-											<Switch
-												size="small"
-												checked={g.isActive}
-												onChange={() => handleToggleActive(g)}
-											/>
-										</TableCell>
-										<TableCell>
-											<div className="flex gap-1">
-												<Button variant="ghost" size="sm" onClick={() => openEditForm(g)}>
-													<Edit className="h-4 w-4" />
-												</Button>
-												<Button variant="ghost" size="sm" onClick={() => handleDelete(g)}>
-													<Trash2 className="h-4 w-4 text-red-500" />
-												</Button>
-											</div>
-										</TableCell>
-									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+						<div className="ag-theme-alpine" style={{ height: 600, width: "100%" }} dir="rtl">
+							<AgGridReact
+								rowData={genres}
+								columnDefs={columnDefs}
+								pagination={true}
+								paginationPageSize={20}
+								paginationPageSizeSelector={[10, 20, 50, 100]}
+								domLayout="normal"
+								enableRtl={true}
+								suppressMovableColumns={false}
+								animateRows={true}
+								rowHeight={70}
+								headerHeight={56}
+								defaultColDef={{
+									resizable: true,
+									sortable: true,
+									filter: true,
+								}}
+							/>
+						</div>
 					)}
 				</CardContent>
 			</Card>

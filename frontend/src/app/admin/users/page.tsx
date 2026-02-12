@@ -1,6 +1,6 @@
 "use client";
 
-import { Ban, CheckCircle, Edit, Eye, Trash2 } from "lucide-react";
+import { Ban, CheckCircle, Edit, Eye, Trash2, Plus } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/admin/ui/button";
@@ -27,6 +27,13 @@ import {
 	DialogContentText,
 	DialogActions,
 	Button as MuiButton,
+	TextField,
+	Select,
+	MenuItem,
+	InputLabel,
+	FormControl,
+	Switch,
+	FormControlLabel,
 } from "@mui/material";
 import { usersApi } from "@/lib/api/admin";
 import { useTranslation } from "@/i18n";
@@ -38,6 +45,14 @@ export default function UsersManagementPage() {
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(0);
 	const [search, setSearch] = useState("");
+	const [createDialogOpen, setCreateDialogOpen] = useState(false);
+	const [newUser, setNewUser] = useState({
+		email: "",
+		password: "",
+		name: "",
+		role: "user" as string,
+		isActive: true,
+	});
 	const [feedback, setFeedback] = useState<{
 		type: "success" | "error";
 		message: string;
@@ -101,6 +116,36 @@ export default function UsersManagementPage() {
 		fetchUsers();
 	}, [page, search]);
 
+	const handleCreateUser = async () => {
+		// Validation
+		if (!newUser.email || !newUser.password || !newUser.name) {
+			showFeedback("error", "لطفا تمام فیلدهای الزامی را پر کنید");
+			return;
+		}
+		if (newUser.password.length < 6) {
+			showFeedback("error", "رمز عبور باید حداقل 6 کاراکتر باشد");
+			return;
+		}
+
+		try {
+			await usersApi.create(newUser);
+			showFeedback("success", "کاربر با موفقیت ایجاد شد");
+			setCreateDialogOpen(false);
+			setNewUser({
+				email: "",
+				password: "",
+				name: "",
+				role: "user",
+				isActive: true,
+			});
+			fetchUsers();
+		} catch (error: any) {
+			console.error("Failed to create user:", error);
+			const message = error.response?.data?.message || "خطا در ایجاد کاربر";
+			showFeedback("error", message);
+		}
+	};
+
 	const handleToggleActive = async (id: string, isActive: boolean) => {
 		try {
 			await usersApi.update(id, { isActive: !isActive });
@@ -131,9 +176,15 @@ export default function UsersManagementPage() {
 
 	return (
 		<div className="space-y-6">
-			<div>
-				<h1 className="text-3xl font-bold text-gray-900">{t("admin.users.title")}</h1>
-				<p className="text-gray-600">{t("admin.users.description")}</p>
+			<div className="flex items-center justify-between">
+				<div>
+					<h1 className="text-3xl font-bold text-gray-900">{t("admin.users.title")}</h1>
+					<p className="text-gray-600">{t("admin.users.description")}</p>
+				</div>
+				<Button onClick={() => setCreateDialogOpen(true)}>
+					<Plus className="h-4 w-4 mr-2" />
+					ایجاد کاربر
+				</Button>
 			</div>
 
 			<Card>
@@ -243,6 +294,106 @@ export default function UsersManagementPage() {
 					)}
 				</CardContent>
 			</Card>
+
+			{/* Create User Dialog */}
+			<Dialog
+				open={createDialogOpen}
+				onClose={() => setCreateDialogOpen(false)}
+				dir="rtl"
+				maxWidth="sm"
+				fullWidth
+			>
+				<DialogTitle>ایجاد کاربر جدید</DialogTitle>
+				<DialogContent>
+					<div className="space-y-4 pt-4">
+						<TextField
+							fullWidth
+							label="نام کاربر"
+							value={newUser.name}
+							onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+							required
+						/>
+						<TextField
+							fullWidth
+							label="ایمیل"
+							type="email"
+							value={newUser.email}
+							onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+							required
+						/>
+						<TextField
+							fullWidth
+							label="رمز عبور"
+							type="password"
+							value={newUser.password}
+							onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+							required
+							helperText="حداقل 6 کاراکتر"
+						/>
+						<FormControl fullWidth>
+							<InputLabel>نقش کاربر</InputLabel>
+							<Select
+								value={newUser.role}
+								onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+								label="نقش کاربر"
+							>
+								<MenuItem value="user">
+									<div>
+										<div className="font-medium">کاربر عادی - User</div>
+										<div className="text-xs text-gray-500">دسترسی عادی به سایت</div>
+									</div>
+								</MenuItem>
+								<MenuItem value="viewer">
+									<div>
+										<div className="font-medium">بازدیدکننده پنل - Viewer</div>
+										<div className="text-xs text-gray-500">فقط مشاهده اطلاعات پنل</div>
+									</div>
+								</MenuItem>
+								<MenuItem value="content_manager">
+									<div>
+										<div className="font-medium">مدیر محتوا - Content Manager</div>
+										<div className="text-xs text-gray-500">مدیریت ویدیوها و محتوا</div>
+									</div>
+								</MenuItem>
+								<MenuItem value="finance">
+									<div>
+										<div className="font-medium">مدیر مالی - Finance</div>
+										<div className="text-xs text-gray-500">دسترسی به بخش مالی</div>
+									</div>
+								</MenuItem>
+								<MenuItem value="admin">
+									<div>
+										<div className="font-medium">ادمین - Admin</div>
+										<div className="text-xs text-gray-500">دسترسی کامل به پنل و سایت</div>
+									</div>
+								</MenuItem>
+							</Select>
+						</FormControl>
+						<FormControlLabel
+							control={
+								<Switch
+									checked={newUser.isActive}
+									onChange={(e) => setNewUser({ ...newUser, isActive: e.target.checked })}
+								/>
+							}
+							label="فعال"
+						/>
+					</div>
+				</DialogContent>
+				<DialogActions>
+					<MuiButton onClick={() => setCreateDialogOpen(false)} color="inherit">
+						انصراف
+					</MuiButton>
+					<MuiButton
+						onClick={handleCreateUser}
+						color="primary"
+						variant="contained"
+						disabled={!newUser.email || !newUser.password || newUser.password.length < 6 || !newUser.name}
+					>
+						ذخیره
+					</MuiButton>
+				</DialogActions>
+			</Dialog>
 
 			{/* Confirmation Dialog */}
 			<Dialog
