@@ -1,8 +1,18 @@
 /**
  * Category Configurations
  * 
- * Unified configurations for all genre/category pages
- * Each config defines: titles, TMDB params, gradients, sub-genres
+ * Unified configurations for all genre/category pages.
+ * These serve as local fallback definitions matching the DB's parent-child
+ * category structure. The canonical data lives in the database.
+ * 
+ * Menu Structure:
+ * • فیلم خارجی  (children: اکشن, ترسناک, هندی, عاشقانه, جنگی, کمدی, درام, هیجان‌انگیز, جنایی, حادثه‌ای)
+ * • فیلم ایرانی  (no children)
+ * • سریال       (children: سریال خارجی, سریال ترکی, سریال کره‌ای)
+ * • انیمیشن     (no children)
+ * • دوبله فارسی (no children)
+ * • انیمه       (no children)
+ * • سایر        (children: 250 فیلم برتر IMDb, کالکشن, به زودی)
  */
 
 import type { CategoryConfig, SubGenre } from "@/types/category";
@@ -48,85 +58,204 @@ const commonSeriesGenres: SubGenre[] = [
 // ============================================================================
 
 export const categoryConfigs: Record<string, CategoryConfig> = {
-  // Foreign Movies
-  "movies-foreign": {
-    id: "movies-foreign",
+  // ========================================================================
+  // فیلم خارجی — Foreign Movies (parent with children)
+  // ========================================================================
+  "foreign": {
+    id: "foreign" as any,
     contentType: "movie",
-    titleFa: "فیلم‌های خارجی",
+    titleFa: "فیلم خارجی",
     titleEn: "Foreign Movies",
     descriptionFa: "بهترین فیلم‌های خارجی از سراسر جهان با زیرنویس فارسی",
     descriptionEn: "Best foreign movies from around the world with Persian subtitles",
     gradientColors: ["#3B82F6", "#1D4ED8"],
-    tmdbParams: {
-      include_adult: false,
-    },
+    tmdbParams: { include_adult: false },
     subGenres: commonMovieGenres,
   },
-
-  // Iranian Movies
-  "movies-iranian": {
-    id: "movies-iranian",
+  // Children of فیلم خارجی
+  "foreign-action": {
+    id: "foreign-action" as any,
     contentType: "movie",
-    titleFa: "فیلم‌های ایرانی",
+    titleFa: "اکشن",
+    titleEn: "Action",
+    descriptionFa: "فیلم‌های اکشن خارجی",
+    descriptionEn: "Foreign action movies",
+    gradientColors: ["#DC2626", "#991B1B"],
+    tmdbParams: { with_genres: "28", include_adult: false },
+  },
+  "foreign-horror": {
+    id: "foreign-horror" as any,
+    contentType: "movie",
+    titleFa: "ترسناک",
+    titleEn: "Horror",
+    descriptionFa: "فیلم‌های ترسناک خارجی",
+    descriptionEn: "Foreign horror movies",
+    gradientColors: ["#7C3AED", "#5B21B6"],
+    tmdbParams: { with_genres: "27", include_adult: false },
+  },
+  "foreign-indian": {
+    id: "foreign-indian" as any,
+    contentType: "movie",
+    titleFa: "هندی",
+    titleEn: "Indian",
+    descriptionFa: "فیلم‌های هندی",
+    descriptionEn: "Indian movies",
+    gradientColors: ["#F97316", "#EA580C"],
+    tmdbParams: { with_original_language: "hi", include_adult: false },
+  },
+  "foreign-romance": {
+    id: "foreign-romance" as any,
+    contentType: "movie",
+    titleFa: "عاشقانه",
+    titleEn: "Romance",
+    descriptionFa: "فیلم‌های عاشقانه خارجی",
+    descriptionEn: "Foreign romance movies",
+    gradientColors: ["#EC4899", "#DB2777"],
+    tmdbParams: { with_genres: "10749", include_adult: false },
+  },
+  "foreign-war": {
+    id: "foreign-war" as any,
+    contentType: "movie",
+    titleFa: "جنگی",
+    titleEn: "War",
+    descriptionFa: "فیلم‌های جنگی خارجی",
+    descriptionEn: "Foreign war movies",
+    gradientColors: ["#78716C", "#57534E"],
+    tmdbParams: { with_genres: "10752", include_adult: false },
+  },
+  "foreign-comedy": {
+    id: "foreign-comedy" as any,
+    contentType: "movie",
+    titleFa: "کمدی",
+    titleEn: "Comedy",
+    descriptionFa: "فیلم‌های کمدی خارجی",
+    descriptionEn: "Foreign comedy movies",
+    gradientColors: ["#F59E0B", "#D97706"],
+    tmdbParams: { with_genres: "35", include_adult: false },
+  },
+  "foreign-drama": {
+    id: "foreign-drama" as any,
+    contentType: "movie",
+    titleFa: "درام",
+    titleEn: "Drama",
+    descriptionFa: "فیلم‌های درام خارجی",
+    descriptionEn: "Foreign drama movies",
+    gradientColors: ["#6366F1", "#4F46E5"],
+    tmdbParams: { with_genres: "18", include_adult: false },
+  },
+  "foreign-thriller": {
+    id: "foreign-thriller" as any,
+    contentType: "movie",
+    titleFa: "هیجان‌انگیز",
+    titleEn: "Thriller",
+    descriptionFa: "فیلم‌های هیجان‌انگیز خارجی",
+    descriptionEn: "Foreign thriller movies",
+    gradientColors: ["#1F2937", "#111827"],
+    tmdbParams: { with_genres: "53", include_adult: false },
+  },
+  "foreign-crime": {
+    id: "foreign-crime" as any,
+    contentType: "movie",
+    titleFa: "جنایی",
+    titleEn: "Crime",
+    descriptionFa: "فیلم‌های جنایی خارجی",
+    descriptionEn: "Foreign crime movies",
+    gradientColors: ["#374151", "#1F2937"],
+    tmdbParams: { with_genres: "80", include_adult: false },
+  },
+  "foreign-adventure": {
+    id: "foreign-adventure" as any,
+    contentType: "movie",
+    titleFa: "حادثه‌ای",
+    titleEn: "Adventure",
+    descriptionFa: "فیلم‌های حادثه‌ای خارجی",
+    descriptionEn: "Foreign adventure movies",
+    gradientColors: ["#22C55E", "#16A34A"],
+    tmdbParams: { with_genres: "12", include_adult: false },
+  },
+
+  // ========================================================================
+  // فیلم ایرانی — Iranian Movies (no children)
+  // ========================================================================
+  "iranian": {
+    id: "iranian" as any,
+    contentType: "movie",
+    titleFa: "فیلم ایرانی",
     titleEn: "Iranian Movies",
     descriptionFa: "گلچینی از بهترین فیلم‌های سینمای ایران",
     descriptionEn: "A selection of the best Iranian cinema",
     gradientColors: ["#059669", "#047857"],
-    tmdbParams: {
-      with_original_language: "fa",
-      include_adult: false,
-    },
-    subGenres: commonMovieGenres.filter(g => 
-      ["drama", "comedy", "romance", "thriller", "historical", "family"].includes(g.slug)
+    tmdbParams: { with_original_language: "fa", include_adult: false },
+    subGenres: commonMovieGenres.filter(g =>
+      ["drama", "comedy", "romance", "thriller", "historical", "family", "action"].includes(g.slug)
     ),
   },
 
-  // Foreign Series
-  "series-foreign": {
-    id: "series-foreign",
+  // ========================================================================
+  // سریال — Series (parent with children)
+  // ========================================================================
+  "series": {
+    id: "series" as any,
     contentType: "series",
-    titleFa: "سریال‌های خارجی",
-    titleEn: "Foreign Series",
-    descriptionFa: "سریال‌های محبوب از سراسر جهان با زیرنویس فارسی",
-    descriptionEn: "Popular TV series from around the world with Persian subtitles",
+    titleFa: "سریال",
+    titleEn: "Series",
+    descriptionFa: "سریال‌های محبوب از سراسر جهان",
+    descriptionEn: "Popular TV series from around the world",
     gradientColors: ["#8B5CF6", "#7C3AED"],
-    tmdbParams: {
-      include_adult: false,
-    },
+    tmdbParams: { include_adult: false },
     subGenres: commonSeriesGenres,
   },
-
-  // Iranian Series
-  "series-iranian": {
-    id: "series-iranian",
+  // Children of سریال
+  "series-foreign": {
+    id: "series-foreign" as any,
     contentType: "series",
-    titleFa: "سریال‌های ایرانی",
-    titleEn: "Iranian Series",
-    descriptionFa: "سریال‌های محبوب تلویزیونی ایران",
-    descriptionEn: "Popular Iranian TV series",
-    gradientColors: ["#10B981", "#059669"],
-    tmdbParams: {
-      with_original_language: "fa",
-      include_adult: false,
-    },
+    titleFa: "سریال خارجی",
+    titleEn: "Foreign Series",
+    descriptionFa: "سریال‌های خارجی محبوب",
+    descriptionEn: "Popular foreign TV series",
+    gradientColors: ["#8B5CF6", "#7C3AED"],
+    tmdbParams: { include_adult: false },
+    subGenres: commonSeriesGenres,
+  },
+  "series-turkish": {
+    id: "series-turkish" as any,
+    contentType: "series",
+    titleFa: "سریال ترکی",
+    titleEn: "Turkish Series",
+    descriptionFa: "سریال‌های ترکی محبوب",
+    descriptionEn: "Popular Turkish TV series",
+    gradientColors: ["#EF4444", "#DC2626"],
+    tmdbParams: { with_original_language: "tr", include_adult: false },
     subGenres: commonSeriesGenres.filter(g =>
-      ["drama", "comedy", "crime", "family", "historical"].includes(g.slug)
+      ["drama", "comedy", "crime", "romance", "family"].includes(g.slug)
+    ),
+  },
+  "series-korean": {
+    id: "series-korean" as any,
+    contentType: "series",
+    titleFa: "سریال کره‌ای",
+    titleEn: "Korean Series",
+    descriptionFa: "سریال‌های کره‌ای محبوب",
+    descriptionEn: "Popular Korean TV series",
+    gradientColors: ["#EC4899", "#DB2777"],
+    tmdbParams: { with_original_language: "ko", include_adult: false },
+    subGenres: commonSeriesGenres.filter(g =>
+      ["drama", "comedy", "romance", "action", "mystery", "fantasy"].includes(g.slug)
     ),
   },
 
-  // Animation
+  // ========================================================================
+  // انیمیشن — Animation (no children)
+  // ========================================================================
   "animation": {
-    id: "animation",
+    id: "animation" as any,
     contentType: "mixed",
     titleFa: "انیمیشن",
     titleEn: "Animation",
     descriptionFa: "بهترین انیمیشن‌های سینمایی و سریالی",
     descriptionEn: "Best animated movies and series",
     gradientColors: ["#F97316", "#EA580C"],
-    tmdbParams: {
-      with_genres: "16",
-      include_adult: false,
-    },
+    tmdbParams: { with_genres: "16", include_adult: false },
     subGenres: [
       { slug: "action", nameEn: "Action", nameFa: "اکشن" },
       { slug: "adventure", nameEn: "Adventure", nameFa: "ماجراجویی" },
@@ -137,37 +266,36 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
     ],
   },
 
-  // Dubbed
+  // ========================================================================
+  // دوبله فارسی — Persian Dubbed (no children)
+  // ========================================================================
   "dubbed": {
-    id: "dubbed",
-    contentType: "movie",
+    id: "dubbed" as any,
+    contentType: "mixed",
+    isDubbed: true,
     titleFa: "دوبله فارسی",
     titleEn: "Persian Dubbed",
-    descriptionFa: "فیلم‌های خارجی با دوبله فارسی",
-    descriptionEn: "Foreign movies with Persian dubbing",
+    descriptionFa: "فیلم‌ها و سریال‌های خارجی با دوبله فارسی",
+    descriptionEn: "Foreign movies & series with Persian dubbing",
     gradientColors: ["#EC4899", "#DB2777"],
-    tmdbParams: {
-      include_adult: false,
-    },
+    tmdbParams: { include_adult: false },
     subGenres: commonMovieGenres.filter(g =>
       ["action", "comedy", "animation", "family", "adventure", "fantasy"].includes(g.slug)
     ),
   },
 
-  // Anime
+  // ========================================================================
+  // انیمه — Anime (no children)
+  // ========================================================================
   "anime": {
-    id: "anime",
+    id: "anime" as any,
     contentType: "series",
     titleFa: "انیمه",
     titleEn: "Anime",
     descriptionFa: "بهترین انیمه‌های ژاپنی با زیرنویس فارسی",
     descriptionEn: "Best Japanese anime with Persian subtitles",
     gradientColors: ["#E11D48", "#BE185D"],
-    tmdbParams: {
-      with_genres: "16",
-      with_original_language: "ja",
-      include_adult: false,
-    },
+    tmdbParams: { with_genres: "16", with_original_language: "ja", include_adult: false },
     subGenres: [
       { slug: "action", nameEn: "Action", nameFa: "اکشن" },
       { slug: "adventure", nameEn: "Adventure", nameFa: "ماجراجویی" },
@@ -181,6 +309,78 @@ export const categoryConfigs: Record<string, CategoryConfig> = {
       { slug: "sports", nameEn: "Sports", nameFa: "ورزشی" },
     ],
     showEpisodes: true,
+  },
+
+  // ========================================================================
+  // سایر — Other (parent with children)
+  // ========================================================================
+  "other": {
+    id: "other" as any,
+    contentType: "mixed",
+    titleFa: "سایر",
+    titleEn: "Other",
+    descriptionFa: "سایر دسته‌بندی‌ها",
+    descriptionEn: "Other categories",
+    gradientColors: ["#6B7280", "#4B5563"],
+    tmdbParams: {},
+  },
+  "other-top250": {
+    id: "other-top250" as any,
+    contentType: "movie",
+    titleFa: "250 فیلم برتر IMDb",
+    titleEn: "Top 250 IMDb",
+    descriptionFa: "250 فیلم برتر IMDb",
+    descriptionEn: "Top 250 IMDb movies",
+    gradientColors: ["#F59E0B", "#D97706"],
+    tmdbParams: { sort_by: "vote_average.desc" },
+  },
+  "other-collections": {
+    id: "other-collections" as any,
+    contentType: "mixed",
+    titleFa: "کالکشن",
+    titleEn: "Collections",
+    descriptionFa: "مجموعه‌های فیلم و سریال",
+    descriptionEn: "Movie and series collections",
+    gradientColors: ["#8B5CF6", "#7C3AED"],
+    tmdbParams: {},
+  },
+  "other-coming-soon": {
+    id: "other-coming-soon" as any,
+    contentType: "mixed",
+    titleFa: "به زودی",
+    titleEn: "Coming Soon",
+    descriptionFa: "فیلم‌ها و سریال‌های به زودی",
+    descriptionEn: "Upcoming movies and series",
+    gradientColors: ["#14B8A6", "#0D9488"],
+    tmdbParams: {},
+  },
+
+  // ========================================================================
+  // Legacy IDs (backward compatibility)
+  // ========================================================================
+  "movies-foreign": {
+    id: "movies-foreign" as any,
+    contentType: "movie",
+    titleFa: "فیلم خارجی",
+    titleEn: "Foreign Movies",
+    descriptionFa: "بهترین فیلم‌های خارجی از سراسر جهان با زیرنویس فارسی",
+    descriptionEn: "Best foreign movies from around the world with Persian subtitles",
+    gradientColors: ["#3B82F6", "#1D4ED8"],
+    tmdbParams: { include_adult: false },
+    subGenres: commonMovieGenres,
+  },
+  "movies-iranian": {
+    id: "movies-iranian" as any,
+    contentType: "movie",
+    titleFa: "فیلم ایرانی",
+    titleEn: "Iranian Movies",
+    descriptionFa: "گلچینی از بهترین فیلم‌های سینمای ایران",
+    descriptionEn: "A selection of the best Iranian cinema",
+    gradientColors: ["#059669", "#047857"],
+    tmdbParams: { with_original_language: "fa", include_adult: false },
+    subGenres: commonMovieGenres.filter(g =>
+      ["drama", "comedy", "romance", "thriller", "historical", "family"].includes(g.slug)
+    ),
   },
 };
 
@@ -212,6 +412,7 @@ export function getSubGenre(categoryId: string, genreSlug: string): SubGenre | u
 
 /**
  * Generate breadcrumbs for a category page
+ * Supports both new parent-child IDs and legacy category IDs
  */
 export function generateBreadcrumbs(
   categoryId: string,
@@ -224,10 +425,29 @@ export function generateBreadcrumbs(
     { label: "Home", labelFa: "خانه", href: "/", isActive: false },
   ];
 
-  // Add category type (Movies/Series)
-  if (categoryId.startsWith("movies")) {
+  // Determine if this is a child category by checking if the ID contains a dash
+  // and the parent part exists as a separate config
+  const parts = categoryId.split("-");
+  const parentId = parts[0];
+  const parentConfig = parts.length > 1 ? categoryConfigs[parentId] : null;
+
+  if (parentConfig && parts.length > 1) {
+    // This is a child category
+    breadcrumbs.push({
+      label: parentConfig.titleEn,
+      labelFa: parentConfig.titleFa,
+      href: `/movies/${parentId}`,
+      isActive: false,
+    });
+    breadcrumbs.push({
+      label: config.titleEn,
+      labelFa: config.titleFa,
+      href: `/movies/${parentId}/${parts.slice(1).join("-")}`,
+      isActive: !subGenre,
+    });
+  } else if (categoryId.startsWith("movies")) {
+    // Legacy: movies-foreign, movies-iranian
     breadcrumbs.push({ label: "Movies", labelFa: "فیلم‌ها", href: "/movies", isActive: false });
-    
     if (categoryId === "movies-foreign") {
       breadcrumbs.push({
         label: "Foreign",
@@ -243,30 +463,12 @@ export function generateBreadcrumbs(
         isActive: !subGenre,
       });
     }
-  } else if (categoryId.startsWith("series")) {
-    breadcrumbs.push({ label: "Series", labelFa: "سریال‌ها", href: "/series", isActive: false });
-    
-    if (categoryId === "series-foreign") {
-      breadcrumbs.push({
-        label: "Foreign",
-        labelFa: "خارجی",
-        href: "/series/foreign",
-        isActive: !subGenre,
-      });
-    } else if (categoryId === "series-iranian") {
-      breadcrumbs.push({
-        label: "Iranian",
-        labelFa: "ایرانی",
-        href: "/series/iranian",
-        isActive: !subGenre,
-      });
-    }
   } else {
-    // Standalone categories
+    // Top-level categories (animation, dubbed, anime, iranian, etc.)
     breadcrumbs.push({
       label: config.titleEn,
       labelFa: config.titleFa,
-      href: `/${categoryId}`,
+      href: `/movies/${categoryId}`,
       isActive: !subGenre,
     });
   }
@@ -275,10 +477,11 @@ export function generateBreadcrumbs(
   if (subGenre) {
     const subGenreInfo = getSubGenre(categoryId, subGenre);
     if (subGenreInfo) {
+      const lastBreadcrumb = breadcrumbs[breadcrumbs.length - 1];
       breadcrumbs.push({
         label: subGenreInfo.nameEn,
         labelFa: subGenreInfo.nameFa,
-        href: `${breadcrumbs[breadcrumbs.length - 1].href}/${subGenre}`,
+        href: `${lastBreadcrumb.href}/${subGenre}`,
         isActive: true,
       });
     }

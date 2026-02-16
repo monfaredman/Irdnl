@@ -5,22 +5,17 @@ export const routes = {
 	// Public
 	home: "/",
 	about: "/about",
-	account: "/account",
-	careers: "/careers",
+	blog: "/blog",
 	collections: "/collections",
 	comingSoon: "/coming-soon",
 	contact: "/contact",
-	cookies: "/cookies",
 	faq: "/faq",
 	genres: "/genres",
 	help: "/help",
 	kids: "/kids",
 	movies: "/movies",
-	press: "/press",
-	privacy: "/privacy",
 	search: "/search",
 	series: "/series",
-	terms: "/terms",
 	top250: "/top-250",
 
 	// Auth
@@ -55,6 +50,11 @@ export const routes = {
 	// Dynamic content
 	movieBySlug: (slug: string) => `/movies/${slug}`,
 	seriesBySlug: (slug: string) => `/series/${slug}`,
+
+	// Category routes (parent-child pattern)
+	category: (parent: string) => `/movies/${parent}`,
+	categoryChild: (parent: string, child: string) => `/movies/${parent}/${child}`,
+	categoryGenre: (parent: string, genre: string) => `/movies/${parent}?genre=${genre}`,
 } as const;
 
 export type Routes = typeof routes;

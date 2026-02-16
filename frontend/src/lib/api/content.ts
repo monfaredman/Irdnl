@@ -25,6 +25,11 @@ export interface ContentQueryParams {
 	country?: string;
 	language?: string;
 	featured?: boolean;
+	isDubbed?: boolean;
+	isFree?: boolean;
+	isKids?: boolean;
+	isComingSoon?: boolean;
+	categoryId?: string;
 	sort?: "rating" | "year" | "createdAt" | "priority" | "title";
 	order?: "ASC" | "DESC";
 	page?: number;
@@ -49,6 +54,7 @@ function transformContent(content: any): Movie | Series {
 		slug,
 		poster: content.posterUrl || content.poster || "",
 		backdrop: content.backdropUrl || content.bannerUrl || content.backdrop || "",
+		accessType: content.accessType || "free",
 	};
 }
 

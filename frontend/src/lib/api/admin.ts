@@ -715,6 +715,7 @@ export const tmdbApi = {
 		tmdbId: string;
 		mediaType: "movie" | "tv";
 		rawData?: any;
+		autoImport?: boolean;
 	}) => {
 		const response = await adminApi.post("/tmdb/saved", data);
 		return response.data;
@@ -1046,6 +1047,190 @@ export const commentsApi = {
 	// Bulk action
 	bulkAction: async (ids: string[], action: "approve" | "reject" | "delete" | "spam") => {
 		const response = await adminApi.post("/comments/bulk-action", { ids, action });
+		return response.data;
+	},
+};
+
+export const blogApi = {
+	// List blog posts
+	list: async (params?: {
+		page?: number;
+		limit?: number;
+		status?: string;
+		category?: string;
+		search?: string;
+		tag?: string;
+		isFeatured?: boolean;
+		sortBy?: string;
+		sortOrder?: string;
+	}) => {
+		const response = await adminApi.get("/blog", { params });
+		return response.data;
+	},
+
+	// Get statistics
+	getStats: async () => {
+		const response = await adminApi.get("/blog/stats");
+		return response.data;
+	},
+
+	// Get single blog post
+	getById: async (id: string) => {
+		const response = await adminApi.get(`/blog/${id}`);
+		return response.data;
+	},
+
+	// Create blog post
+	create: async (data: {
+		title: string;
+		slug: string;
+		excerpt: string;
+		content: string;
+		coverImage?: string;
+		status: string;
+		category: string;
+		tags?: string[];
+		scheduledAt?: string;
+		isFeatured?: boolean;
+		metaTitle?: string;
+		metaDescription?: string;
+		metaKeywords?: string[];
+	}) => {
+		const response = await adminApi.post("/blog", data);
+		return response.data;
+	},
+
+	// Update blog post
+	update: async (id: string, data: {
+		title?: string;
+		slug?: string;
+		excerpt?: string;
+		content?: string;
+		coverImage?: string;
+		status?: string;
+		category?: string;
+		tags?: string[];
+		scheduledAt?: string;
+		isFeatured?: boolean;
+		metaTitle?: string;
+		metaDescription?: string;
+		metaKeywords?: string[];
+	}) => {
+		const response = await adminApi.put(`/blog/${id}`, data);
+		return response.data;
+	},
+
+	// Delete blog post
+	delete: async (id: string) => {
+		await adminApi.delete(`/blog/${id}`);
+	},
+};
+
+// ── User Profile API (calls /user/* instead of /admin/*) ──
+// Must use the BACKEND API URL, not the Next.js frontend URL
+const BACKEND_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+const userApi = axios.create({
+	baseURL: `${BACKEND_API_URL}/user`,
+	headers: { "Content-Type": "application/json" },
+});
+
+userApi.interceptors.request.use((config) => {
+	if (typeof window !== "undefined") {
+		const token = localStorage.getItem("admin_access_token");
+		if (token) {
+			config.headers.Authorization = `Bearer ${token}`;
+		}
+	}
+	return config;
+});
+
+// Handle token refresh on 401 for userApi
+userApi.interceptors.response.use(
+	(response) => response,
+	async (error) => {
+		const originalRequest = error.config;
+		if (error.response?.status === 401 && !originalRequest._retry) {
+			originalRequest._retry = true;
+			try {
+				const refreshToken = localStorage.getItem("admin_refresh_token");
+				if (refreshToken) {
+					const response = await axios.post(
+						`${BACKEND_API_URL}/auth/admin/refresh`,
+						{ refresh_token: refreshToken },
+					);
+					const { access_token } = response.data;
+					localStorage.setItem("admin_access_token", access_token);
+					originalRequest.headers.Authorization = `Bearer ${access_token}`;
+					return userApi(originalRequest);
+				}
+			} catch (refreshError) {
+				if (typeof window !== "undefined") {
+					localStorage.removeItem("admin_access_token");
+					localStorage.removeItem("admin_refresh_token");
+					window.location.href = "/admin/login";
+				}
+			}
+		}
+		return Promise.reject(error);
+	},
+);
+
+export const profileApi = {
+	// Get current user profile
+	getMe: async () => {
+		const response = await userApi.get("/me");
+		return response.data;
+	},
+
+	// Update current user profile (name, avatarUrl)
+	updateMe: async (data: { name?: string; avatarUrl?: string }) => {
+		const response = await userApi.put("/me", data);
+		return response.data;
+	},
+
+	// Change password
+	changePassword: async (data: { currentPassword: string; newPassword: string }) => {
+		const response = await userApi.post("/me/change-password", data);
+		return response.data;
+	},
+
+	// Upload avatar image
+	uploadAvatar: async (file: File): Promise<{ url: string }> => {
+		const formData = new FormData();
+		formData.append("file", file);
+		formData.append("type", "poster");
+		const response = await adminApi.post("/images/upload", formData, {
+			headers: { "Content-Type": "multipart/form-data" },
+		});
+		return response.data;
+	},
+};
+
+// ─── Admin Tickets API ─────────────────────────────────────────
+export const ticketsApi = {
+	list: async (status?: string) => {
+		const params = status ? { params: { status } } : {};
+		const response = await adminApi.get("/tickets", params);
+		return response.data;
+	},
+	getStats: async () => {
+		const response = await adminApi.get("/tickets/stats");
+		return response.data;
+	},
+	get: async (id: string) => {
+		const response = await adminApi.get(`/tickets/${id}`);
+		return response.data;
+	},
+	reply: async (id: string, data: { adminReply: string; status?: string }) => {
+		const response = await adminApi.put(`/tickets/${id}/reply`, data);
+		return response.data;
+	},
+	updateStatus: async (id: string, status: string) => {
+		const response = await adminApi.put(`/tickets/${id}/status`, { status });
+		return response.data;
+	},
+	delete: async (id: string) => {
+		const response = await adminApi.delete(`/tickets/${id}`);
 		return response.data;
 	},
 };

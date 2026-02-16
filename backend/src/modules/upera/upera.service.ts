@@ -56,6 +56,7 @@ export class UperaService {
 
   async searchMovies(dto: SearchUperaContentDto): Promise<any> {
     try {
+      const token = this.configService.get<string>('UPERA_TOKEN', '');
       const params = new URLSearchParams({
         trending: String(dto.trending ?? 1),
         genre: dto.genre ?? 'all',
@@ -63,6 +64,7 @@ export class UperaService {
         country: String(dto.country ?? 0),
         persian: String(dto.persian ?? 0),
         affiliate: '1',
+        ...(token ? { token } : {}),
       });
 
       if (dto.query) params.append('query', dto.query);
@@ -84,6 +86,7 @@ export class UperaService {
 
   async searchSeries(dto: SearchUperaContentDto): Promise<any> {
     try {
+      const token = this.configService.get<string>('UPERA_TOKEN', '');
       const params = new URLSearchParams({
         trending: String(dto.trending ?? 1),
         genre: dto.genre ?? 'all',
@@ -91,6 +94,7 @@ export class UperaService {
         country: String(dto.country ?? 0),
         persian: String(dto.persian ?? 0),
         affiliate: '1',
+        ...(token ? { token } : {}),
       });
 
       if (dto.query) params.append('query', dto.query);

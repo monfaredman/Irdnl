@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit, Plus, Trash2, Film, Tv, Image, MapPin, Gift, MoreVertical } from "lucide-react";
+import { Edit, Plus, Trash2, Film, Tv, Image, MapPin, Gift, MoreVertical, Copy } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { Button } from "@/components/admin/ui/button";
@@ -31,7 +31,6 @@ import {
 	Chip,
 } from "@mui/material";
 import { AgGridReact } from "ag-grid-react";
-import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { ColDef, GridReadyEvent } from "ag-grid-community";
 import { contentApi, slidersApi, pinsApi, offersApi } from "@/lib/api/admin";
@@ -241,10 +240,14 @@ export default function ContentManagementPage() {
 	};
 
 	const handleSliderSave = async () => {
+		if (!menuItem?.id) {
+			showFeedback("error", "شناسه محتوا یافت نشد");
+			return;
+		}
 		try {
 			await slidersApi.create({
 				...sliderForm,
-				contentId: menuItem?.id,
+				contentId: menuItem.id,
 			});
 			showFeedback("success", "محتوا به اسلایدر اضافه شد");
 			setSliderDialog(false);
@@ -254,10 +257,14 @@ export default function ContentManagementPage() {
 	};
 
 	const handlePinSave = async () => {
+		if (!menuItem?.id) {
+			showFeedback("error", "شناسه محتوا یافت نشد");
+			return;
+		}
 		try {
 			await pinsApi.create({
 				...pinForm,
-				contentId: menuItem?.id,
+				contentId: menuItem.id,
 			});
 			showFeedback("success", "محتوا پین شد");
 			setPinDialog(false);
@@ -379,6 +386,26 @@ export default function ContentManagementPage() {
 			pinned: "right",
 		},
 		{
+			field: "id",
+			headerName: "شناسه",
+			width: 130,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const id = params.value;
+				if (!id) return "-";
+				return (
+					<div className="flex items-center gap-1 cursor-pointer group" title="کپی شناسه" onClick={() => {
+						navigator.clipboard.writeText(id);
+						showFeedback("success", "شناسه کپی شد");
+					}}>
+						<span className="text-xs text-gray-500 font-mono truncate">{id.slice(0, 8)}…</span>
+						<Copy className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+					</div>
+				);
+			},
+		},
+		{
 			field: "title",
 			headerName: t("admin.upload.basicInfo.title"),
 			cellRenderer: TitleRenderer,
@@ -392,7 +419,7 @@ export default function ContentManagementPage() {
 			headerName: t("admin.upload.basicInfo.type"),
 			cellRenderer: TypeRenderer,
 			sortable: true,
-			filter: "agSetColumnFilter",
+			filter: "agTextColumnFilter",
 			width: 140,
 		},
 		{
@@ -400,7 +427,7 @@ export default function ContentManagementPage() {
 			headerName: t("admin.content.detail.status"),
 			cellRenderer: StatusRenderer,
 			sortable: true,
-			filter: "agSetColumnFilter",
+			filter: "agTextColumnFilter",
 			width: 150,
 		},
 		{
@@ -420,7 +447,7 @@ export default function ContentManagementPage() {
 			filter: false,
 			pinned: "left",
 		},
-	], [t, PosterRenderer, TitleRenderer, TypeRenderer, StatusRenderer, ActionsRenderer]);
+	], [t, PosterRenderer, TitleRenderer, TypeRenderer, StatusRenderer, ActionsRenderer, showFeedback]);
 
 	return (
 		<div className="space-y-6">
@@ -492,8 +519,9 @@ export default function ContentManagementPage() {
 								pagination={true}
 								paginationPageSize={20}
 								paginationPageSizeSelector={[10, 20, 50, 100]}
-								suppressRowClickSelection={true}
+								rowSelection={{ mode: "singleRow", enableClickSelection: false }}
 								enableRtl={true}
+								theme="legacy"
 								loading={loading}
 								animateRows={true}
 								rowHeight={70}

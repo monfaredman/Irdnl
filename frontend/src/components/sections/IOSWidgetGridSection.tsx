@@ -8,7 +8,6 @@ import Link from "next/link";
 import { useLanguage } from "@/providers/language-provider";
 import {
 	glassAnimations,
-	glassBlur,
 	glassBorderRadius,
 	glassColors,
 } from "@/theme/glass-design-system";
@@ -21,13 +20,25 @@ import type { Movie, Series } from "@/types/media";
 // TYPES
 // ============================================================================
 
-interface IOSWidgetGridSectionProps {
-	items: (Movie | Series)[];
-	title?: string;
-	storageKey?: string;
+export interface OfferItem {
+	id: string;
+	title: string;
+	titleFa?: string;
+	imageUrl?: string;
+	backdropUrl?: string;
+	linkUrl?: string;
+	contentId?: string;
+	discountPercent?: number;
 }
 
-type ChipType = "dubbed" | "free" | "subtitle";
+interface IOSWidgetGridSectionProps {
+	items?: (Movie | Series)[];
+	title?: string;
+	storageKey?: string;
+	offers?: OfferItem[];
+}
+
+type ChipType = "dubbed" | "free" | "subtitle" | "offer";
 
 // ============================================================================
 // CONSTANTS
@@ -60,6 +71,7 @@ const getChipLabel = (type: ChipType, language: string): string => {
 		dubbed: language === "fa" ? "دوبله" : "Dubbed",
 		free: language === "fa" ? "رایگان" : "Free",
 		subtitle: language === "fa" ? "زیرنویس" : "Subtitle",
+		offer: language === "fa" ? "پیشنهاد" : "Offer",
 	};
 	return labels[type];
 };
@@ -69,6 +81,7 @@ const getChipColor = (type: ChipType): string => {
 		dubbed: glassColors.persianGold,
 		free: "#10b981",
 		subtitle: "#3b82f6",
+		offer: "#ef4444",
 	};
 	return colors[type];
 };
@@ -102,7 +115,7 @@ const WidgetContent = memo(function WidgetContent({
 	priority = false,
 }: WidgetContentProps) {
 	const chipColor = getChipColor(chipType);
-	const href = `/item/${item.id}`;
+	const href = (item as any).linkUrl || `/item/${item.id}`;
 	const isSeries = "type" in item;
 	const [isLoaded, setIsLoaded] = useState(false);
 	const [hasError, setHasError] = useState(false);
@@ -427,6 +440,7 @@ export const IOSWidgetGridSection = memo(function IOSWidgetGridSection({
 	items,
 	title,
 	storageKey = STORAGE_KEY,
+	offers,
 }: IOSWidgetGridSectionProps) {
 	const { language } = useLanguage();
 	const isRTL = language === "fa";
@@ -449,15 +463,35 @@ export const IOSWidgetGridSection = memo(function IOSWidgetGridSection({
 		itemCount: ITEM_COUNT,
 	});
 
-	// Prepare display items (cycle through available items)
+	const activeOffers = offers?.filter((o) => o.imageUrl || o.linkUrl) || [];
+
+	// Convert offers to Movie-like items for widget grid display
+	const offerAsItems = useMemo((): (Movie | Series)[] => {
+		return activeOffers.map((offer) => ({
+			id: offer.contentId || offer.id,
+			title: (language === "fa" ? offer.titleFa : undefined) || offer.title,
+			slug: offer.id,
+			poster: offer.imageUrl || "",
+			backdrop: offer.backdropUrl || offer.imageUrl || "",
+			rating: 0,
+			year: new Date().getFullYear(),
+			genres: [],
+			description: "",
+			// Store linkUrl for widget click
+			linkUrl: offer.linkUrl || (offer.contentId ? `/item/${offer.contentId}` : undefined),
+		} as any));
+	}, [activeOffers, language]);
+
+	// Prepare display items: use provided items, or fall back to offer items
 	const displayItems = useMemo(() => {
-		if (!items || items.length === 0) return [];
+		const sourceItems = items && items.length > 0 ? items : offerAsItems;
+		if (sourceItems.length === 0) return [];
 		const result: (Movie | Series)[] = [];
 		for (let i = 0; i < ITEM_COUNT; i++) {
-			result.push(items[i % items.length]);
+			result.push(sourceItems[i % sourceItems.length]);
 		}
 		return result;
-	}, [items]);
+	}, [items, offerAsItems]);
 
 	// Handle drag end
 	const handleDragEnd = useCallback(
@@ -545,7 +579,6 @@ export const IOSWidgetGridSection = memo(function IOSWidgetGridSection({
 							isRTL={isRTL}
 							isDragging={isEditMode}
 							widgetType={config.type}
-							// Prioritize the first 2 widgets (largest above-the-fold-ish)
 							priority={index < 2}
 						/>
 					</DraggableWidget>

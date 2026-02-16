@@ -87,9 +87,11 @@ export interface ContentFormData {
   shortDescription?: string;
   duration?: number;
   status: "draft" | "scheduled" | "published" | "unpublished";
+  accessType?: "free" | "subscription" | "single_purchase" | "traffic";
   isKids?: boolean;
   isComingSoon?: boolean;
   collectionId?: string;
+  categoryIds?: string[];
 
   // Visual Assets
   posterUrl?: string;

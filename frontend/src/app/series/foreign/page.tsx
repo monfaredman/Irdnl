@@ -11,7 +11,7 @@ export default function ForeignSeriesPage() {
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
-			basePath="/series/foreign" 
+			basePath="/movies/series/foreign" 
 		/>
 	);
 }

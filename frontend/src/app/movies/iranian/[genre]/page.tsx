@@ -10,13 +10,13 @@ export default function IranianMovieGenrePage() {
 	const genre = params.genre as string;
 	
 	// Get base config and sub-genre info
-	const baseConfig = categoryConfigs["movies-iranian"];
-	const subGenreInfo = getSubGenre("movies-iranian", genre);
+	const baseConfig = categoryConfigs["iranian"] || categoryConfigs["movies-iranian"];
+	const subGenreInfo = getSubGenre("iranian", genre) || getSubGenre("movies-iranian", genre);
 	
 	// Create modified config for this specific genre
 	const config: CategoryConfig = {
 		...baseConfig,
-		id: "movies-iranian" as CategoryType, // Keep parent category type
+		id: "iranian" as CategoryType,
 		titleFa: subGenreInfo?.nameFa || genre,
 		titleEn: subGenreInfo?.nameEn || genre,
 		descriptionFa: `فیلم‌های ${subGenreInfo?.nameFa || genre} ایرانی`,
@@ -27,13 +27,15 @@ export default function IranianMovieGenrePage() {
 		},
 	};
 	
-	const breadcrumbs = generateBreadcrumbs("movies-iranian", genre);
+	const breadcrumbs = generateBreadcrumbs("iranian", genre);
 	
 	return (
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
+			currentSubGenre={{ slug: genre, nameEn: subGenreInfo?.nameEn || genre, nameFa: subGenreInfo?.nameFa || genre }}
 			basePath={`/movies/iranian/${genre}`}
+			genreBasePath="/movies/iranian"
 		/>
 	);
 }

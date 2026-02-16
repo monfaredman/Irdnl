@@ -23,6 +23,9 @@ import { Collection } from '../modules/content/entities/collection.entity';
 import { UperaContent } from '../modules/upera/entities/upera-content.entity';
 import { TMDBSavedContent } from '../modules/tmdb/entities/tmdb-saved-content.entity';
 import { Comment } from '../modules/comments/entities/comment.entity';
+import { BlogPost } from '../modules/blog/entities/blog-post.entity';
+import { Playlist, PlaylistItem, PlaylistLike } from '../modules/playlists/entities/playlist.entity';
+import { Ticket } from '../modules/tickets/entities/ticket.entity';
 
 loadEnvConfig();
 loadEnvConfig({ path: '.env.local', override: true });
@@ -48,6 +51,11 @@ const ENTITIES = [
   UperaContent,
   TMDBSavedContent,
   Comment,
+  BlogPost,
+  Playlist,
+  PlaylistItem,
+  PlaylistLike,
+  Ticket,
 ];
 
 type ConfigLike = {
@@ -97,7 +105,7 @@ export const buildTypeOrmOptions = (config: ConfigLike): DataSourceOptions => {
     password: config.get<string>('DB_PASSWORD', 'MonfaredMan@2024'),
     database: config.get<string>('DB_DATABASE', 'irdnl_db'),
     entities: ENTITIES,
-    synchronize: false,
+    synchronize: true,
     migrations: isDevelopment ? [] : ['dist/migrations/*.js'],
     migrationsRun: false,
     logging: isDevelopment,

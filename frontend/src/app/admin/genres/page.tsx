@@ -45,6 +45,9 @@ interface GenreItem {
 	nameFa: string;
 	tmdbGenreId: string | null;
 	categorySlugs: string[];
+	posterUrl: string | null;
+	logoUrl: string | null;
+	backdropUrl: string | null;
 	isActive: boolean;
 	sortOrder: number;
 }
@@ -61,6 +64,9 @@ const emptyForm = {
 	nameFa: "",
 	tmdbGenreId: "",
 	categorySlugs: [] as string[],
+	posterUrl: "",
+	logoUrl: "",
+	backdropUrl: "",
 	isActive: true,
 	sortOrder: 0,
 };
@@ -147,6 +153,9 @@ export default function GenresPage() {
 			nameFa: g.nameFa,
 			tmdbGenreId: g.tmdbGenreId || "",
 			categorySlugs: g.categorySlugs || [],
+			posterUrl: g.posterUrl || "",
+			logoUrl: g.logoUrl || "",
+			backdropUrl: g.backdropUrl || "",
 			isActive: g.isActive,
 			sortOrder: g.sortOrder,
 		});
@@ -158,6 +167,9 @@ export default function GenresPage() {
 			const payload = {
 				...form,
 				tmdbGenreId: form.tmdbGenreId || undefined,
+				posterUrl: form.posterUrl || undefined,
+				logoUrl: form.logoUrl || undefined,
+				backdropUrl: form.backdropUrl || undefined,
 			};
 			if (editingId) {
 				await genresApi.update(editingId, payload);
@@ -211,6 +223,21 @@ export default function GenresPage() {
 			cellRenderer: (params: any) => (
 				<span className="font-mono text-xs">{params.value}</span>
 			),
+		},
+		{
+			field: "posterUrl",
+			headerName: "پوستر",
+			width: 100,
+			sortable: false,
+			filter: false,
+			cellRenderer: (params: any) => {
+				const url = params.value;
+				return url ? (
+					<img src={url} alt="Poster" className="w-10 h-14 object-cover rounded" />
+				) : (
+					<span className="text-xs text-gray-400">—</span>
+				);
+			},
 		},
 		{
 			field: "nameFa",
@@ -433,6 +460,55 @@ export default function GenresPage() {
 								size="small"
 							/>
 						</div>
+						<TextField
+							label="لینک تصویر پوستر (Poster URL)"
+							value={form.posterUrl}
+							onChange={(e) => setForm({ ...form, posterUrl: e.target.value })}
+							fullWidth
+							size="small"
+							placeholder="https://image.tmdb.org/t/p/original/..."
+						/>
+						<TextField
+							label="لینک لوگو (Logo URL)"
+							value={form.logoUrl}
+							onChange={(e) => setForm({ ...form, logoUrl: e.target.value })}
+							fullWidth
+							size="small"
+							placeholder="https://image.tmdb.org/t/p/original/..."
+						/>
+						<div className="col-span-2">
+							<TextField
+								label="لینک تصویر پس‌زمینه (Backdrop URL)"
+								value={form.backdropUrl}
+								onChange={(e) => setForm({ ...form, backdropUrl: e.target.value })}
+								fullWidth
+								size="small"
+								placeholder="https://image.tmdb.org/t/p/original/..."
+							/>
+						</div>
+						{/* Image Previews */}
+						{(form.posterUrl || form.logoUrl || form.backdropUrl) && (
+							<div className="col-span-2 flex gap-4 flex-wrap">
+								{form.posterUrl && (
+									<div className="text-center">
+										<p className="text-xs text-gray-500 mb-1">پوستر</p>
+										<img src={form.posterUrl} alt="Poster" className="h-24 rounded object-cover" />
+									</div>
+								)}
+								{form.logoUrl && (
+									<div className="text-center">
+										<p className="text-xs text-gray-500 mb-1">لوگو</p>
+										<img src={form.logoUrl} alt="Logo" className="h-24 rounded object-contain" />
+									</div>
+								)}
+								{form.backdropUrl && (
+									<div className="text-center">
+										<p className="text-xs text-gray-500 mb-1">پس‌زمینه</p>
+										<img src={form.backdropUrl} alt="Backdrop" className="h-24 rounded object-cover" />
+									</div>
+								)}
+							</div>
+						)}
 						<TextField
 							label="ترتیب نمایش"
 							type="number"

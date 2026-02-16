@@ -11,7 +11,7 @@ export const RatingBadge = ({ rating }: RatingBadgeProps) => {
 
 	return (
 		<Chip
-			label={`${rating.toFixed(1)} / 10`}
+			label={`${(Number(rating) || 0).toFixed(1)} / 10`}
 			sx={{
 				background: `linear-gradient(135deg, ${theme.palette.primary.main}30, ${theme.palette.secondary.main}30)`,
 				backdropFilter: "blur(30px) saturate(180%)",

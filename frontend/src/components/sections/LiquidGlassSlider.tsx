@@ -286,10 +286,11 @@ export const LiquidGlassSlider = ({
 											{item.description}
 										</Typography>
 
-										{/* CTA Button */}
+										{/* CTA Button - always visible */}
+										{(item as any).linkUrl ? (
 										<Box
 											component={Link}
-											href={`/item/${item.id}`}
+											href={(item as any).linkUrl}
 											sx={{
 												display: "inline-flex",
 												alignItems: "center",
@@ -303,6 +304,7 @@ export const LiquidGlassSlider = ({
 												borderRadius: glassBorderRadius.lg,
 												textDecoration: "none",
 												border: `1px solid rgba(255, 255, 255, 0.1)`,
+												cursor: "pointer",
 												boxShadow: `
                           0 8px 32px ${glassColors.gold.glow},
                           inset 0 1px 0 rgba(255, 255, 255, 0.2)
@@ -321,6 +323,32 @@ export const LiquidGlassSlider = ({
 											<PlayArrowIcon />
 											{language === "fa" ? "تماشا" : "Watch Now"}
 										</Box>
+										) : (
+										<Box
+											sx={{
+												display: "inline-flex",
+												alignItems: "center",
+												gap: 1,
+												px: 4,
+												py: 2,
+												background: glassColors.persianGold,
+												color: glassColors.deepMidnight,
+												fontSize: "17px",
+												fontWeight: 600,
+												borderRadius: glassBorderRadius.lg,
+												textDecoration: "none",
+												border: `1px solid rgba(255, 255, 255, 0.1)`,
+												cursor: "default",
+												boxShadow: `
+                          0 8px 32px ${glassColors.gold.glow},
+                          inset 0 1px 0 rgba(255, 255, 255, 0.2)
+                        `,
+											}}
+										>
+											<PlayArrowIcon />
+											{language === "fa" ? "تماشا" : "Watch Now"}
+										</Box>
+										)}
 									</Box>
 								</Box>
 							</Container>

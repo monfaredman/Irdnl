@@ -47,6 +47,9 @@ export class Notification {
   @Column({ name: 'is_sent', default: false })
   isSent: boolean;
 
+  @Column({ name: 'is_read', default: false })
+  isRead: boolean;
+
   @Column({ name: 'sent_at', nullable: true })
   sentAt: Date | null;
 

@@ -29,6 +29,9 @@ export class Offer {
   @Column({ name: 'link_url', nullable: true })
   linkUrl: string | null;
 
+  @Column({ name: 'content_id', nullable: true })
+  contentId: string | null;
+
   @Column({ name: 'discount_percent', type: 'int', nullable: true })
   discountPercent: number | null;
 

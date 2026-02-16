@@ -26,13 +26,15 @@ interface CategoryHeroProps {
   breadcrumbs: BreadcrumbItem[];
   currentSubGenre?: SubGenre;
   totalResults?: number;
+  basePath?: string;
 }
 
 export function CategoryHero({ 
   config, 
   breadcrumbs, 
   currentSubGenre,
-  totalResults 
+  totalResults,
+  basePath 
 }: CategoryHeroProps) {
   const { language } = useLanguage();
   const isRTL = language === "fa";
@@ -94,7 +96,6 @@ export function CategoryHero({
           pointerEvents: "none",
         }}
       />
-
       <Stack spacing={3} sx={{ position: "relative", zIndex: 1 }}>
         {/* Breadcrumbs */}
         <Box
@@ -266,7 +267,7 @@ export function CategoryHero({
               return (
                 <Link
                   key={genre.slug}
-                  href={`${getBreadcrumbBase(breadcrumbs)}/${genre.slug}`}
+                  href={`${basePath || "/"}/${genre.slug}`}
                   style={{ textDecoration: "none" }}
                 >
                   <Chip

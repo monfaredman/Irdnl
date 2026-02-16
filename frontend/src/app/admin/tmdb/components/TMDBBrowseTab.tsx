@@ -145,6 +145,7 @@ export function TMDBBrowseTab() {
 				tmdbId: String(item.id),
 				mediaType,
 				rawData: item,
+				autoImport: true,
 			});
 			setSuccess(t("admin.tmdb.browse.savedSuccess"));
 			setTimeout(() => setSuccess(null), 3000);
@@ -179,7 +180,7 @@ export function TMDBBrowseTab() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h3 className="text-lg font-semibold text-white flex items-center gap-2">
+				<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
 					<Search className="w-5 h-5" />
 					{t("admin.tmdb.browse.title")}
 				</h3>
@@ -393,7 +394,7 @@ export function TMDBBrowseTab() {
 			{results.length > 0 && (
 				<div className="space-y-4">
 					<div className="flex items-center justify-between">
-						<p className="text-sm text-gray-400">
+						<p className="text-sm text-gray-600">
 							{totalResults} {t("admin.tmdb.browse.results")}
 						</p>
 						<Button
@@ -422,7 +423,7 @@ export function TMDBBrowseTab() {
 							return (
 								<div
 									key={item.id}
-									className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
+									className="bg-white rounded-lg overflow-hidden border border-gray-200 hover:border-blue-500 transition-colors shadow-sm"
 								>
 									{posterPath && (
 										<img
@@ -432,7 +433,7 @@ export function TMDBBrowseTab() {
 										/>
 									)}
 									<div className="p-2">
-										<p className="text-sm font-medium text-white truncate" title={title}>
+										<p className="text-sm font-medium text-gray-900 truncate" title={title}>
 											{title}
 										</p>
 										<div className="flex items-center gap-1 mt-1">
@@ -473,7 +474,7 @@ export function TMDBBrowseTab() {
 			)}
 
 			{!loading && results.length === 0 && (
-				<div className="text-center text-gray-400 py-8">
+				<div className="text-center text-gray-500 py-8">
 					{t("admin.tmdb.browse.noResults")}
 				</div>
 			)}

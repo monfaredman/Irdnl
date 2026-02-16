@@ -129,4 +129,10 @@ export class CommentsPublicController {
       sortOrder: 'DESC',
     });
   }
+
+  @Post(':id/like')
+  @ApiOperation({ summary: 'Like a comment' })
+  async likeComment(@Param('id') id: string) {
+    return this.commentsService.likeComment(id);
+  }
 }

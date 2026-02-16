@@ -18,6 +18,42 @@ export class PublicController {
     return this.publicService.listActiveCategories();
   }
 
+  @Get('categories/menu')
+  @ApiOperation({ summary: 'List categories shown in menu (public)' })
+  @ApiResponse({ status: 200, description: 'Menu categories list' })
+  async listMenuCategories() {
+    return this.publicService.listMenuCategories();
+  }
+
+  @Get('categories/landing')
+  @ApiOperation({ summary: 'List categories shown on landing page (public)' })
+  @ApiResponse({ status: 200, description: 'Landing categories list' })
+  async listLandingCategories() {
+    return this.publicService.listLandingCategories();
+  }
+
+  @Get('categories/path/:parent/:child')
+  @ApiOperation({ summary: 'Get child category by URL path (public)' })
+  @ApiParam({ name: 'parent', type: String })
+  @ApiParam({ name: 'child', type: String })
+  @ApiResponse({ status: 200, description: 'Child category details by path' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  async getCategoryByChildPath(
+    @Param('parent') parent: string,
+    @Param('child') child: string,
+  ) {
+    return this.publicService.getCategoryByUrlPath(parent, child);
+  }
+
+  @Get('categories/path/:parent')
+  @ApiOperation({ summary: 'Get category by URL path (public)' })
+  @ApiParam({ name: 'parent', type: String })
+  @ApiResponse({ status: 200, description: 'Category details by path' })
+  @ApiResponse({ status: 404, description: 'Category not found' })
+  async getCategoryByPath(@Param('parent') parent: string) {
+    return this.publicService.getCategoryByUrlPath(parent);
+  }
+
   @Get('categories/:slug')
   @ApiOperation({ summary: 'Get category by slug (public)' })
   @ApiParam({ name: 'slug', type: String })
@@ -81,5 +117,25 @@ export class PublicController {
   @ApiResponse({ status: 200, description: 'Active pins list' })
   async listPins(@Query('section') section?: string) {
     return this.publicService.listActivePins(section);
+  }
+
+  // ========================================================================
+  // COLLECTIONS
+  // ========================================================================
+
+  @Get('collections')
+  @ApiOperation({ summary: 'List active collections (public)' })
+  @ApiResponse({ status: 200, description: 'Active collections list' })
+  async listCollections() {
+    return this.publicService.listActiveCollections();
+  }
+
+  @Get('collections/:slug')
+  @ApiOperation({ summary: 'Get collection by slug with contents (public)' })
+  @ApiParam({ name: 'slug', type: String })
+  @ApiResponse({ status: 200, description: 'Collection details with contents' })
+  @ApiResponse({ status: 404, description: 'Collection not found' })
+  async getCollection(@Param('slug') slug: string) {
+    return this.publicService.getCollectionBySlug(slug);
   }
 }

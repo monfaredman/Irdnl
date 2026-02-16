@@ -1,125 +1,85 @@
 "use client";
 
-import { Alert, Box, CircularProgress } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
-import { BannerCarousel } from "@/components/sections/BannerCarousel";
+import { Alert, Box } from "@mui/material";
+import { useEffect, useState } from "react";
 import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
-import { FiltersSection } from "@/components/sections/FiltersSection";
 import { IOSWidgetGridSection } from "@/components/sections/IOSWidgetGridSection";
 import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
 import { MainPageSkeleton } from "@/components/layout/SkeletonLoader";
-import {
-	useBackendFilteredContent,
-	useBackendCombinedContent,
-	useBackendPopularMovies,
-	useBackendPopularTVShows,
-	useBackendTrendingMovies,
-} from "@/hooks/useBackendContent";
 import { useLanguage } from "@/providers/language-provider";
 import { contentApi } from "@/lib/api/content";
-import type { Movie } from "@/types/media";
-
-type UiFilterState = {
-	type: string;
-	genre: string;
-	country: string;
-	yearRange: [number, number];
-	ageRating: string;
-};
+import { slidersApi, offersApi, categoriesApi, type Slider, type Offer, type Category } from "@/lib/api/public";
+import type { Movie, Series } from "@/types/media";
 
 /**
  * Apple-Inspired Liquid Glass Homepage
  *
- * Design Principles:
- * - Frosted Liquid Glass aesthetic
- * - Extreme minimalism with depth
- * - 70% whitespace minimum
- * - Content-first experience
- * - Premium, sophisticated feel
- *
  * Data Source: Backend Database (all content uploaded via admin panel)
+ * API calls: menu (header), sliders, offers, landing categories + content per category
  */
 export default function Home() {
 	const { language } = useLanguage();
-	const [filters, setFilters] = useState<UiFilterState>({
-		type: "all",
-		genre: "all",
-		country: "all",
-		yearRange: [2000, 2024],
-		ageRating: "all",
-	});
-	const [hasAppliedFilters, setHasAppliedFilters] = useState(false);
 
-	const backendFilters = useMemo(() => {
-		// Map UI filters to database query params
-		return {
-			type:
-				filters.type === "movie" || filters.type === "series"
-					? (filters.type as "movie" | "series")
-					: undefined,
-			genre: filters.genre !== "all" ? filters.genre : undefined,
-			year: filters.yearRange[1] !== 2024 ? filters.yearRange[1] : undefined,
-			country: filters.country !== "all" ? filters.country : undefined,
-			page: 1,
-			limit: 20,
-		};
-	}, [
-		filters.genre,
-		filters.type,
-		filters.yearRange,
-		filters.country,
-	]);
+	// Dynamic landing categories from DB
+	const [landingCategories, setLandingCategories] = useState<Category[]>([]);
+	const [landingCategoryContent, setLandingCategoryContent] = useState<Record<string, (Movie | Series)[]>>({});
 
-	// Fetch real data from backend database
-	const { data: combinedContent, loading: loadingCombined } =
-		useBackendCombinedContent();
-	const { data: popularMovies, loading: loadingMovies } =
-		useBackendPopularMovies();
-	const { data: trendingMovies, loading: loadingTrending } =
-		useBackendTrendingMovies();
-	const { data: popularSeries, loading: loadingSeries } =
-		useBackendPopularTVShows();
-	const {
-		data: filteredContent,
-		loading: loadingFiltered,
-		error: errorFiltered,
-	} = useBackendFilteredContent(backendFilters, { enabled: true });
+	// Sliders & Offers from admin panel
+	const [sliders, setSliders] = useState<Slider[]>([]);
+	const [offers, setOffers] = useState<Offer[]>([]);
+	const [loading, setLoading] = useState(true);
 
-	const [animationItems, setAnimationItems] = useState<Movie[]>([]);
-	const [loadingAnimation, setLoadingAnimation] = useState(false);
-
-	// Animation content (genre animation) from database
-	// Lightweight client-side fetch (no need for a dedicated hook yet).
+	// Fetch sliders, offers, and landing categories in one effect
 	useEffect(() => {
 		let cancelled = false;
 		(async () => {
 			try {
-				setLoadingAnimation(true);
-				const res = await contentApi.getAnimationContent({
-					page: 1,
-				});
+				const [slidersRes, offersRes, landingRes] = await Promise.all([
+					slidersApi.list().catch(() => ({ data: [] })),
+					offersApi.list().catch(() => ({ data: [] })),
+					categoriesApi.listLanding().catch(() => ({ data: [] })),
+				]);
 				if (cancelled) return;
-				// For the home carousel we show movies (can be extended to mixed types later)
-				setAnimationItems(res.movies.slice(0, 8));
+
+				setSliders(slidersRes.data || []);
+				setOffers(offersRes.data || []);
+
+				const cats = landingRes.data || [];
+				setLandingCategories(cats);
+
+				// Fetch content for each landing category
+				if (cats.length > 0) {
+					const contentMap: Record<string, (Movie | Series)[]> = {};
+					await Promise.all(
+						cats.map(async (cat) => {
+							try {
+								const contentRes = await contentApi.getContent({
+									categoryId: cat.id,
+									sort: "createdAt",
+									order: "DESC",
+									limit: 20,
+								});
+								contentMap[cat.id] = contentRes.items;
+							} catch {
+								contentMap[cat.id] = [];
+							}
+						})
+					);
+					if (!cancelled) {
+						setLandingCategoryContent(contentMap);
+					}
+				}
+			} catch {
+				// silently fail - sections just won't show
 			} finally {
-				if (!cancelled) setLoadingAnimation(false);
+				if (!cancelled) setLoading(false);
 			}
 		})();
-		return () => {
-			cancelled = true;
-		};
+		return () => { cancelled = true; };
 	}, []);
 
-	// Filter content by origin (Iranian vs Foreign)
-	const foreignMovies =
-		popularMovies?.filter((m) => m.origin === "foreign") || [];
-	const foreignSeries =
-		popularSeries?.filter((s) => s.origin === "foreign") || [];
-	const iranianSeries =
-		popularSeries?.filter((s) => s.origin === "iranian") || [];
-
-	// Loading state - Show beautiful skeleton instead of spinner
-	if (loadingCombined || loadingMovies || loadingTrending || loadingSeries) {
+	// Loading state
+	if (loading) {
 		return <MainPageSkeleton />;
 	}
 
@@ -129,129 +89,51 @@ export default function Home() {
 				minHeight: "100vh",
 			}}
 		>
-			{/* Premium Hero Slider - Featured/Popular Content */}
-			{combinedContent && combinedContent.length > 0 && (
+			{/* Premium Hero Slider - Shows admin panel sliders only */}
+			{sliders.length > 0 && (
 				<LiquidGlassSlider
-					items={combinedContent.slice(0, 5)}
+					items={sliders.map((s) => ({
+						id: s.contentId || s.id,
+						title: language === "fa" ? s.titleFa || s.title : s.title,
+						backdrop: s.imageUrl || "",
+						poster: s.imageUrl || "",
+						rating: 0,
+						year: new Date().getFullYear(),
+						genres: [] as string[],
+						description: language === "fa" ? s.descriptionFa || s.description || "" : s.description || "",
+						slug: s.contentId || s.id,
+						linkUrl: s.contentId ? `/item/${s.contentId}` : (s.linkUrl || `/item/${s.id}`),
+					})) as any}
 					type="movie"
 					autoplayDelay={5000}
 				/>
 			)}
 
-			{/* iOS-Style Widget Grid - Drag & Drop */}
-			{combinedContent && combinedContent.length > 0 && (
-				<IOSWidgetGridSection items={combinedContent} />
+			{/* iOS-Style Widget Grid - Shows offers from admin panel */}
+			{offers.length > 0 && (
+				<IOSWidgetGridSection offers={offers} />
 			)}
 
-			{/* Filters Section */}
-			<FiltersSection
-				onFilterChange={(next) => {
-					setFilters(next);
-					setHasAppliedFilters(true);
-				}}
-			/>
+			{/* Dynamic Landing Categories from DB (showInLanding=true, sorted by sortOrder) */}
+			{landingCategories.map((cat) => {
+				const items = landingCategoryContent[cat.id] || [];
+				if (items.length === 0) return null;
 
-			{/* Filtered Results (from backend /content) */}
-			{hasAppliedFilters && errorFiltered && (
-				<Box sx={{ px: { xs: 2, md: 4 }, pb: 4 }}>
-					<Alert severity="error" sx={{ maxWidth: 900, mx: "auto" }}>
-						{language === "fa"
-							? "خطا در دریافت نتایج فیلتر شده"
-							: "Failed to fetch filtered results"}
-					</Alert>
-				</Box>
-			)}
-
-			{hasAppliedFilters && loadingFiltered && (
-				<Box sx={{ display: "flex", justifyContent: "center", py: 3 }}>
-					<CircularProgress sx={{ color: "#F59E0B" }} size={28} />
-				</Box>
-			)}
-
-			{hasAppliedFilters &&
-				!loadingFiltered &&
-				filteredContent &&
-				filteredContent.length > 0 && (
-				<EmblaCarousel
-					title={language === "fa" ? "نتایج فیلتر" : "Filtered Results"}
-					items={filteredContent}
-					type="movie"
-					viewAllHref="/search"
-				/>
-			)}
-
-			{/* New Movie Carousel - فیلم جدید */}
-			{trendingMovies && trendingMovies.length > 0 && (
-				<EmblaCarousel
-					title={language === "fa" ? "فیلم جدید" : "New Movies"}
-					items={trendingMovies}
-					type="movie"
-					viewAllHref="/movies/foreign"
-				/>
-			)}
-
-			{/* Banner 1 - Featured Content */}
-			{popularMovies && popularMovies.length > 0 && (
-				<BannerCarousel
-					items={popularMovies.slice(5, 10)}
-					height={324}
-					autoplayDelay={6000}
-				/>
-			)}
-
-			{/* Foreign Series Carousel - سریال خارجی */}
-			{foreignSeries.length > 0 && (
-				<EmblaCarousel
-					title={language === "fa" ? "سریال خارجی" : "Foreign Series"}
-					items={foreignSeries}
-					type="series"
-					viewAllHref="/series/foreign"
-				/>
-			)}
-
-			{/* New Iranian Series - سریال ایرانی جدید */}
-			{iranianSeries.length > 0 && (
-				<EmblaCarousel
-					title={language === "fa" ? "سریال ایرانی جدید" : "New Iranian Series"}
-					items={iranianSeries}
-					type="series"
-					viewAllHref="/series/iranian"
-				/>
-			)}
-
-			{/* Banner 2 - Series Highlights */}
-			{popularSeries && popularSeries.length > 0 && (
-				<BannerCarousel
-					items={popularSeries.slice(3, 8)}
-					height={324}
-					autoplayDelay={7000}
-				/>
-			)}
-
-			{/* Persian Dubbed - دوبله فارسی جدید */}
-			{foreignMovies.length > 0 && (
-				<EmblaCarousel
-					title={language === "fa" ? "دوبله فارسی جدید" : "New Persian Dubbed"}
-					items={foreignMovies.slice(0, 8)}
-					type="movie"
-					viewAllHref="/dubbed"
-				/>
-			)}
-
-			{/* Animation Carousel - انیمیشن */}
-			{!loadingAnimation && animationItems.length > 0 && (
-				<EmblaCarousel
-					title={language === "fa" ? "انیمیشن" : "Animation"}
-					items={animationItems}
-					type="movie"
-					viewAllHref="/animation"
-				/>
-			)}
+				return (
+					<EmblaCarousel
+						key={cat.id}
+						title={language === "fa" ? cat.nameFa : cat.nameEn}
+						items={items}
+						type={cat.contentType === "series" ? "series" : "movie"}
+						viewAllHref={`/category/${cat.slug}`}
+					/>
+				);
+			})}
 
 			{/* Fallback if no content */}
-			{!combinedContent?.length &&
-				!popularMovies?.length &&
-				!popularSeries?.length && (
+			{sliders.length === 0 &&
+				offers.length === 0 &&
+				landingCategories.length === 0 && (
 					<Box sx={{ p: 8, textAlign: "center" }}>
 						<Alert severity="info" sx={{ maxWidth: 600, mx: "auto" }}>
 							{language === "fa"

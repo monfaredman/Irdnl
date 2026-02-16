@@ -18,7 +18,7 @@ export class Season {
   @Column({ name: 'series_id' })
   seriesId: string;
 
-  @ManyToOne(() => Series, (series) => series.seasons)
+  @ManyToOne(() => Series, (series) => series.seasons, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'series_id' })
   series: Series;
 

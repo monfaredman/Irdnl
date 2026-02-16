@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { ContentService } from './content.service';
-import { Content, ContentType, ContentStatus } from './entities/content.entity';
+import { Content, ContentType, ContentStatus, AccessType } from './entities/content.entity';
 import { Series } from './entities/series.entity';
 import { Season } from './entities/season.entity';
 import { Episode } from './entities/episode.entity';
@@ -74,6 +74,8 @@ describe('ContentService', () => {
     isComingSoon: false,
     isDubbed: false,
     collectionId: null,
+    categoryIds: [],
+    accessType: AccessType.FREE,
   };
 
   beforeEach(async () => {

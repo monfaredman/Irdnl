@@ -4,7 +4,7 @@
 
 "use client";
 
-import { PlayArrow, Bookmark, Share, Add, OpenInNew } from "@mui/icons-material";
+import { PlayArrow, Bookmark, BookmarkBorder, Share, PlaylistAdd, PlaylistAddCheck, ThumbUp, ThumbUpOutlined, OpenInNew, ShoppingCart, Subscriptions, DataUsage } from "@mui/icons-material";
 import { Box, Button, Chip, Typography, IconButton } from "@mui/material";
 import { useState, useEffect } from "react";
 import {
@@ -12,6 +12,8 @@ import {
 	glassBorderRadius,
 	glassBlur,
 } from "@/theme/glass-design-system";
+
+import type { AccessType } from "@/types/media";
 
 interface CinematicHeroProps {
 	backdropUrl: string;
@@ -23,11 +25,20 @@ interface CinematicHeroProps {
 	duration?: number | string;
 	genres: string[];
 	externalPlayerUrl?: string;
+	accessType?: AccessType;
 	sources?: Array<{ quality: string; url: string; format?: string; type?: string }>;
 	contentId?: string;
 	onPlay?: () => void;
 	onAddToList?: () => void;
 	onShare?: () => void;
+	// Bookmark / Playlist / Clap
+	isBookmarked?: boolean;
+	onToggleBookmark?: () => void;
+	isInPlaylist?: boolean;
+	onTogglePlaylist?: () => void;
+	isClapped?: boolean;
+	clapCount?: number;
+	onToggleClap?: () => void;
 }
 
 export function CinematicHero({
@@ -40,11 +51,19 @@ export function CinematicHero({
 	duration,
 	genres,
 	externalPlayerUrl,
+	accessType,
 	sources,
 	contentId,
 	onPlay,
 	onAddToList,
 	onShare,
+	isBookmarked,
+	onToggleBookmark,
+	isInPlaylist,
+	onTogglePlaylist,
+	isClapped,
+	clapCount,
+	onToggleClap,
 }: CinematicHeroProps) {
 	const [scrollY, setScrollY] = useState(0);
 
@@ -55,6 +74,33 @@ export function CinematicHero({
 	}, []);
 
 	const parallaxOffset = scrollY * 0.5;
+
+	// Determine if this is Upera content (redirect) vs free in-site content
+	const isUperaContent = accessType && accessType !== "free";
+	const hasPlayableContent = !isUperaContent && (sources?.length ?? 0) > 0;
+	const hasExternalLink = !!externalPlayerUrl;
+
+	// Button label and icon based on access type
+	const getPlayButtonConfig = () => {
+		if (isUperaContent) {
+			switch (accessType) {
+				case "subscription":
+					return { label: "تماشا (اشتراکی)", icon: <Subscriptions sx={{ fontSize: "1rem" }} /> };
+				case "single_purchase":
+					return { label: "خرید و تماشا", icon: <ShoppingCart sx={{ fontSize: "1rem" }} /> };
+				case "traffic":
+					return { label: "تماشا (ترافیکی)", icon: <DataUsage sx={{ fontSize: "1rem" }} /> };
+				default:
+					return { label: "پخش آنلاین", icon: <OpenInNew sx={{ fontSize: "1rem" }} /> };
+			}
+		}
+		if (hasExternalLink) {
+			return { label: "تماشای آنلاین", icon: <OpenInNew sx={{ fontSize: "1rem" }} /> };
+		}
+		return { label: "پخش", icon: undefined };
+	};
+
+	const playConfig = getPlayButtonConfig();
 
 	return (
 		<Box
@@ -189,7 +235,7 @@ export function CinematicHero({
 							}}
 						/>
 						<Chip
-							label={`⭐ ${rating.toFixed(1)}`}
+							label={`⭐ ${(Number(rating) || 0).toFixed(1)}`}
 							sx={{
 								background: `linear-gradient(135deg, ${glassColors.gold.light}, ${glassColors.gold.lighter})`,
 								backdropFilter: glassBlur.light,
@@ -232,28 +278,31 @@ export function CinematicHero({
 							display: "flex",
 							gap: 2,
 							flexWrap: "wrap",
+							alignItems: "center",
 						}}
 					>
 						<Button
 							variant="contained"
 							size="large"
 							startIcon={<PlayArrow />}
-							endIcon={externalPlayerUrl ? <OpenInNew sx={{ fontSize: "1rem !important" }} /> : undefined}
-							onClick={() => {
-								if (externalPlayerUrl) {
-									window.open(externalPlayerUrl, "_blank", "noopener,noreferrer");
-								} else if (onPlay) {
+							endIcon={playConfig.icon}
+							component={hasExternalLink ? "a" : "button"}
+							href={hasExternalLink ? externalPlayerUrl : undefined}
+							target={hasExternalLink ? "_blank" : undefined}
+							rel={hasExternalLink ? "noopener noreferrer" : undefined}
+							onClick={hasExternalLink ? undefined : () => {
+								if (onPlay) {
 									onPlay();
-								} else if (sources && sources.length > 0 && contentId) {
+								} else if (hasPlayableContent && contentId) {
 									window.location.href = `/watch/${contentId}`;
 								}
 							}}
-							disabled={!externalPlayerUrl && !onPlay && (!sources || sources.length === 0)}
+							disabled={!hasExternalLink && !onPlay && !hasPlayableContent}
 							sx={{
-								background: externalPlayerUrl
+								background: isUperaContent || hasExternalLink
 									? `linear-gradient(135deg, ${glassColors.gold.solid}, #D97706)`
 									: glassColors.glass.mid,
-								color: externalPlayerUrl ? glassColors.black : glassColors.text.primary,
+								color: isUperaContent || hasExternalLink ? glassColors.black : glassColors.text.primary,
 								fontWeight: 700,
 								px: 4,
 								py: 1.5,
@@ -271,7 +320,7 @@ export function CinematicHero({
 									transition: "opacity 0.4s ease",
 								},
 								"&:hover": {
-									background: externalPlayerUrl
+									background: isUperaContent || hasExternalLink
 										? `linear-gradient(135deg, #FBBF24, ${glassColors.gold.solid})`
 										: glassColors.glass.strong,
 									transform: "translateY(-2px)",
@@ -293,42 +342,74 @@ export function CinematicHero({
 								},
 							}}
 						>
-							{externalPlayerUrl ? "پخش آنلاین" : "پخش"}
+							{playConfig.label}
 						</Button>
 
+						{/* Bookmark */}
 						<IconButton
-							onClick={onAddToList}
+							onClick={onToggleBookmark}
+							aria-label="نشان‌گذاری"
 							sx={{
-								background: glassColors.glass.mid,
+								background: isBookmarked ? `${glassColors.persianGold}30` : glassColors.glass.mid,
 								backdropFilter: glassBlur.light,
-								border: `1px solid ${glassColors.glass.border}`,
-								color: glassColors.text.primary,
+								border: `1px solid ${isBookmarked ? glassColors.persianGold : glassColors.glass.border}`,
+								color: isBookmarked ? glassColors.persianGold : glassColors.text.primary,
+								transition: "all 0.3s ease",
 								"&:hover": {
-									background: glassColors.glass.strong,
-									border: `1px solid ${glassColors.gold.solid}`,
-									transform: "scale(1.05)",
+									background: `${glassColors.persianGold}20`,
+									transform: "scale(1.1)",
 								},
 							}}
 						>
-							<Add />
+							{isBookmarked ? <Bookmark /> : <BookmarkBorder />}
 						</IconButton>
 
+						{/* Playlist */}
 						<IconButton
-							onClick={onAddToList}
+							onClick={onTogglePlaylist}
+							aria-label="افزودن به لیست پخش"
 							sx={{
-								background: glassColors.glass.mid,
+								background: isInPlaylist ? `${glassColors.persianGold}30` : glassColors.glass.mid,
 								backdropFilter: glassBlur.light,
-								border: `1px solid ${glassColors.glass.border}`,
-								color: glassColors.text.primary,
+								border: `1px solid ${isInPlaylist ? glassColors.persianGold : glassColors.glass.border}`,
+								color: isInPlaylist ? glassColors.persianGold : glassColors.text.primary,
+								transition: "all 0.3s ease",
 								"&:hover": {
-									background: glassColors.glass.strong,
-									transform: "scale(1.05)",
+									background: `${glassColors.persianGold}20`,
+									transform: "scale(1.1)",
 								},
 							}}
 						>
-							<Bookmark />
+							{isInPlaylist ? <PlaylistAddCheck /> : <PlaylistAdd />}
 						</IconButton>
 
+						{/* Clap / Like */}
+						<Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+							<IconButton
+								onClick={onToggleClap}
+								aria-label="لایک"
+								sx={{
+									background: isClapped ? `${glassColors.persianGold}30` : glassColors.glass.mid,
+									backdropFilter: glassBlur.light,
+									border: `1px solid ${isClapped ? glassColors.persianGold : glassColors.glass.border}`,
+									color: isClapped ? glassColors.persianGold : glassColors.text.primary,
+									transition: "all 0.3s ease",
+									"&:hover": {
+										background: `${glassColors.persianGold}20`,
+										transform: "scale(1.1)",
+									},
+								}}
+							>
+								{isClapped ? <ThumbUp /> : <ThumbUpOutlined />}
+							</IconButton>
+							{(clapCount ?? 0) > 0 && (
+								<Typography sx={{ color: glassColors.text.secondary, fontSize: "0.85rem" }}>
+									{clapCount}
+								</Typography>
+							)}
+						</Box>
+
+						{/* Share */}
 						<IconButton
 							onClick={onShare}
 							sx={{

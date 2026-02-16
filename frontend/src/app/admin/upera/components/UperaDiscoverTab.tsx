@@ -191,84 +191,366 @@ export function UperaDiscoverTab() {
 		}
 	}, []);
 
+	/** Convert raw Upera CDN URLs to thumb proxy URLs for proper display */
+	const uperaThumb = (src: string | undefined, w = 142, h = 212, mode = 'c') => {
+		if (!src) return undefined;
+		// Already a thumb URL
+		if (src.includes('thumb.upera.tv/thumb')) return src;
+		// Convert cdn.upera.tv or thumb.upera.tv/s3 paths
+		return `https://thumb.upera.tv/thumb?w=${w}&h=${h}&q=100&a=${mode}&src=${encodeURIComponent(src)}`;
+	};
+
 	const renderResult = () => {
 		if (!result) return null;
 
-		// Determine items to display
-		const items = result?.data || result?.items || result?.results || result?.list;
-		const isArray = Array.isArray(items);
-		const isRawArray = Array.isArray(result);
+		switch (activeSection) {
+			case "discover":
+				return renderDiscoverResult();
+			case "sliders":
+				return renderSlidersResult();
+			case "offers":
+				return renderOffersResult();
+			case "genres":
+				return renderGenresResult();
+			case "plans":
+				return renderPlansResult();
+			default:
+				return renderRawJSON();
+		}
+	};
+
+	const renderDiscoverResult = () => {
+		// discover response: { data: { data: [ { title, link, data: [...items] }, ... ] } }
+		const lists = result?.data?.data || result?.data || [];
+		if (!Array.isArray(lists) || lists.length === 0) return renderRawJSON();
 
 		return (
-			<div className="mt-4">
-				{/* Summary */}
-				{result?.total !== undefined && (
-					<p className="text-sm text-gray-500 mb-2">
-						{t("admin.upera.discover.totalItems")}: {result.total}
-					</p>
-				)}
+			<div className="mt-4 space-y-6">
+				{lists.map((list: any, listIdx: number) => (
+					<div key={list?.id || listIdx} className="space-y-2">
+						{list?.title && (
+							<h4 className="text-base font-semibold text-white border-b border-gray-700 pb-1">
+								{list.title}
+							</h4>
+						)}
+						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+							{(list?.data || []).map((item: any, idx: number) => {
+								const posterUrl = item?.cdn?.poster || item?.poster || item?.cover || item?.image;
+								return (
+									<div
+										key={item?.id || item?.movie_id || idx}
+										className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
+									>
+										{posterUrl && (
+											<img
+												src={uperaThumb(posterUrl, 142, 212, 'c')}
+												alt={item?.title_fa || item?.title || ""}
+												className="w-full aspect-2/3 object-cover"
+												loading="lazy"
+											/>
+										)}
+										<div className="p-2">
+											<p className="text-sm font-medium text-white truncate">
+												{item?.title_fa || item?.title || item?.name || `#${idx + 1}`}
+											</p>
+											{item?.title_en && (
+												<p className="text-xs text-gray-400 truncate">{item.title_en}</p>
+											)}
+											<div className="flex flex-wrap gap-1 mt-1">
+												{item?.year && (
+													<Chip label={item.year} size="small" variant="outlined" sx={{ color: '#aaa', borderColor: '#555' }} />
+												)}
+												{item?.imdb_rate && (
+													<Chip label={`IMDb ${item.imdb_rate}`} size="small" color="warning" variant="outlined" />
+												)}
+												{item?.type && (
+													<Chip label={item.type === 'series' ? 'سریال' : 'فیلم'} size="small" color="info" variant="outlined" />
+												)}
+												{item?.hd === 1 && (
+													<Chip label="HD" size="small" color="success" variant="outlined" />
+												)}
+												{item?.dubbed === 1 && (
+													<Chip label="دوبله" size="small" color="secondary" variant="outlined" />
+												)}
+											</div>
+										</div>
+									</div>
+								);
+							})}
+						</div>
+					</div>
+				))}
+			</div>
+		);
+	};
 
-				{/* Render content cards for arrays */}
-				{(isArray || isRawArray) && (
-					<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
-						{(isRawArray ? result : items).map((item: any, idx: number) => (
+	const renderSlidersResult = () => {
+		// sliders response: { data: { sliders: [ { id, name, image, genre, link, ... } ] } }
+		const sliders = result?.data?.sliders || result?.sliders || [];
+		if (!Array.isArray(sliders) || sliders.length === 0) return renderRawJSON();
+
+		return (
+			<div className="mt-4 space-y-3">
+				<p className="text-sm text-gray-400">
+					تعداد اسلایدر: {sliders.length}
+				</p>
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+					{sliders.map((slider: any, idx: number) => (
+						<div
+							key={slider?.id || idx}
+							className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-purple-500 transition-colors"
+						>
+							{slider?.image && (
+								<img
+									src={uperaThumb(slider.image, 764, 400, 'r')}
+									alt={slider?.name || ""}
+									className="w-full aspect-video object-cover"
+									loading="lazy"
+								/>
+							)}
+							<div className="p-3">
+								<p className="text-sm font-semibold text-white">
+									{slider?.name || `اسلایدر #${idx + 1}`}
+								</p>
+							<div className="flex flex-wrap gap-1 mt-2">
+								{slider?.genre && (
+									typeof slider.genre === 'object'
+										? Object.keys(slider.genre).map((g) => (
+											<Chip key={g} label={g} size="small" color="secondary" variant="outlined" />
+										))
+										: <Chip label={String(slider.genre)} size="small" color="secondary" variant="outlined" />
+								)}
+									{slider?.media_type && (
+										<Chip label={slider.media_type === 'series' ? 'سریال' : 'فیلم'} size="small" color="info" variant="outlined" />
+									)}
+									{slider?.badge_text && (
+										<Chip label={slider.badge_text} size="small" color="warning" />
+									)}
+								</div>
+								{slider?.link && (
+									<a href={slider.link} target="_blank" rel="noopener noreferrer" className="text-xs text-blue-400 hover:underline mt-1 inline-block">
+										مشاهده لینک
+									</a>
+								)}
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		);
+	};
+
+	const renderOffersResult = () => {
+		// offers response: { data: [ { id, name, series_name, episode_number, cdn: { poster }, ... } ] }
+		const offers = result?.data || [];
+		if (!Array.isArray(offers) || offers.length === 0) return renderRawJSON();
+
+		return (
+			<div className="mt-4 space-y-3">
+				<p className="text-sm text-gray-400">
+					تعداد آفرها: {offers.length}
+				</p>
+				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+					{offers.map((item: any, idx: number) => {
+						const posterUrl = item?.cdn?.poster || item?.poster || item?.cover;
+						return (
 							<div
-								key={item?.id || item?._id || idx}
-								className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700"
+								key={item?.id || idx}
+								className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-orange-500 transition-colors"
 							>
-								{(item?.poster || item?.cover || item?.image || item?.banner) && (
+								{posterUrl && (
 									<img
-										src={item.poster || item.cover || item.image || item.banner}
-										alt={item?.title_fa || item?.title || item?.name || ""}
+										src={uperaThumb(posterUrl, 142, 212, 'c')}
+										alt={item?.name || ""}
 										className="w-full aspect-2/3 object-cover"
+										loading="lazy"
 									/>
 								)}
 								<div className="p-2">
 									<p className="text-sm font-medium text-white truncate">
-										{item?.title_fa || item?.title || item?.name || item?.label || `#${idx + 1}`}
+										{item?.name || item?.title_fa || `#${idx + 1}`}
 									</p>
-									{item?.title_en && (
+									{item?.series_name && (
 										<p className="text-xs text-gray-400 truncate">
-											{item.title_en}
+											{item.series_name}
 										</p>
 									)}
 									<div className="flex flex-wrap gap-1 mt-1">
+										{item?.episode_number !== undefined && (
+											<Chip label={`قسمت ${item.episode_number}`} size="small" color="primary" variant="outlined" />
+										)}
+										{item?.type && (
+											<Chip label={item.type === 'series' ? 'سریال' : 'فیلم'} size="small" color="info" variant="outlined" />
+										)}
 										{item?.year && (
-											<Chip label={item.year} size="small" variant="outlined" />
+											<Chip label={item.year} size="small" variant="outlined" sx={{ color: '#aaa', borderColor: '#555' }} />
 										)}
 										{item?.imdb_rate && (
 											<Chip label={`IMDb ${item.imdb_rate}`} size="small" color="warning" variant="outlined" />
 										)}
-										{item?.type && (
-											<Chip label={item.type} size="small" color="info" variant="outlined" />
-										)}
-										{item?.price !== undefined && (
-											<Chip
-												label={item.price === 0 ? "رایگان" : `${item.price?.toLocaleString?.()} تومان`}
-												size="small"
-												color={item.price === 0 ? "success" : "default"}
-												variant="outlined"
-											/>
-										)}
-										{item?.duration && (
-											<Chip label={item.duration} size="small" variant="outlined" />
+										{item?.offer_percent > 0 && (
+											<Chip label={`${item.offer_percent}% تخفیف`} size="small" color="error" />
 										)}
 									</div>
 								</div>
 							</div>
-						))}
-					</div>
-				)}
-
-				{/* Raw JSON for non-array results */}
-				{!isArray && !isRawArray && (
-					<pre className="bg-gray-900 text-green-400 p-4 rounded-lg text-xs overflow-auto max-h-[500px] whitespace-pre-wrap" dir="ltr">
-						{JSON.stringify(result, null, 2)}
-					</pre>
-				)}
+						);
+					})}
+				</div>
 			</div>
 		);
 	};
+
+	const renderGenresResult = () => {
+		// genres response: { genres: [ { id, fa, en, slug, cover, ... } ] }
+		const genres = result?.genres || result?.data?.genres || [];
+		if (!Array.isArray(genres) || genres.length === 0) return renderRawJSON();
+
+		return (
+			<div className="mt-4 space-y-3">
+				<p className="text-sm text-gray-400">
+					تعداد ژانرها: {genres.length}
+				</p>
+				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+					{genres.map((genre: any, idx: number) => (
+						<div
+							key={genre?.id || genre?.slug || idx}
+							className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-green-500 transition-colors"
+						>
+							{genre?.cover && (
+								<img
+									src={uperaThumb(genre.cover, 764, 400, 'r')}
+									alt={genre?.fa || genre?.en || ""}
+									className="w-full aspect-video object-cover"
+									loading="lazy"
+								/>
+							)}
+							<div className="p-3 text-center">
+								<p className="text-sm font-semibold text-white">
+									{genre?.fa || genre?.name || `ژانر #${idx + 1}`}
+								</p>
+								{genre?.en && (
+									<p className="text-xs text-gray-400 mt-0.5">{genre.en}</p>
+								)}
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+		);
+	};
+
+	const renderPlansResult = () => {
+		// plans response: { data: { plan_key: { id, amount, duration_type, discount, title, ... }, ... } }
+		const plansData = result?.data || result;
+		if (!plansData || typeof plansData !== "object") return renderRawJSON();
+
+		// Collect plan entries (could be object or array)
+		const planEntries: any[] = Array.isArray(plansData)
+			? plansData
+			: Object.entries(plansData)
+					.filter(([key]) => key !== "status" && key !== "message")
+					.map(([key, val]) => ({ planKey: key, ...(typeof val === 'object' && val !== null ? val : {}) }));
+
+		if (planEntries.length === 0) return renderRawJSON();
+
+		return (
+			<div className="mt-4 space-y-3">
+				<p className="text-sm text-gray-400">
+					تعداد پلن‌ها: {planEntries.length}
+				</p>
+				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+					{planEntries.map((plan: any, idx: number) => {
+						const amount = plan?.toman || plan?.amount || plan?.price || 0;
+						const discountObj = plan?.discount;
+						const discountPercent = typeof discountObj === 'object' && discountObj !== null
+							? (discountObj.discount_percent || 0)
+							: (typeof discountObj === 'number' ? discountObj : 0);
+						const discountPrice = typeof discountObj === 'object' && discountObj !== null
+							? discountObj.discount_price
+							: null;
+						const finalPrice = discountPrice != null
+							? discountPrice
+							: (discountPercent > 0 ? amount - (amount * discountPercent / 100) : amount);
+						const planName = plan?.name_fa || plan?.name || plan?.title || plan?.planKey || `پلن #${idx + 1}`;
+						const days = plan?.days || plan?.duration_days;
+						return (
+							<div
+								key={plan?.id || plan?.planKey || idx}
+								className="bg-gray-800 rounded-xl border border-gray-700 p-4 hover:border-yellow-500 transition-colors"
+							>
+								<div className="flex items-center justify-between mb-3">
+									<h4 className="text-base font-bold text-white">
+										{planName}
+									</h4>
+									{plan?.is_popular && (
+										<Chip label="محبوب" size="small" color="warning" />
+									)}
+								</div>
+
+								<div className="space-y-2">
+									<div className="flex items-baseline gap-2">
+										<span className="text-2xl font-bold text-emerald-400">
+											{finalPrice?.toLocaleString?.() || "0"}
+										</span>
+										<span className="text-xs text-gray-400">تومان</span>
+									</div>
+
+									{discountPercent > 0 && (
+										<div className="flex items-center gap-2">
+											<span className="text-sm text-gray-500 line-through">
+												{amount?.toLocaleString?.()}
+											</span>
+											<Chip label={`${discountPercent}% تخفیف`} size="small" color="error" />
+										</div>
+									)}
+
+									{days && (
+										<p className="text-xs text-gray-400">
+											مدت: {days} روز
+										</p>
+									)}
+
+									{plan?.duration_type && (
+										<p className="text-xs text-gray-400">
+											نوع: {plan.duration_type === 'monthly' ? 'ماهانه' : plan.duration_type === 'yearly' ? 'سالانه' : plan.duration_type}
+										</p>
+									)}
+
+									{plan?.dollar && (
+										<p className="text-xs text-gray-400">
+											قیمت دلاری: ${plan.dollar}
+										</p>
+									)}
+
+									{plan?.description && (
+										<p className="text-xs text-gray-300 mt-2">{plan.description}</p>
+									)}
+
+									<div className="flex flex-wrap gap-1 mt-2">
+										{plan?.max_quality && (
+											<Chip label={`کیفیت: ${plan.max_quality}`} size="small" variant="outlined" sx={{ color: '#aaa', borderColor: '#555' }} />
+										)}
+										{plan?.simultaneous_streams && (
+											<Chip label={`${plan.simultaneous_streams} دستگاه`} size="small" variant="outlined" sx={{ color: '#aaa', borderColor: '#555' }} />
+										)}
+									</div>
+								</div>
+							</div>
+						);
+					})}
+				</div>
+			</div>
+		);
+	};
+
+	const renderRawJSON = () => (
+		<div className="mt-4">
+			<pre className="bg-gray-900 text-green-400 p-4 rounded-lg text-xs overflow-auto max-h-[500px] whitespace-pre-wrap" dir="ltr">
+				{JSON.stringify(result, null, 2)}
+			</pre>
+		</div>
+	);
 
 	const renderAgeSelect = (value: string, onChange: (v: string) => void) => (
 		<FormControl size="small" sx={{ minWidth: 140 }}>

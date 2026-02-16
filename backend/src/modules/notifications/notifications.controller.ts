@@ -8,6 +8,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Put,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { NotificationsService } from './notifications.service';
@@ -20,6 +21,9 @@ import { UserRole } from '../users/entities/user.entity';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 
+// ========================================================================
+// Admin Notifications Controller
+// ========================================================================
 @ApiTags('admin/notifications')
 @Controller('admin/notifications')
 @ApiBearerAuth()
@@ -48,5 +52,49 @@ export class NotificationsController {
   @ApiResponse({ status: 200, description: 'Notification details' })
   async findOne(@Param('id') id: string) {
     return this.notificationsService.findOne(id);
+  }
+}
+
+// ========================================================================
+// User Notifications Controller
+// ========================================================================
+@ApiTags('user/notifications')
+@Controller('user/notifications')
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+export class UserNotificationsController {
+  constructor(private readonly notificationsService: NotificationsService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'Get my notifications' })
+  @ApiResponse({ status: 200, description: 'User notifications list' })
+  async getMyNotifications(
+    @CurrentUser() user: User,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+  ) {
+    return this.notificationsService.findForUser(
+      user.id,
+      page ? Number(page) : 1,
+      limit ? Number(limit) : 20,
+    );
+  }
+
+  @Put('read-all')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Mark all notifications as read' })
+  @ApiResponse({ status: 200, description: 'All notifications marked as read' })
+  async markAllAsRead(@CurrentUser() user: User) {
+    await this.notificationsService.markAllAsRead(user.id);
+    return { success: true };
+  }
+
+  @Put(':id/read')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Mark notification as read' })
+  @ApiResponse({ status: 200, description: 'Notification marked as read' })
+  async markAsRead(@CurrentUser() user: User, @Param('id') id: string) {
+    await this.notificationsService.markAsRead(id, user.id);
+    return { success: true };
   }
 }

@@ -13,12 +13,12 @@ import {
 	Menu,
 	MenuItem,
 	Skeleton,
+	Snackbar,
 	Typography,
 } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-import { useBackendPopularMovies } from "@/hooks/useBackendContent";
+import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/providers/language-provider";
 import {
 	glassAnimations,
@@ -26,6 +26,7 @@ import {
 	glassBorderRadius,
 	glassColors,
 } from "@/theme/glass-design-system";
+import { userApi, type WatchlistItem } from "@/lib/api/user";
 
 const translations = {
 	en: {
@@ -53,19 +54,49 @@ export default function WatchlistPage() {
 	const isRTL = language === "fa";
 	const t = translations[language] || translations.en;
 
-	const { data: movies, loading } = useBackendPopularMovies();
+	const [watchlistItems, setWatchlistItems] = useState<WatchlistItem[]>([]);
+	const [loading, setLoading] = useState(true);
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+	const [snackbar, setSnackbar] = useState<string | null>(null);
 
-	const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+	const fetchWatchlist = useCallback(async () => {
+		try {
+			setLoading(true);
+			const items = await userApi.getWatchlist();
+			setWatchlistItems(Array.isArray(items) ? items : []);
+		} catch {
+			setWatchlistItems([]);
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		fetchWatchlist();
+	}, [fetchWatchlist]);
+
+	const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, contentId: string) => {
 		setAnchorEl(event.currentTarget);
+		setSelectedItemId(contentId);
 	};
 
 	const handleMenuClose = () => {
 		setAnchorEl(null);
+		setSelectedItemId(null);
 	};
 
-	// Use first 8 movies as mock watchlist
-	const watchlistItems = movies?.slice(0, 8) || [];
+	const handleRemove = async () => {
+		if (!selectedItemId) return;
+		try {
+			await userApi.removeFromWatchlist(selectedItemId);
+			setWatchlistItems((prev) => prev.filter((item) => item.contentId !== selectedItemId));
+			setSnackbar(language === "fa" ? "از لیست تماشا حذف شد" : "Removed from watchlist");
+		} catch {
+			setSnackbar(language === "fa" ? "خطا در حذف از لیست" : "Failed to remove");
+		}
+		handleMenuClose();
+	};
 
 	if (loading) {
 		return (
@@ -179,8 +210,8 @@ export default function WatchlistPage() {
 								{/* Image */}
 								<Box sx={{ position: "relative", aspectRatio: "2/3" }}>
 									<Image
-										src={item.poster}
-										alt={item.title}
+										src={item.content?.posterUrl || "/images/placeholder.jpg"}
+										alt={item.content?.title || ""}
 										fill
 										style={{ objectFit: "cover" }}
 										sizes="(max-width: 600px) 50vw, 25vw"
@@ -203,7 +234,7 @@ export default function WatchlistPage() {
 										}}
 									>
 										<Link
-											href={`/item/${item.id}`}
+											href={`/item/${item.contentId}`}
 											style={{ textDecoration: "none" }}
 										>
 											<Box
@@ -228,7 +259,7 @@ export default function WatchlistPage() {
 
 									{/* Menu Button */}
 									<IconButton
-										onClick={(e) => handleMenuOpen(e)}
+										onClick={(e) => handleMenuOpen(e, item.contentId)}
 										sx={{
 											position: "absolute",
 											top: 8,
@@ -244,7 +275,7 @@ export default function WatchlistPage() {
 									</IconButton>
 
 									{/* Rating Badge */}
-									{item.rating && (
+									{item.content?.rating && (
 										<Box
 											sx={{
 												position: "absolute",
@@ -273,7 +304,7 @@ export default function WatchlistPage() {
 													fontWeight: 600,
 												}}
 											>
-												{item.rating}
+												{item.content.rating}
 											</Typography>
 										</Box>
 									)}
@@ -291,7 +322,7 @@ export default function WatchlistPage() {
 											whiteSpace: "nowrap",
 										}}
 									>
-										{item.title}
+										{item.content?.titleFa || item.content?.title || "---"}
 									</Typography>
 									<Typography
 										sx={{
@@ -299,7 +330,7 @@ export default function WatchlistPage() {
 											fontSize: "0.8rem",
 										}}
 									>
-										{item.year}
+										{item.content?.year || ""}
 									</Typography>
 								</Box>
 							</Box>
@@ -323,7 +354,7 @@ export default function WatchlistPage() {
 				}}
 			>
 				<MenuItem
-					onClick={handleMenuClose}
+					onClick={handleRemove}
 					sx={{
 						color: "#EF4444",
 						gap: 1,
@@ -334,6 +365,25 @@ export default function WatchlistPage() {
 					{t.remove}
 				</MenuItem>
 			</Menu>
+
+			{/* Snackbar */}
+			<Snackbar
+				open={!!snackbar}
+				autoHideDuration={3000}
+				onClose={() => setSnackbar(null)}
+				message={snackbar}
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+				sx={{
+					"& .MuiSnackbarContent-root": {
+						background: `linear-gradient(135deg, ${glassColors.glass.strong}, ${glassColors.glass.mid})`,
+						backdropFilter: "blur(20px)",
+						border: `1px solid ${glassColors.glass.border}`,
+						borderRadius: glassBorderRadius.md,
+						color: glassColors.text.primary,
+						direction: "rtl",
+					},
+				}}
+			/>
 		</Box>
 	);
 }

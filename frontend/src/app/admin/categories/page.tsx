@@ -56,6 +56,8 @@ interface CategoryItem {
 	tmdbParams?: Record<string, any>;
 	showEpisodes: boolean;
 	isActive: boolean;
+	showInMenu: boolean;
+	showInLanding: boolean;
 	sortOrder: number;
 }
 
@@ -72,6 +74,8 @@ const emptyForm: Omit<CategoryItem, "id"> = {
 	tmdbParams: {},
 	showEpisodes: false,
 	isActive: true,
+	showInMenu: true,
+	showInLanding: false,
 	sortOrder: 0,
 };
 
@@ -151,6 +155,8 @@ export default function CategoriesPage() {
 			tmdbParams: cat.tmdbParams || {},
 			showEpisodes: cat.showEpisodes,
 			isActive: cat.isActive,
+			showInMenu: cat.showInMenu ?? true,
+			showInLanding: cat.showInLanding ?? false,
 			sortOrder: cat.sortOrder,
 		});
 		setGradientInput((cat.gradientColors || []).join(", "));
@@ -202,6 +208,15 @@ export default function CategoriesPage() {
 	const handleToggleActive = async (cat: CategoryItem) => {
 		try {
 			await categoriesApi.update(cat.id, { isActive: !cat.isActive });
+			fetchCategories();
+		} catch (e) {
+			showFeedback("error", "خطا در تغییر وضعیت");
+		}
+	};
+
+	const handleToggleField = async (cat: CategoryItem, field: "showInMenu" | "showInLanding") => {
+		try {
+			await categoriesApi.update(cat.id, { [field]: !cat[field] });
 			fetchCategories();
 		} catch (e) {
 			showFeedback("error", "خطا در تغییر وضعیت");
@@ -298,6 +313,42 @@ export default function CategoriesPage() {
 						size="small"
 						checked={params.value}
 						onChange={() => handleToggleActive(category)}
+					/>
+				);
+			},
+		},
+		{
+			field: "showInMenu",
+			headerName: "منو",
+			width: 90,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => {
+				const category = params.data;
+				return (
+					<Switch
+						size="small"
+						checked={params.value}
+						onChange={() => handleToggleField(category, "showInMenu")}
+						color="primary"
+					/>
+				);
+			},
+		},
+		{
+			field: "showInLanding",
+			headerName: "لندینگ",
+			width: 90,
+			sortable: true,
+			filter: true,
+			cellRenderer: (params: any) => {
+				const category = params.data;
+				return (
+					<Switch
+						size="small"
+						checked={params.value}
+						onChange={() => handleToggleField(category, "showInLanding")}
+						color="secondary"
 					/>
 				);
 			},
@@ -502,6 +553,30 @@ export default function CategoriesPage() {
 								/>
 							}
 							label="فعال"
+						/>
+						<FormControlLabel
+							control={
+								<Switch
+									checked={form.showInMenu}
+									onChange={(e) =>
+										setForm({ ...form, showInMenu: e.target.checked })
+									}
+									color="primary"
+								/>
+							}
+							label="نمایش در منو"
+						/>
+						<FormControlLabel
+							control={
+								<Switch
+									checked={form.showInLanding}
+									onChange={(e) =>
+										setForm({ ...form, showInLanding: e.target.checked })
+									}
+									color="secondary"
+								/>
+							}
+							label="نمایش در صفحه اصلی"
 						/>
 					</div>
 				</DialogContent>

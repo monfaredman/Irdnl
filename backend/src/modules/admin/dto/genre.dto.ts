@@ -34,6 +34,21 @@ export class CreateGenreDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  posterUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  logoUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  backdropUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsBoolean()
   isActive?: boolean;
 
@@ -70,6 +85,21 @@ export class UpdateGenreDto {
   @IsOptional()
   @IsArray()
   categorySlugs?: string[];
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  posterUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  logoUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  backdropUrl?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

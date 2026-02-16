@@ -4,6 +4,9 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
 } from 'typeorm';
 
 @Entity('categories')
@@ -47,8 +50,39 @@ export class Category {
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 
+  @Column({ name: 'show_in_menu', type: 'boolean', default: true })
+  showInMenu: boolean;
+
+  @Column({ name: 'show_in_landing', type: 'boolean', default: false })
+  showInLanding: boolean;
+
   @Column({ name: 'sort_order', type: 'int', default: 0 })
   sortOrder: number;
+
+  // ========================================================================
+  // PARENT-CHILD RELATIONSHIP (self-referencing tree)
+  // ========================================================================
+
+  @Column({ name: 'parent_id', type: 'uuid', nullable: true })
+  parentId: string | null;
+
+  @ManyToOne(() => Category, (category) => category.children, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'parent_id' })
+  parent: Category | null;
+
+  @OneToMany(() => Category, (category) => category.parent)
+  children: Category[];
+
+  // ========================================================================
+  // URL / ROUTING
+  // ========================================================================
+
+  /** URL path segment for this category (e.g. "foreign", "action") */
+  @Column({ name: 'url_path', nullable: true })
+  urlPath: string | null;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

@@ -58,7 +58,7 @@ const footerSections: FooterSection[] = [
 		title: "Support",
 		titleFa: "پشتیبانی",
 		links: [
-			{ label: "Help Center", labelFa: "مرکز راهنما", href: routes.help },
+			{ label: "Help Center", labelFa: "راهنما", href: routes.help },
 			{ label: "Contact", labelFa: "تماس", href: routes.contact },
 			{ label: "FAQ", labelFa: "سوالات متداول", href: routes.faq },
 		],
@@ -68,17 +68,7 @@ const footerSections: FooterSection[] = [
 		titleFa: "شرکت",
 		links: [
 			{ label: "About Us", labelFa: "درباره ما", href: routes.about },
-			{ label: "Careers", labelFa: "فرصت‌های شغلی", href: routes.careers },
-			{ label: "Press", labelFa: "اخبار", href: routes.press },
-		],
-	},
-	{
-		title: "Legal",
-		titleFa: "قانونی",
-		links: [
-			{ label: "Privacy", labelFa: "حریم خصوصی", href: routes.privacy },
-			{ label: "Terms", labelFa: "شرایط استفاده", href: routes.terms },
-			{ label: "Cookies", labelFa: "کوکی‌ها", href: routes.cookies },
+			{ label: "Blog", labelFa: "بلاگ", href: "/blog" },
 		],
 	},
 ];
@@ -441,51 +431,6 @@ export function PremiumLiquidGlassFooter() {
 							justifyContent: "center",
 						}}
 					>
-						<Link href="/privacy" style={{ textDecoration: "none" }}>
-							<Typography
-								sx={{
-									fontSize: "0.75rem",
-									color: "rgba(255, 255, 255, 0.5)",
-									fontFamily: language === "fa" ? "Vazirmatn" : "inherit",
-									transition: "color 0.2s ease",
-									"&:hover": {
-										color: liquidGlassColors.persianGold,
-									},
-								}}
-							>
-								{language === "fa" ? "حریم خصوصی" : "Privacy Policy"}
-							</Typography>
-						</Link>
-						<Link href="/terms" style={{ textDecoration: "none" }}>
-							<Typography
-								sx={{
-									fontSize: "0.75rem",
-									color: "rgba(255, 255, 255, 0.5)",
-									fontFamily: language === "fa" ? "Vazirmatn" : "inherit",
-									transition: "color 0.2s ease",
-									"&:hover": {
-										color: liquidGlassColors.persianGold,
-									},
-								}}
-							>
-								{language === "fa" ? "شرایط استفاده" : "Terms of Service"}
-							</Typography>
-						</Link>
-						<Link href="/cookies" style={{ textDecoration: "none" }}>
-							<Typography
-								sx={{
-									fontSize: "0.75rem",
-									color: "rgba(255, 255, 255, 0.5)",
-									fontFamily: language === "fa" ? "Vazirmatn" : "inherit",
-									transition: "color 0.2s ease",
-									"&:hover": {
-										color: liquidGlassColors.persianGold,
-									},
-								}}
-							>
-								{language === "fa" ? "سیاست کوکی" : "Cookie Policy"}
-							</Typography>
-						</Link>
 					</Box>
 				</Box>
 

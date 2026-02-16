@@ -1,12 +1,13 @@
-import { Controller, Get, Put, Body, Param, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Put, Post, Body, Param, UseGuards, HttpCode, HttpStatus, BadRequestException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from './users.service';
-import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User, UserRole } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
 
 @ApiTags('users')
 @Controller('user')
@@ -33,7 +34,23 @@ export class UsersController {
     return result;
   }
 
-  @Get(':id')
+  @Post('me/change-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Change current user password' })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid current password' })
+  async changePassword(@CurrentUser() user: User, @Body() changePasswordDto: ChangePasswordDto) {
+    const fullUser = await this.usersService.findOne(user.id);
+    const isPasswordValid = await bcrypt.compare(changePasswordDto.currentPassword, fullUser.passwordHash);
+    if (!isPasswordValid) {
+      throw new BadRequestException('رمز عبور فعلی اشتباه است');
+    }
+    const newHash = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    await this.usersService.update(user.id, { passwordHash: newHash } as any);
+    return { message: 'رمز عبور با موفقیت تغییر کرد' };
+  }
+
+  @Get('by-id/:id')
   @UseGuards(RolesGuard)
   @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get user by ID (admin only)' })

@@ -169,7 +169,7 @@ export function VisualContentGrid({
 											fontWeight: 600,
 										}}
 									>
-										⭐ {item.rating.toFixed(1)}
+										⭐ {(Number(item.rating) || 0).toFixed(1)}
 									</Typography>
 								</Box>
 							</Box>

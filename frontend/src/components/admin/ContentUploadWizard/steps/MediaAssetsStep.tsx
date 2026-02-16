@@ -201,6 +201,41 @@ export function MediaAssetsStep({ formData, updateFormData }: MediaAssetsStepPro
             </div>
           </div>
 
+          {/* Backdrop */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label>تصویر پس‌زمینه (Backdrop)</Label>
+              <TMDBFieldButton
+                tmdbId={tmdbId}
+                mediaType={mediaType}
+                fieldKey="backdropUrl"
+                onFetch={(val) => updateFormData({ backdropUrl: val })}
+              />
+            </div>
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImageUpload(file, "backdropUrl");
+                }}
+                className="hidden"
+                id="backdrop-upload"
+              />
+              <label htmlFor="backdrop-upload" className="cursor-pointer flex flex-col items-center">
+                {formData.backdropUrl ? (
+                  <img src={formData.backdropUrl} alt="Backdrop" className="h-32 w-full object-cover rounded" />
+                ) : (
+                  <>
+                    <Upload className="h-8 w-8 text-gray-400 mb-2" />
+                    <span className="text-sm text-gray-600">{t("admin.form.upload")}</span>
+                  </>
+                )}
+              </label>
+            </div>
+          </div>
+
           {/* Logo */}
           <div className="space-y-2">
             <Label>{t("admin.upload.visualAssets.logo")}</Label>

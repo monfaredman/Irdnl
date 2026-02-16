@@ -3,11 +3,14 @@
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import CardMembershipIcon from "@mui/icons-material/CardMembership";
 import CloseIcon from "@mui/icons-material/Close";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 import HistoryIcon from "@mui/icons-material/History";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import PaymentIcon from "@mui/icons-material/Payment";
 import PersonIcon from "@mui/icons-material/Person";
+import PlaylistPlayIcon from "@mui/icons-material/PlaylistPlay";
 import SettingsIcon from "@mui/icons-material/Settings";
 import {
 	Avatar,
@@ -40,8 +43,11 @@ interface UserLayoutProps {
 const translations = {
 	en: {
 		profile: "Profile",
+		notifications: "Notifications",
+		playlists: "Playlists",
 		watchlist: "Watchlist",
 		history: "Watch History",
+		tickets: "Support Tickets",
 		settings: "Settings",
 		subscription: "Subscription",
 		payment: "Payment",
@@ -50,8 +56,11 @@ const translations = {
 	},
 	fa: {
 		profile: "پروفایل",
+		notifications: "اعلان‌ها",
+		playlists: "لیست‌های پخش",
 		watchlist: "لیست تماشا",
 		history: "تاریخچه تماشا",
+		tickets: "تیکت‌های پشتیبانی",
 		settings: "تنظیمات",
 		subscription: "اشتراک",
 		payment: "پرداخت",
@@ -62,8 +71,11 @@ const translations = {
 
 const menuItems = [
 	{ key: "profile", path: "/user/profile", icon: PersonIcon },
+	{ key: "notifications", path: "/user/notifications", icon: NotificationsIcon },
+	{ key: "playlists", path: "/user/playlists", icon: PlaylistPlayIcon },
 	{ key: "watchlist", path: "/user/watchlist", icon: BookmarkIcon },
 	{ key: "history", path: "/user/history", icon: HistoryIcon },
+	{ key: "tickets", path: "/user/tickets", icon: ConfirmationNumberIcon },
 	{ key: "settings", path: "/user/settings", icon: SettingsIcon },
 	{ key: "subscription", path: "/user/subscription", icon: CardMembershipIcon },
 	{ key: "payment", path: "/user/payment", icon: PaymentIcon },

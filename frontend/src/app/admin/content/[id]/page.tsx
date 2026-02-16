@@ -29,7 +29,7 @@ import {
 } from "@/components/admin/ui/card";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
-import { contentApi, episodesApi, seasonsApi, videosApi, tmdbApi } from "@/lib/api/admin";
+import { contentApi, episodesApi, seasonsApi, videosApi, tmdbApi, categoriesApi as adminCategoriesApi } from "@/lib/api/admin";
 import type { TMDBSeasonSummary, TMDBEpisode } from "@/lib/api/admin";
 import { useTranslation } from "@/i18n";
 import {
@@ -41,6 +41,15 @@ import {
 	DialogContentText,
 	DialogActions,
 	Button as MuiButton,
+	FormControl,
+	InputLabel,
+	Select as MuiSelect,
+	MenuItem as MuiMenuItem,
+	Checkbox,
+	ListItemText,
+	OutlinedInput,
+	Chip,
+	Box,
 } from "@mui/material";
 
 interface EpisodeFormData {
@@ -117,6 +126,9 @@ export default function ContentDetailPage() {
 
 	// Status change
 	const [updatingStatus, setUpdatingStatus] = useState(false);
+
+	// Categories for multi-select
+	const [availableCategories, setAvailableCategories] = useState<any[]>([]);
 
 	// TMDB season/episode auto-fill
 	const [tmdbSeasons, setTmdbSeasons] = useState<TMDBSeasonSummary[]>([]);
@@ -197,6 +209,13 @@ export default function ContentDetailPage() {
 			imdbId: content?.imdbId || "",
 			tmdbId: content?.tmdbId || "",
 			externalPlayerUrl: content?.externalPlayerUrl || "",
+			categoryIds: content?.categoryIds || [],
+			isKids: content?.isKids || false,
+			isDubbed: content?.isDubbed || false,
+			isComingSoon: content?.isComingSoon || false,
+			featured: content?.featured || false,
+			accessType: content?.accessType || "free",
+			priority: content?.priority || 0,
 		});
 		setEditMode(true);
 	};
@@ -226,6 +245,13 @@ export default function ContentDetailPage() {
 				backdropUrl: editForm.backdropUrl || undefined,
 				imdbId: editForm.imdbId || undefined,
 				tmdbId: editForm.tmdbId || undefined,
+				categoryIds: editForm.categoryIds || [],
+				isKids: editForm.isKids ?? false,
+				isDubbed: editForm.isDubbed ?? false,
+				isComingSoon: editForm.isComingSoon ?? false,
+				featured: editForm.featured ?? false,
+				accessType: editForm.accessType || "free",
+				priority: editForm.priority != null ? Number(editForm.priority) : 0,
 			};
 			if (content?.type === "series") {
 				payload.externalPlayerUrl = editForm.externalPlayerUrl || undefined;
@@ -386,6 +412,13 @@ export default function ContentDetailPage() {
 		};
 		if (id) fetchContent();
 	}, [id]);
+
+	// Fetch categories for multi-select
+	useEffect(() => {
+		adminCategoriesApi.list().then((res) => {
+			setAvailableCategories((res as any).data || []);
+		}).catch(console.error);
+	}, []);
 
 	// ── Season Handlers ──
 
@@ -994,6 +1027,73 @@ export default function ContentDetailPage() {
 								<Label className="text-sm">شناسه TMDB</Label>
 								<Input value={editForm.tmdbId} onChange={(e) => setEditForm({ ...editForm, tmdbId: e.target.value })} placeholder="12345" />
 							</div>
+							<div className="space-y-1 sm:col-span-2 lg:col-span-3">
+								<Label className="text-sm">دسته‌بندی‌ها</Label>
+								<FormControl fullWidth size="small">
+									<MuiSelect
+										multiple
+										value={editForm.categoryIds || []}
+										onChange={(e) => {
+											const val = e.target.value;
+											setEditForm({ ...editForm, categoryIds: typeof val === "string" ? val.split(",") : val });
+										}}
+										input={<OutlinedInput />}
+										renderValue={(selected) => (
+											<Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+												{(selected as string[]).map((cid: string) => {
+													const cat = availableCategories.find((c: any) => c.id === cid);
+													return <Chip key={cid} label={cat?.nameFa || cid} size="small" />;
+												})}
+											</Box>
+										)}
+									>
+										{availableCategories.map((cat: any) => (
+											<MuiMenuItem key={cat.id} value={cat.id}>
+												<Checkbox checked={(editForm.categoryIds || []).includes(cat.id)} />
+												<ListItemText primary={cat.nameFa} secondary={cat.nameEn} />
+											</MuiMenuItem>
+										))}
+									</MuiSelect>
+								</FormControl>
+							</div>
+
+							{/* Boolean flags */}
+							<div className="space-y-1">
+								<Label className="text-sm">نوع دسترسی</Label>
+								<select
+									value={editForm.accessType || "free"}
+									onChange={(e) => setEditForm({ ...editForm, accessType: e.target.value })}
+									className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+								>
+									<option value="free">رایگان (Free)</option>
+									<option value="subscription">اشتراکی (Subscription)</option>
+									<option value="single_purchase">خرید تکی (Single Purchase)</option>
+									<option value="traffic">ترافیکی (Traffic)</option>
+								</select>
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm">اولویت نمایش</Label>
+								<Input type="number" value={editForm.priority ?? 0} onChange={(e) => setEditForm({ ...editForm, priority: e.target.value })} placeholder="0" />
+							</div>
+							<div className="flex items-center gap-4 sm:col-span-2 lg:col-span-3">
+								<label className="flex items-center gap-2 cursor-pointer">
+									<input type="checkbox" checked={editForm.isKids || false} onChange={(e) => setEditForm({ ...editForm, isKids: e.target.checked })} className="rounded" />
+									<span className="text-sm">کودکان (Kids)</span>
+								</label>
+								<label className="flex items-center gap-2 cursor-pointer">
+									<input type="checkbox" checked={editForm.isDubbed || false} onChange={(e) => setEditForm({ ...editForm, isDubbed: e.target.checked })} className="rounded" />
+									<span className="text-sm">دوبله شده (Dubbed)</span>
+								</label>
+								<label className="flex items-center gap-2 cursor-pointer">
+									<input type="checkbox" checked={editForm.isComingSoon || false} onChange={(e) => setEditForm({ ...editForm, isComingSoon: e.target.checked })} className="rounded" />
+									<span className="text-sm">به زودی (Coming Soon)</span>
+								</label>
+								<label className="flex items-center gap-2 cursor-pointer">
+									<input type="checkbox" checked={editForm.featured || false} onChange={(e) => setEditForm({ ...editForm, featured: e.target.checked })} className="rounded" />
+									<span className="text-sm">ویژه (Featured)</span>
+								</label>
+							</div>
+
 							{content.type === "series" && (
 								<div className="space-y-1 sm:col-span-2 lg:col-span-3">
 									<Label className="text-sm">{t("admin.content.detail.externalPlayerUrl")}</Label>

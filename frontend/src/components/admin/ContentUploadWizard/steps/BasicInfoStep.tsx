@@ -6,7 +6,7 @@ import { Label } from "@/components/admin/ui/label";
 import { TMDBFieldButton } from "../TMDBFieldButton";
 import type { ContentFormData } from "../types";
 import { useState, useEffect } from "react";
-import { collectionsApi } from "@/lib/api/admin";
+import { collectionsApi, categoriesApi } from "@/lib/api/admin";
 import {
   FormControlLabel,
   Switch,
@@ -14,6 +14,11 @@ import {
   Select,
   FormControl,
   InputLabel,
+  Checkbox,
+  ListItemText,
+  OutlinedInput,
+  Chip,
+  Box,
 } from "@mui/material";
 
 interface BasicInfoStepProps {
@@ -26,10 +31,14 @@ export function BasicInfoStep({ formData, updateFormData }: BasicInfoStepProps) 
   const tmdbId = formData.tmdbId || "";
   const mediaType = formData.type === "series" ? "series" : "movie";
   const [collections, setCollections] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
 
   useEffect(() => {
     collectionsApi.list({ page: 1, limit: 100 }).then((res) => {
       setCollections(res.collections || []);
+    }).catch(console.error);
+    categoriesApi.list().then((res) => {
+      setCategories((res as any).data || []);
     }).catch(console.error);
   }, []);
 
@@ -201,7 +210,48 @@ export function BasicInfoStep({ formData, updateFormData }: BasicInfoStepProps) 
         />
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      {/* Access Type / How to Watch */}
+      <div className="space-y-2">
+        <Label htmlFor="accessType">نوع دسترسی / نحوه تماشا</Label>
+        <select
+          id="accessType"
+          value={formData.accessType || "free"}
+          onChange={(e) => updateFormData({ accessType: e.target.value as any })}
+          className="w-full rounded-md border border-gray-300 px-3 py-2"
+        >
+          <option value="free">🎬 رایگان (پخش در سایت خودم)</option>
+          <option value="subscription">🔑 اشتراکی (Upera)</option>
+          <option value="single_purchase">💰 تک فروشی (Upera)</option>
+          <option value="traffic">📊 ترافیک (Upera)</option>
+        </select>
+        <p className="text-xs text-gray-500 mt-1">
+          {formData.accessType === "free" || !formData.accessType
+            ? "محتوا با پلیر داخلی سایت پخش می‌شود."
+            : "محتوا به پلیر یا درگاه پرداخت Upera هدایت می‌شود. لینک خارجی را در قسمت زیر وارد کنید."}
+        </p>
+      </div>
+
+      {/* External Player URL - shown prominently for Upera types */}
+      {formData.accessType && formData.accessType !== "free" && (
+        <div className="space-y-2 bg-amber-50 border border-amber-200 rounded-lg p-4">
+          <Label htmlFor="externalPlayerUrl" className="text-amber-800 font-semibold">
+            🔗 لینک پلیر/درگاه Upera (الزامی)
+          </Label>
+          <Input
+            id="externalPlayerUrl"
+            value={formData.externalPlayerUrl || ""}
+            onChange={(e) => updateFormData({ externalPlayerUrl: e.target.value })}
+            placeholder="https://upera.tv/watch/..."
+            className="border-amber-300"
+          />
+          <p className="text-xs text-amber-600">
+            کاربر پس از کلیک روی دکمه تماشا به این لینک هدایت می‌شود.
+          </p>
+        </div>
+      )}
+
+      {/* External Player URL for free content (optional) */}
+      {(!formData.accessType || formData.accessType === "free") && (
         <div className="space-y-2">
           <Label htmlFor="externalPlayerUrl">
             {t("admin.upload.basicInfo.externalPlayerUrl")}
@@ -214,7 +264,48 @@ export function BasicInfoStep({ formData, updateFormData }: BasicInfoStepProps) 
             onChange={(e) => updateFormData({ externalPlayerUrl: e.target.value })}
           />
         </div>
+      )}
 
+      {/* Feature Flags: Dubbed, Featured, Free */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="flex items-center">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.isDubbed || false}
+                onChange={(e) => updateFormData({ isDubbed: e.target.checked })}
+              />
+            }
+            label="دوبله شده"
+          />
+        </div>
+        <div className="flex items-center">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.featured || false}
+                onChange={(e) => updateFormData({ featured: e.target.checked })}
+              />
+            }
+            label="ویژه (Featured)"
+          />
+        </div>
+        <div className="flex items-center">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={formData.monetization?.isFree || false}
+                onChange={(e) => updateFormData({
+                  monetization: { ...formData.monetization, isFree: e.target.checked },
+                })}
+              />
+            }
+            label="رایگان"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
           <Label htmlFor="status">
             {t("admin.upload.basicInfo.status")}
@@ -242,16 +333,20 @@ export function BasicInfoStep({ formData, updateFormData }: BasicInfoStepProps) 
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
             <Label htmlFor="publishDate">
-              {t("admin.upload.basicInfo.publishDate")}
+              {t("admin.upload.basicInfo.publishDate")} {formData.status === 'scheduled' && <span className="text-red-500">*</span>}
             </Label>
             <Input
               id="publishDate"
               type="datetime-local"
+              required={formData.status === 'scheduled'}
               value={formData.publishDate ? new Date(formData.publishDate).toISOString().slice(0, 16) : ""}
               onChange={(e) => updateFormData({ publishDate: e.target.value ? new Date(e.target.value) : null })}
+              className={formData.status === 'scheduled' && !formData.publishDate ? 'border-red-400 ring-1 ring-red-400' : ''}
             />
-            <p className="text-xs text-gray-500">
-              {formData.status === 'scheduled' ? 'محتوا در این تاریخ منتشر می‌شود' : 'تاریخ انتشار (اختیاری)'}
+            <p className={`text-xs ${formData.status === 'scheduled' && !formData.publishDate ? 'text-red-500 font-medium' : 'text-gray-500'}`}>
+              {formData.status === 'scheduled'
+                ? (formData.publishDate ? 'محتوا در این تاریخ منتشر می‌شود' : '⚠️ برای وضعیت زمان‌بندی، تاریخ انتشار الزامی است')
+                : 'تاریخ انتشار (اختیاری)'}
             </p>
           </div>
 
@@ -341,6 +436,37 @@ export function BasicInfoStep({ formData, updateFormData }: BasicInfoStepProps) 
               </Select>
             </FormControl>
           </div>
+        </div>
+
+        {/* Multi-Category Assignment */}
+        <div className="space-y-2">
+          <FormControl fullWidth size="small">
+            <InputLabel>دسته‌بندی‌ها</InputLabel>
+            <Select
+              multiple
+              value={formData.categoryIds || []}
+              onChange={(e) => {
+                const val = e.target.value;
+                updateFormData({ categoryIds: typeof val === "string" ? val.split(",") : val });
+              }}
+              input={<OutlinedInput label="دسته‌بندی‌ها" />}
+              renderValue={(selected) => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {(selected as string[]).map((id) => {
+                    const cat = categories.find((c) => c.id === id);
+                    return <Chip key={id} label={cat?.nameFa || id} size="small" />;
+                  })}
+                </Box>
+              )}
+            >
+              {categories.map((cat) => (
+                <MenuItem key={cat.id} value={cat.id}>
+                  <Checkbox checked={(formData.categoryIds || []).includes(cat.id)} />
+                  <ListItemText primary={cat.nameFa} secondary={cat.nameEn} />
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
       </div>
     </div>

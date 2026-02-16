@@ -43,7 +43,9 @@ export default function AnimationGenrePage() {
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
+			currentSubGenre={{ slug: genre, nameEn: subGenreInfo.nameEn, nameFa: subGenreInfo.nameFa }}
 			basePath={`/animation/${genre}`}
+			genreBasePath="/animation"
 		/>
 	);
 }

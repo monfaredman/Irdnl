@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "@/i18n";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/admin/ui/card";
@@ -15,6 +15,16 @@ import { SEOStep } from "./steps/SEOStep";
 import { ReviewStep } from "./steps/ReviewStep";
 import { TMDBSearchPanel } from "./TMDBSearchPanel";
 import { contentApi } from "@/lib/api/admin";
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button as MuiButton,
+  Snackbar,
+  Alert as MuiAlert,
+} from "@mui/material";
 import type { ContentFormData } from "./types";
 
 const STEPS = [
@@ -32,6 +42,9 @@ export function ContentUploadWizard() {
   const { t } = useTranslation();
   const [currentStep, setCurrentStep] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: "success" | "error" | "warning" }>({ open: false, message: "", severity: "error" });
   const [formData, setFormData] = useState<ContentFormData>({
     // Basic Info
     title: "",
@@ -100,7 +113,24 @@ export function ContentUploadWizard() {
     seo: {},
   });
 
+  // Warn before closing/navigating away if form has been touched
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty]);
+
   const handleNext = () => {
+    // Block navigation if status is scheduled but publishDate is missing
+    if (currentStep === 0 && formData.status === "scheduled" && !formData.publishDate) {
+      setSnackbar({ open: true, message: "وقتی وضعیت «زمانبندی شده» است، باید تاریخ انتشار را مشخص کنید.", severity: "warning" });
+      return;
+    }
     if (currentStep < STEPS.length - 1) {
       setCurrentStep(currentStep + 1);
     }
@@ -110,6 +140,41 @@ export function ContentUploadWizard() {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     }
+  };
+
+  const handleSaveAsDraft = async () => {
+    setLoading(true);
+    try {
+      const cleanedData = { ...formData, status: "draft" as const };
+      if (!cleanedData.externalPlayerUrl) cleanedData.externalPlayerUrl = undefined as any;
+      if (!cleanedData.posterUrl) cleanedData.posterUrl = undefined as any;
+      if (!cleanedData.bannerUrl) cleanedData.bannerUrl = undefined as any;
+      if (!cleanedData.thumbnailUrl) cleanedData.thumbnailUrl = undefined as any;
+      if (!cleanedData.backdropUrl) cleanedData.backdropUrl = undefined as any;
+      if (!cleanedData.logoUrl) cleanedData.logoUrl = undefined as any;
+      await contentApi.create(cleanedData);
+      setIsDirty(false);
+      router.push("/admin/content");
+    } catch (error) {
+      console.error("Failed to save draft:", error);
+      setSnackbar({ open: true, message: "خطا در ذخیره پیش‌نویس", severity: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExitRequest = () => {
+    if (isDirty) {
+      setShowExitDialog(true);
+    } else {
+      router.push("/admin/content");
+    }
+  };
+
+  const handleDiscardAndExit = () => {
+    setIsDirty(false);
+    setShowExitDialog(false);
+    router.push("/admin/content");
   };
 
   const handleSubmit = async () => {
@@ -124,6 +189,7 @@ export function ContentUploadWizard() {
       if (!cleanedData.backdropUrl) cleanedData.backdropUrl = undefined as any;
       if (!cleanedData.logoUrl) cleanedData.logoUrl = undefined as any;
       await contentApi.create(cleanedData);
+      setIsDirty(false);
       router.push("/admin/content");
     } catch (error) {
       console.error("Failed to create content:", error);
@@ -135,6 +201,7 @@ export function ContentUploadWizard() {
 
   const updateFormData = (data: Partial<ContentFormData>) => {
     setFormData({ ...formData, ...data });
+    setIsDirty(true);
   };
 
   const CurrentStepComponent = STEPS[currentStep].component;
@@ -210,7 +277,10 @@ export function ContentUploadWizard() {
               {t("admin.form.previous")}
             </Button>
             <div className="flex gap-4">
-              <Button variant="outline" onClick={() => router.push("/admin/content")}>
+              <Button variant="outline" onClick={handleSaveAsDraft} disabled={loading}>
+                {loading ? "در حال ذخیره..." : "ذخیره پیش‌نویس"}
+              </Button>
+              <Button variant="outline" onClick={handleExitRequest}>
                 {t("admin.form.cancel")}
               </Button>
               {currentStep === STEPS.length - 1 ? (
@@ -226,6 +296,54 @@ export function ContentUploadWizard() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Exit Confirmation Dialog */}
+      <Dialog
+        open={showExitDialog}
+        onClose={() => setShowExitDialog(false)}
+        dir="rtl"
+        PaperProps={{ sx: { borderRadius: 3, minWidth: 360 } }}
+      >
+        <DialogTitle sx={{ fontWeight: "bold" }}>خروج از فرم</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            تغییرات ذخیره نشده دارید. آیا می‌خواهید قبل از خروج به‌عنوان پیش‌نویس ذخیره کنید؟
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ gap: 1, px: 3, pb: 2 }}>
+          <MuiButton onClick={() => setShowExitDialog(false)} color="inherit">
+            انصراف
+          </MuiButton>
+          <MuiButton onClick={handleDiscardAndExit} color="error" variant="outlined">
+            خروج بدون ذخیره
+          </MuiButton>
+          <MuiButton
+            onClick={() => { setShowExitDialog(false); handleSaveAsDraft(); }}
+            variant="contained"
+            color="primary"
+            disabled={loading}
+          >
+            {loading ? "در حال ذخیره..." : "ذخیره پیش‌نویس و خروج"}
+          </MuiButton>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar for alerts */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <MuiAlert
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          severity={snackbar.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </MuiAlert>
+      </Snackbar>
     </div>
   );
 }

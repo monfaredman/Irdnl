@@ -6,6 +6,9 @@ import { Label } from "@/components/admin/ui/label";
 import { Button } from "@/components/admin/ui/button";
 import { X, Plus } from "lucide-react";
 import { TMDBFieldButton } from "../TMDBFieldButton";
+import { useState, useEffect } from "react";
+import { FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, OutlinedInput, Chip, Box, TextField as MuiTextField } from "@mui/material";
+import { genresApi } from "@/lib/api/admin";
 import type { ContentFormData } from "../types";
 
 interface MetadataStepProps {
@@ -13,22 +16,47 @@ interface MetadataStepProps {
   updateFormData: (data: Partial<ContentFormData>) => void;
 }
 
+interface GenreOption {
+  id: string;
+  slug: string;
+  nameEn: string;
+  nameFa: string;
+}
+
 export function MetadataStep({ formData, updateFormData }: MetadataStepProps) {
   const { t } = useTranslation();
   const tmdbId = formData.tmdbId || "";
   const mediaType = formData.type === "series" ? "series" : "movie";
+  const [availableGenres, setAvailableGenres] = useState<GenreOption[]>([]);
+  const [newTagValue, setNewTagValue] = useState("");
 
-  const addGenre = () => {
-    const genre = prompt(t("admin.upload.metadata.genres"));
-    if (genre) {
-      updateFormData({ genres: [...(formData.genres || []), genre] });
+  useEffect(() => {
+    genresApi.list().then((res: any) => {
+      const genres = res.data || res || [];
+      setAvailableGenres(genres);
+    }).catch(console.error);
+  }, []);
+
+  const handleGenreChange = (selected: string[]) => {
+    updateFormData({ genres: selected });
+  };
+
+  const removeGenre = (genreToRemove: string) => {
+    updateFormData({ genres: (formData.genres || []).filter(g => g !== genreToRemove) });
+  };
+
+  const addTag = () => {
+    const tag = newTagValue.trim();
+    if (tag) {
+      updateFormData({ tags: [...(formData.tags || []), tag] });
+      setNewTagValue("");
     }
   };
 
-  const removeGenre = (index: number) => {
-    const newGenres = [...(formData.genres || [])];
-    newGenres.splice(index, 1);
-    updateFormData({ genres: newGenres });
+  const removeTag = (index: number) => {
+    const newTags = [...(formData.tags || [])];
+    newTags.splice(index, 1);
+    updateFormData({ tags: newTags });
   };
 
   return (
@@ -97,23 +125,72 @@ export function MetadataStep({ formData, updateFormData }: MetadataStepProps) {
             }}
           />
         </div>
+        {/* Genre Multi-Select Dropdown */}
+        <FormControl fullWidth size="small" sx={{ mt: 1 }}>
+          <InputLabel id="genre-select-label">انتخاب ژانر</InputLabel>
+          <Select
+            labelId="genre-select-label"
+            multiple
+            value={formData.genres || []}
+            onChange={(e) => handleGenreChange(e.target.value as string[])}
+            input={<OutlinedInput label="انتخاب ژانر" />}
+            renderValue={(selected) => (
+              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                {(selected as string[]).map((value) => {
+                  const genreInfo = availableGenres.find(g => g.nameFa === value || g.nameEn === value || g.slug === value);
+                  return (
+                    <Chip
+                      key={value}
+                      label={genreInfo?.nameFa || value}
+                      size="small"
+                      onDelete={() => removeGenre(value)}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    />
+                  );
+                })}
+              </Box>
+            )}
+          >
+            {availableGenres.map((genre) => (
+              <MenuItem key={genre.id || genre.slug} value={genre.nameFa || genre.nameEn}>
+                <Checkbox checked={(formData.genres || []).indexOf(genre.nameFa || genre.nameEn) > -1} />
+                <ListItemText primary={`${genre.nameFa || genre.nameEn}`} secondary={genre.nameEn !== genre.nameFa ? genre.nameEn : undefined} />
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </div>
+
+      {/* Tags */}
+      <div className="space-y-2">
+        <Label>تگ‌ها (Tags)</Label>
         <div className="flex flex-wrap gap-2 mb-2">
-          {(formData.genres || []).map((genre, index) => (
+          {(formData.tags || []).map((tag, index) => (
             <span
               key={index}
-              className="inline-flex items-center gap-1 bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
+              className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm"
             >
-              {genre}
-              <button onClick={() => removeGenre(index)} className="hover:text-blue-600">
+              {tag}
+              <button onClick={() => removeTag(index)} className="hover:text-green-600">
                 <X className="h-4 w-4" />
               </button>
             </span>
           ))}
         </div>
-        <Button type="button" variant="outline" onClick={addGenre}>
-          <Plus className="h-4 w-4 ml-2" />
-          افزودن ژانر
-        </Button>
+        <div className="flex gap-2 items-center">
+          <MuiTextField
+            size="small"
+            placeholder="تگ جدید وارد کنید"
+            value={newTagValue}
+            onChange={(e) => setNewTagValue(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); addTag(); } }}
+            sx={{ flex: 1 }}
+          />
+          <Button type="button" variant="outline" onClick={addTag} disabled={!newTagValue.trim()}>
+            <Plus className="h-4 w-4 ml-2" />
+            افزودن تگ
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">

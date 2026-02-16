@@ -21,6 +21,7 @@ import {
 	Dialog,
 	DialogTitle,
 	DialogContent,
+	DialogContentText,
 	DialogActions,
 	Button as MuiButton,
 	Checkbox,
@@ -60,6 +61,14 @@ export default function CommentsPage() {
 	
 	// Selection
 	const [selectedIds, setSelectedIds] = useState<string[]>([]);
+	
+	// Confirm dialog
+	const [confirmDialog, setConfirmDialog] = useState<{
+		open: boolean;
+		title: string;
+		message: string;
+		onConfirm: () => void;
+	}>({ open: false, title: "", message: "", onConfirm: () => {} });
 	
 	// Feedback
 	const [feedback, setFeedback] = useState<{
@@ -146,19 +155,25 @@ export default function CommentsPage() {
 	};
 
 	const handleDelete = async (id: string) => {
-		if (!confirm("آیا مطمئن هستید که می‌خواهید این نظر را حذف کنید؟")) return;
-		
-		try {
-			await commentsApi.delete(id);
-			setFeedback({ type: "success", message: "نظر حذف شد" });
-			fetchComments();
-			fetchStats();
-		} catch (error: any) {
-			setFeedback({
-				type: "error",
-				message: error.response?.data?.message || "خطا در حذف نظر",
-			});
-		}
+		setConfirmDialog({
+			open: true,
+			title: "حذف نظر",
+			message: "آیا مطمئن هستید که می‌خواهید این نظر را حذف کنید؟",
+			onConfirm: async () => {
+				setConfirmDialog({ open: false, title: "", message: "", onConfirm: () => {} });
+				try {
+					await commentsApi.delete(id);
+					setFeedback({ type: "success", message: "نظر حذف شد" });
+					fetchComments();
+					fetchStats();
+				} catch (error: any) {
+					setFeedback({
+						type: "error",
+						message: error.response?.data?.message || "خطا در حذف نظر",
+					});
+				}
+			},
+		});
 	};
 
 	const handleReply = async () => {
@@ -185,7 +200,30 @@ export default function CommentsPage() {
 			return;
 		}
 		
-		if (action === "delete" && !confirm(`آیا مطمئن هستید که می‌خواهید ${selectedIds.length} نظر را حذف کنید؟`)) {
+		if (action === "delete") {
+			setConfirmDialog({
+				open: true,
+				title: "حذف نظرات",
+				message: `آیا مطمئن هستید که می‌خواهید ${selectedIds.length} نظر را حذف کنید؟`,
+				onConfirm: async () => {
+					setConfirmDialog({ open: false, title: "", message: "", onConfirm: () => {} });
+					try {
+						const result = await commentsApi.bulkAction(selectedIds, action);
+						setFeedback({
+							type: "success",
+							message: `${result.success} نظر با موفقیت حذف شد`,
+						});
+						setSelectedIds([]);
+						fetchComments();
+						fetchStats();
+					} catch (error: any) {
+						setFeedback({
+							type: "error",
+							message: error.response?.data?.message || "خطا در عملیات دسته‌جمعی",
+						});
+					}
+				},
+			});
 			return;
 		}
 		
@@ -557,6 +595,7 @@ export default function CommentsPage() {
 							headerHeight={50}
 							domLayout="normal"
 							loading={loading}
+							enableRtl={true}
 						/>
 					</div>
 				</CardContent>
@@ -620,6 +659,25 @@ export default function CommentsPage() {
 						disabled={!replyDialog.reply.trim()}
 					>
 						ثبت پاسخ
+					</MuiButton>
+				</DialogActions>
+			</Dialog>
+
+			{/* Confirm Dialog */}
+			<Dialog
+				open={confirmDialog.open}
+				onClose={() => setConfirmDialog({ open: false, title: "", message: "", onConfirm: () => {} })}
+			>
+				<DialogTitle>{confirmDialog.title}</DialogTitle>
+				<DialogContent>
+					<DialogContentText>{confirmDialog.message}</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<MuiButton onClick={() => setConfirmDialog({ open: false, title: "", message: "", onConfirm: () => {} })}>
+						انصراف
+					</MuiButton>
+					<MuiButton onClick={confirmDialog.onConfirm} color="error" variant="contained">
+						حذف
 					</MuiButton>
 				</DialogActions>
 			</Dialog>

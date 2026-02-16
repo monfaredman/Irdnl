@@ -5,9 +5,11 @@ import {
 	Avatar,
 	Box,
 	Button,
+	CircularProgress,
 	IconButton,
 	MenuItem,
 	Select,
+	Snackbar,
 	TextField,
 	Typography,
 } from "@mui/material";
@@ -17,54 +19,10 @@ import {
 	glassColors,
 	glassStyles,
 } from "@/theme/glass-design-system";
-import { useState } from "react";
-
-interface Comment {
-	id: string;
-	author: {
-		name: string;
-		avatar: string;
-	};
-	content: string;
-	likes: number;
-	timestamp: string;
-	replies?: Comment[];
-}
-
-const mockComments: Comment[] = [
-	{
-		id: "1",
-		author: {
-			name: "علی محمدی",
-			avatar: "/images/avatars/user-1.svg",
-		},
-		content: "یکی از بهترین سریال‌هایی که دیدم! داستان و بازی‌ها عالی بودند.",
-		likes: 24,
-		timestamp: "۲ ساعت پیش",
-		replies: [
-			{
-				id: "1-1",
-				author: {
-					name: "سارا احمدی",
-					avatar: "/images/avatars/user-2.svg",
-				},
-				content: "کاملا موافقم! به نظرم فصل دوم هم خیلی خوب بود.",
-				likes: 8,
-				timestamp: "۱ ساعت پیش",
-			},
-		],
-	},
-	{
-		id: "2",
-		author: {
-			name: "رضا کریمی",
-			avatar: "/images/avatars/user-3.svg",
-		},
-		content: "کارگردانی فوق‌العاده و تصویربرداری حرفه‌ای. پیشنهاد می‌کنم حتما ببینید.",
-		likes: 15,
-		timestamp: "۵ ساعت پیش",
-	},
-];
+import { useState, useEffect, useCallback } from "react";
+import { publicCommentsApi, type PublicComment } from "@/lib/api/public";
+import { useIsAuthenticated, useUser } from "@/store/auth";
+import Link from "next/link";
 
 interface CommentsProps {
 	itemId: string;
@@ -73,12 +31,78 @@ interface CommentsProps {
 export function Comments({ itemId }: CommentsProps) {
 	const [sortBy, setSortBy] = useState<"newest" | "top">("newest");
 	const [newComment, setNewComment] = useState("");
+	const [comments, setComments] = useState<PublicComment[]>([]);
+	const [loading, setLoading] = useState(true);
+	const [submitting, setSubmitting] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+	const [successSnackbar, setSuccessSnackbar] = useState(false);
+	const isAuthenticated = useIsAuthenticated();
+	const currentUser = useUser();
 
-	const handleSubmit = () => {
-		// Handle comment submission with optimistic update
-		console.log("Submit comment:", newComment);
-		setNewComment("");
+	const fetchComments = useCallback(async () => {
+		try {
+			setLoading(true);
+			setError(null);
+			const response = await publicCommentsApi.getByContentId(itemId);
+			// Backend returns { comments: [...] } or { data: [...] }
+			const commentsList = response.comments || response.data || [];
+			setComments(commentsList);
+		} catch (err) {
+			console.error("Failed to fetch comments:", err);
+			setError("خطا در بارگذاری نظرات");
+			setComments([]);
+		} finally {
+			setLoading(false);
+		}
+	}, [itemId]);
+
+	useEffect(() => {
+		if (itemId) {
+			fetchComments();
+		}
+	}, [itemId, fetchComments]);
+
+	const handleSubmit = async () => {
+		if (!newComment.trim()) return;
+
+		try {
+			setSubmitting(true);
+			await publicCommentsApi.create({
+				text: newComment.trim(),
+				contentId: itemId,
+			});
+			setNewComment("");
+			setSuccessSnackbar(true);
+			// Refresh comments after successful submission
+			await fetchComments();
+		} catch (err) {
+			console.error("Failed to submit comment:", err);
+			setError("خطا در ارسال نظر. لطفاً دوباره تلاش کنید.");
+		} finally {
+			setSubmitting(false);
+		}
 	};
+
+	// Sort comments
+	const sortedComments = [...comments].sort((a, b) => {
+		if (sortBy === "top") {
+			return (b.likesCount || 0) - (a.likesCount || 0);
+		}
+		return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+	});
+
+	// Separate top-level comments and replies
+	const topLevelComments = sortedComments.filter((c) => !c.parentId);
+	const repliesMap = sortedComments
+		.filter((c) => c.parentId)
+		.reduce(
+			(acc, reply) => {
+				if (!acc[reply.parentId!]) acc[reply.parentId!] = [];
+				acc[reply.parentId!].push(reply);
+				return acc;
+			},
+			{} as Record<string, PublicComment[]>,
+		);
 
 	return (
 		<Box sx={{ ...glassStyles.card, p: { xs: 3, md: 4 } }}>
@@ -99,7 +123,7 @@ export function Comments({ itemId }: CommentsProps) {
 					}}
 					dir="rtl"
 				>
-					نظرات ({mockComments.length})
+					نظرات ({comments.length})
 				</Typography>
 
 				<Select
@@ -125,6 +149,7 @@ export function Comments({ itemId }: CommentsProps) {
 			</Box>
 
 			{/* Comment Input */}
+			{isAuthenticated ? (
 			<Box
 				sx={{
 					...glassStyles.card,
@@ -138,9 +163,12 @@ export function Comments({ itemId }: CommentsProps) {
 						sx={{
 							width: 40,
 							height: 40,
+							bgcolor: glassColors.persianGold,
 							border: `2px solid ${glassColors.glass.border}`,
 						}}
-					/>
+					>
+						{currentUser?.name?.charAt(0)?.toUpperCase() || "U"}
+					</Avatar>
 
 					<Box sx={{ flex: 1 }}>
 						<TextField
@@ -179,9 +207,9 @@ export function Comments({ itemId }: CommentsProps) {
 
 						<Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
 							<Button
-								endIcon={<Send />}
+								endIcon={submitting ? <CircularProgress size={16} sx={{ color: "inherit" }} /> : <Send />}
 								onClick={handleSubmit}
-								disabled={!newComment.trim()}
+								disabled={!newComment.trim() || submitting}
 								sx={{
 									...glassStyles.pillButton,
 									px: 3,
@@ -205,35 +233,142 @@ export function Comments({ itemId }: CommentsProps) {
 					</Box>
 				</Box>
 			</Box>
+			) : (
+				<Box
+					sx={{
+						textAlign: "center",
+						py: 3,
+						mb: 3,
+						borderRadius: glassBorderRadius.md,
+						background: glassColors.glass.base,
+						border: `1px solid ${glassColors.glass.border}`,
+					}}
+					dir="rtl"
+				>
+					<Typography sx={{ color: glassColors.text.secondary, fontSize: "0.9rem" }}>
+						برای ارسال نظر لطفاً{" "}
+						<Link href="/auth/login" style={{ color: glassColors.persianGold, textDecoration: "underline" }}>
+							وارد حساب کاربری
+						</Link>{" "}
+						شوید.
+					</Typography>
+				</Box>
+			)}
 
 			{/* Comments List */}
-			<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-				{mockComments.map((comment) => (
-					<Box key={comment.id}>
-						<CommentItem comment={comment} />
+			{loading ? (
+				<Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
+					<CircularProgress size={32} sx={{ color: glassColors.persianGold }} />
+				</Box>
+			) : error && comments.length === 0 ? (
+				<Box sx={{ textAlign: "center", py: 4 }}>
+					<Typography sx={{ color: glassColors.text.muted, fontSize: "0.9rem" }} dir="rtl">
+						{error}
+					</Typography>
+				</Box>
+			) : topLevelComments.length === 0 ? (
+				<Box sx={{ textAlign: "center", py: 4 }}>
+					<Typography sx={{ color: glassColors.text.muted, fontSize: "0.9rem" }} dir="rtl">
+						هنوز نظری ثبت نشده. اولین نفر باشید!
+					</Typography>
+				</Box>
+			) : (
+				<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+					{topLevelComments.map((comment) => (
+						<Box key={comment.id}>
+							<CommentItem comment={comment} itemId={itemId} onRefresh={fetchComments} />
 
-						{/* Nested Replies */}
-						{comment.replies && comment.replies.length > 0 && (
-							<Box sx={{ ml: { xs: 4, md: 6 }, mt: 2 }}>
-								{comment.replies.map((reply) => (
-									<CommentItem key={reply.id} comment={reply} isReply />
-								))}
-							</Box>
-						)}
-					</Box>
-				))}
-			</Box>
+							{/* Nested Replies */}
+							{repliesMap[comment.id] && repliesMap[comment.id].length > 0 && (
+								<Box sx={{ ml: { xs: 4, md: 6 }, mt: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
+									{repliesMap[comment.id].map((reply) => (
+										<CommentItem key={reply.id} comment={reply} isReply itemId={itemId} onRefresh={fetchComments} />
+									))}
+								</Box>
+							)}
+						</Box>
+					))}
+				</Box>
+			)}
+
+			{/* Error message for submit */}
+			{error && comments.length > 0 && (
+				<Typography sx={{ color: "rgba(239, 68, 68, 0.8)", fontSize: "0.8rem", mt: 2, textAlign: "center" }} dir="rtl">
+					{error}
+				</Typography>
+			)}
+
+			{/* Toast after comment submission */}
+			<Snackbar
+				open={successSnackbar}
+				autoHideDuration={5000}
+				onClose={() => setSuccessSnackbar(false)}
+				message="نظر شما ارسال شد و پس از بررسی منتشر خواهد شد."
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+				sx={{
+					"& .MuiSnackbarContent-root": {
+						background: `linear-gradient(135deg, ${glassColors.glass.strong}, ${glassColors.glass.mid})`,
+						backdropFilter: "blur(20px)",
+						border: `1px solid ${glassColors.glass.border}`,
+						borderRadius: glassBorderRadius.md,
+						color: glassColors.text.primary,
+						fontFamily: "inherit",
+						direction: "rtl",
+					},
+				}}
+			/>
 		</Box>
 	);
 }
 
 interface CommentItemProps {
-	comment: Comment;
+	comment: PublicComment;
 	isReply?: boolean;
+	itemId: string;
+	onRefresh: () => void;
 }
 
-function CommentItem({ comment, isReply }: CommentItemProps) {
+function CommentItem({ comment, isReply, itemId, onRefresh }: CommentItemProps) {
 	const [liked, setLiked] = useState(false);
+	const [localLikes, setLocalLikes] = useState(comment.likesCount || 0);
+	const [showReplyForm, setShowReplyForm] = useState(false);
+	const [replyText, setReplyText] = useState("");
+	const [submittingReply, setSubmittingReply] = useState(false);
+	const isAuthenticated = useIsAuthenticated();
+
+	const authorName = comment.user?.name || comment.userName || "کاربر";
+	const authorAvatar = comment.user?.avatarUrl || "";
+	const timeAgo = new Date(comment.createdAt).toLocaleDateString("fa-IR");
+
+	const handleLike = async () => {
+		if (liked) return;
+		try {
+			const result = await publicCommentsApi.like(comment.id);
+			setLocalLikes(result.likesCount);
+			setLiked(true);
+		} catch {
+			// silently fail
+		}
+	};
+
+	const handleSubmitReply = async () => {
+		if (!replyText.trim()) return;
+		setSubmittingReply(true);
+		try {
+			await publicCommentsApi.create({
+				text: replyText.trim(),
+				contentId: itemId,
+				parentId: comment.id,
+			});
+			setReplyText("");
+			setShowReplyForm(false);
+			onRefresh();
+		} catch {
+			// silently fail
+		} finally {
+			setSubmittingReply(false);
+		}
+	};
 
 	return (
 		<Box
@@ -252,13 +387,13 @@ function CommentItem({ comment, isReply }: CommentItemProps) {
 			<Box sx={{ display: "flex", gap: 2 }}>
 				{/* Avatar */}
 				<Avatar
-					src={comment.author.avatar}
-					alt={comment.author.name}
+					src={authorAvatar}
+					alt={authorName}
 					sx={{
-						width: 44,
-						height: 44,
+						width: isReply ? 36 : 44,
+						height: isReply ? 36 : 44,
 						border: `2px solid ${glassColors.glass.border}`,
-						boxShadow: `0 4px 12px -2px rgba(0, 0, 0, 0.3)`,
+						boxShadow: "0 4px 12px -2px rgba(0, 0, 0, 0.3)",
 					}}
 				/>
 
@@ -276,11 +411,11 @@ function CommentItem({ comment, isReply }: CommentItemProps) {
 							sx={{
 								color: glassColors.text.primary,
 								fontWeight: 600,
-								fontSize: "0.95rem",
+								fontSize: isReply ? "0.85rem" : "0.95rem",
 							}}
 							dir="rtl"
 						>
-							{comment.author.name}
+							{authorName}
 						</Typography>
 
 						<Typography
@@ -290,7 +425,7 @@ function CommentItem({ comment, isReply }: CommentItemProps) {
 							}}
 							dir="rtl"
 						>
-							{comment.timestamp}
+							{timeAgo}
 						</Typography>
 					</Box>
 
@@ -303,13 +438,13 @@ function CommentItem({ comment, isReply }: CommentItemProps) {
 						}}
 						dir="rtl"
 					>
-						{comment.content}
+						{comment.text}
 					</Typography>
 
 					<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
 						<IconButton
 							size="small"
-							onClick={() => setLiked(!liked)}
+							onClick={handleLike}
 							sx={{
 								color: liked ? glassColors.persianGold : glassColors.text.muted,
 								transition: glassAnimations.transition.springFast,
@@ -329,14 +464,15 @@ function CommentItem({ comment, isReply }: CommentItemProps) {
 								fontWeight: 600,
 							}}
 						>
-							{comment.likes + (liked ? 1 : 0)}
+							{localLikes}
 						</Typography>
 
-						{!isReply && (
+						{!isReply && isAuthenticated && (
 							<Button
 								size="small"
+								onClick={() => setShowReplyForm(!showReplyForm)}
 								sx={{
-									color: glassColors.text.secondary,
+									color: showReplyForm ? glassColors.persianGold : glassColors.text.secondary,
 									fontSize: "0.8rem",
 									textTransform: "none",
 									minWidth: "auto",
@@ -352,6 +488,50 @@ function CommentItem({ comment, isReply }: CommentItemProps) {
 							</Button>
 						)}
 					</Box>
+
+					{/* Reply Form */}
+					{showReplyForm && isAuthenticated && (
+						<Box sx={{ mt: 2, display: "flex", gap: 1, alignItems: "flex-start" }}>
+							<TextField
+								fullWidth
+								size="small"
+								multiline
+								rows={2}
+								placeholder="پاسخ خود را بنویسید..."
+								value={replyText}
+								onChange={(e) => setReplyText(e.target.value)}
+								sx={{
+									"& .MuiOutlinedInput-root": {
+										background: glassColors.glass.base,
+										border: `1px solid ${glassColors.glass.border}`,
+										borderRadius: glassBorderRadius.md,
+										color: glassColors.text.primary,
+										"& fieldset": { border: "none" },
+									},
+									"& .MuiInputBase-input::placeholder": {
+										color: glassColors.text.muted,
+										opacity: 1,
+									},
+								}}
+								dir="rtl"
+							/>
+							<IconButton
+								onClick={handleSubmitReply}
+								disabled={!replyText.trim() || submittingReply}
+								sx={{
+									color: glassColors.persianGold,
+									mt: 0.5,
+									"&:disabled": { opacity: 0.4 },
+								}}
+							>
+								{submittingReply ? (
+									<CircularProgress size={20} sx={{ color: glassColors.persianGold }} />
+								) : (
+									<Send sx={{ fontSize: "1.2rem" }} />
+								)}
+							</IconButton>
+						</Box>
+					)}
 				</Box>
 			</Box>
 		</Box>

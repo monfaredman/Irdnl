@@ -303,7 +303,7 @@ function TrendingCarousel({ items, accentColor, isRTL }: TrendingCarouselProps) 
               >
                 <StarIcon sx={{ fontSize: 10, color: accentColor }} />
                 <Typography sx={{ fontSize: "0.6rem", color: glassColors.text.primary }}>
-                  {item.rating.toFixed(1)}
+                  {(Number(item.rating) || 0).toFixed(1)}
                 </Typography>
               </Box>
             </Box>

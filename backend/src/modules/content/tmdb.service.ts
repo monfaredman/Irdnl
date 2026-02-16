@@ -251,7 +251,7 @@ export class TMDBService {
     }
   }
 
-  private getImageUrl(path: string | null, size: 'w200' | 'w500' | 'original' = 'w500'): string {
+  private getImageUrl(path: string | null, size: 'w200' | 'w500' | 'w780' | 'original' = 'w780'): string {
     if (!path) return '';
     return `${this.imageBaseUrl}/${size}${path}`;
   }
@@ -600,7 +600,7 @@ export class TMDBService {
       slug: this.slugify(title, tmdbMovie.id),
       // Keep empty string instead of leaking placeholder text into UI.
       description,
-      poster: this.getImageUrl(tmdbMovie.poster_path, 'w500'),
+      poster: this.getImageUrl(tmdbMovie.poster_path, 'w780'),
       backdrop: this.getImageUrl(tmdbMovie.backdrop_path, 'original'),
       year: releaseYear && Number.isFinite(releaseYear) ? releaseYear : new Date().getFullYear(),
       rating:
@@ -649,7 +649,7 @@ export class TMDBService {
       slug: this.slugify(title, tmdbShow.id),
       // Keep empty string instead of leaking placeholder text into UI.
       description,
-      poster: this.getImageUrl(tmdbShow.poster_path, 'w500'),
+      poster: this.getImageUrl(tmdbShow.poster_path, 'w780'),
       backdrop: this.getImageUrl(tmdbShow.backdrop_path, 'original'),
       year: firstAirYear && Number.isFinite(firstAirYear) ? firstAirYear : new Date().getFullYear(),
       rating:

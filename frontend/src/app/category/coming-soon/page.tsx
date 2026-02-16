@@ -5,11 +5,12 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import NotificationsActiveIcon from "@mui/icons-material/NotificationsActive";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import UpcomingIcon from "@mui/icons-material/Upcoming";
-import { Box, Button, Chip, IconButton, Typography } from "@mui/material";
+import { Box, Button, Chip, Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Snackbar, TextField, Typography } from "@mui/material";
 import Image from "next/image";
-import { useState } from "react";
-import { useBackendPopularMovies } from "@/hooks/useBackendContent";
+import { useEffect, useState } from "react";
+import { contentApi } from "@/lib/api/content";
 import { useLanguage } from "@/providers/language-provider";
+import { useIsAuthenticated, useUser } from "@/store/auth";
 import {
 	glassBlur,
 	glassBorderRadius,
@@ -78,8 +79,31 @@ function formatDate(dateString: string, language: string): string {
 export default function ComingSoonPage() {
 	const { language } = useLanguage();
 	const t = translations[language] || translations.en;
-	const { data: movies, loading } = useBackendPopularMovies();
+	const isAuthenticated = useIsAuthenticated();
+	const user = useUser();
+
+	const [movies, setMovies] = useState<Movie[]>([]);
+	const [loading, setLoading] = useState(true);
 	const [notifiedMovies, setNotifiedMovies] = useState<Set<string>>(new Set());
+	const [snackbar, setSnackbar] = useState({ open: false, message: "" });
+	const [trailerUrl, setTrailerUrl] = useState<string | null>(null);
+
+	// Fetch coming-soon content from backend
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				setLoading(true);
+				const res = await contentApi.getContent({ isComingSoon: true, sort: "createdAt", order: "DESC", limit: 30 });
+				if (!cancelled) setMovies(res.items as Movie[]);
+			} catch {
+				// silent
+			} finally {
+				if (!cancelled) setLoading(false);
+			}
+		})();
+		return () => { cancelled = true; };
+	}, []);
 
 	const glassCardSx = {
 		background: `linear-gradient(135deg, ${glassColors.glass.strong}, ${glassColors.glass.mid})`,
@@ -90,15 +114,30 @@ export default function ComingSoonPage() {
 	};
 
 	const toggleNotification = (movieId: string) => {
+		if (!isAuthenticated || !user?.email) {
+			setSnackbar({ open: true, message: language === "fa" ? "لطفاً ابتدا وارد حساب کاربری خود شوید" : "Please login first" });
+			return;
+		}
 		setNotifiedMovies((prev) => {
 			const newSet = new Set(prev);
 			if (newSet.has(movieId)) {
 				newSet.delete(movieId);
+				setSnackbar({ open: true, message: language === "fa" ? "اطلاع‌رسانی غیرفعال شد" : "Notification disabled" });
 			} else {
 				newSet.add(movieId);
+				setSnackbar({ open: true, message: language === "fa" ? `اطلاع‌رسانی برای ${user.email} فعال شد` : `Notification enabled for ${user.email}` });
 			}
 			return newSet;
 		});
+	};
+
+	const handleWatchTrailer = (movie: Movie) => {
+		const trailer = (movie as any).trailers?.[0];
+		if (trailer?.url) {
+			setTrailerUrl(trailer.url);
+		} else {
+			setSnackbar({ open: true, message: language === "fa" ? "تریلری برای این محتوا موجود نیست" : "No trailer available" });
+		}
 	};
 
 	return (
@@ -153,8 +192,10 @@ export default function ComingSoonPage() {
 				</Box>
 			) : (
 				<Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
-					{movies?.slice(0, 12).map((movie: Movie, index: number) => {
-						const releaseDate = getRandomFutureDate(index);
+					{movies?.map((movie: Movie, index: number) => {
+						const releaseDate = (movie as any).publishDate
+							? new Date((movie as any).publishDate).toISOString().split("T")[0]
+							: getRandomFutureDate(index);
 						const daysLeft = getDaysUntil(releaseDate);
 						const isNotified = notifiedMovies.has(movie.id);
 
@@ -229,8 +270,10 @@ export default function ComingSoonPage() {
 											background: "rgba(0,0,0,0.3)",
 											opacity: 0,
 											transition: "opacity 0.3s ease",
+											cursor: "pointer",
 											"&:hover": { opacity: 1 },
 										}}
+										onClick={() => handleWatchTrailer(movie)}
 									>
 										<IconButton
 											sx={{
@@ -330,6 +373,7 @@ export default function ComingSoonPage() {
 									>
 										<Button
 											startIcon={<PlayArrowIcon />}
+											onClick={() => handleWatchTrailer(movie)}
 											sx={{
 												borderRadius: glassBorderRadius.lg,
 												background: glassColors.glass.mid,
@@ -380,6 +424,44 @@ export default function ComingSoonPage() {
 					})}
 				</Box>
 			)}
+
+			{/* Trailer Dialog */}
+			<Dialog
+				open={!!trailerUrl}
+				onClose={() => setTrailerUrl(null)}
+				maxWidth="md"
+				fullWidth
+				PaperProps={{ sx: { background: "#000", borderRadius: "16px" } }}
+			>
+				<DialogTitle sx={{ color: "#fff", fontFamily: language === "fa" ? "Vazirmatn" : "inherit" }}>
+					{t.watchTrailer}
+				</DialogTitle>
+				<DialogContent>
+					{trailerUrl && (
+						<Box
+							component="video"
+							src={trailerUrl}
+							controls
+							autoPlay
+							sx={{ width: "100%", borderRadius: "8px" }}
+						/>
+					)}
+				</DialogContent>
+				<DialogActions>
+					<Button onClick={() => setTrailerUrl(null)} sx={{ color: glassColors.persianGold }}>
+						{language === "fa" ? "بستن" : "Close"}
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			{/* Snackbar */}
+			<Snackbar
+				open={snackbar.open}
+				autoHideDuration={3000}
+				onClose={() => setSnackbar({ open: false, message: "" })}
+				message={snackbar.message}
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+			/>
 		</Box>
 	);
 }

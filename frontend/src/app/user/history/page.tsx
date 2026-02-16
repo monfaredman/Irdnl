@@ -6,13 +6,14 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import { Box, Grid, LinearProgress, Skeleton, Typography } from "@mui/material";
 import Image from "next/image";
 import Link from "next/link";
-import { useBackendTrendingMovies } from "@/hooks/useBackendContent";
+import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/providers/language-provider";
 import {
 	glassAnimations,
 	glassBorderRadius,
 	glassColors,
 } from "@/theme/glass-design-system";
+import { userApi, type WatchHistoryItem } from "@/lib/api/user";
 
 const translations = {
 	en: {
@@ -64,15 +65,41 @@ export default function HistoryPage() {
 	const { language } = useLanguage();
 	const t = translations[language] || translations.en;
 
-	const { data: movies, loading } = useBackendTrendingMovies();
+	const [historyData, setHistoryData] = useState<WatchHistoryItem[]>([]);
+	const [loading, setLoading] = useState(true);
 
-	// Generate mock progress for items using deterministic values
-	const historyItems =
-		movies?.slice(0, 12).map((movie, index) => ({
-			...movie,
-			progress: getProgress(index),
-			watchedAt: getWatchedDate(index, language === "fa" ? "fa-IR" : "en-US"),
-		})) || [];
+	const fetchHistory = useCallback(async () => {
+		try {
+			setLoading(true);
+			const items = await userApi.getWatchHistory();
+			setHistoryData(Array.isArray(items) ? items : []);
+		} catch {
+			setHistoryData([]);
+		} finally {
+			setLoading(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		fetchHistory();
+	}, [fetchHistory]);
+
+	// Map backend data to display format
+	const historyItems = historyData.map((entry) => {
+		const duration = entry.content?.duration || 120; // default 120 min
+		const progress = duration > 0 ? Math.min(100, Math.round((entry.progressSeconds / 60 / duration) * 100)) : 100;
+		return {
+			id: entry.content?.id || entry.contentId,
+			title: entry.content?.titleFa || entry.content?.title || "---",
+			poster: entry.content?.posterUrl || "/images/placeholder.jpg",
+			year: entry.content?.year,
+			rating: entry.content?.rating,
+			progress,
+			watchedAt: new Date(entry.updatedAt || entry.createdAt).toLocaleDateString(
+				language === "fa" ? "fa-IR" : "en-US"
+			),
+		};
+	});
 
 	const continueWatching = historyItems.filter((item) => item.progress < 100);
 	const completed = historyItems.filter((item) => item.progress === 100);
@@ -157,7 +184,7 @@ export default function HistoryPage() {
 								{continueWatching.map((item) => (
 									<Grid size={{ xs: 12, sm: 6, md: 3 }} key={item.id}>
 										<Link
-											href={`/movies/${item.slug}`}
+											href={`/item/${item.id}`}
 											style={{ textDecoration: "none" }}
 										>
 											<Box
@@ -177,7 +204,7 @@ export default function HistoryPage() {
 											>
 												<Box sx={{ position: "relative", aspectRatio: "16/9" }}>
 													<Image
-														src={item.backdrop || item.poster}
+														src={item.poster}
 														alt={item.title}
 														fill
 														style={{ objectFit: "cover" }}
@@ -280,7 +307,7 @@ export default function HistoryPage() {
 								{completed.map((item) => (
 									<Grid size={{ xs: 6, sm: 4, md: 2 }} key={item.id}>
 										<Link
-											href={`/movies/${item.slug}`}
+											href={`/item/${item.id}`}
 											style={{ textDecoration: "none" }}
 										>
 											<Box

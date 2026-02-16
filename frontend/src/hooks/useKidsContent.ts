@@ -1,21 +1,13 @@
 /**
  * useKidsContent Hook
  * 
- * Custom hook for fetching kids-friendly content from TMDB
+ * Custom hook for fetching kids-friendly content from backend database
  * Features: Age-based filtering, safety ratings, educational content
  */
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { useLanguage } from "@/providers/language-provider";
-import { tmdbClient, mapTMDBMovieToMovie, mapTMDBTVShowToSeries } from "@/lib/tmdb-service";
+import { contentApi } from "@/lib/api/content";
 import type { Movie, Series } from "@/types/media";
-
-// TMDB Genre IDs
-const KIDS_GENRE_IDS = {
-  animation: 16,
-  family: 10751,
-  kidsTV: 10762,  // Kids (TV)
-};
 
 // Age range types
 export type AgeRange = "all" | "3-5" | "6-9" | "10-12";
@@ -139,7 +131,6 @@ interface UseKidsContentOptions {
 
 // Main hook for kids content
 export function useKidsContent(options: UseKidsContentOptions = {}): KidsContentResult {
-  const { language } = useLanguage();
   const { ageRange = "all", category, page = 1, limit = 20 } = options;
   
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -147,60 +138,19 @@ export function useKidsContent(options: UseKidsContentOptions = {}): KidsContent
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Get genre IDs based on age range
-  const getGenreIds = useCallback(() => {
-    // For kids, always include Animation (16) and Family (10751)
-    return `${KIDS_GENRE_IDS.animation},${KIDS_GENRE_IDS.family}`;
-  }, []);
-
-  // Get vote average filter based on age (younger = higher rating threshold)
-  const getVoteThreshold = useCallback(() => {
-    switch (ageRange) {
-      case "3-5": return 7.0;
-      case "6-9": return 6.5;
-      case "10-12": return 6.0;
-      default: return 6.0;
-    }
-  }, [ageRange]);
-
   const fetchContent = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
-      const genreIds = getGenreIds();
-      
-      // Fetch both movies and TV shows for kids
-      const [movieResponse, tvResponse] = await Promise.all([
-        tmdbClient.discoverMovies({
-          language,
-          page,
-          with_genres: genreIds,
-          sort_by: "popularity.desc",
-        }),
-        tmdbClient.discoverTVShows({
-          language,
-          page,
-          with_genres: `${KIDS_GENRE_IDS.animation}|${KIDS_GENRE_IDS.family}|${KIDS_GENRE_IDS.kidsTV}`,
-          sort_by: "popularity.desc",
-        }),
+      // Fetch kids content from backend (isKids flag)
+      const [movieRes, seriesRes] = await Promise.all([
+        contentApi.getContent({ isKids: true, type: "movie", sort: "rating", order: "DESC", page, limit }),
+        contentApi.getContent({ isKids: true, type: "series", sort: "rating", order: "DESC", page, limit }),
       ]);
 
-      // Filter by vote average for quality
-      const voteThreshold = getVoteThreshold();
-      
-      const filteredMovies = movieResponse.results
-        .filter((m) => m.vote_average >= voteThreshold && !m.adult)
-        .slice(0, limit)
-        .map(mapTMDBMovieToMovie);
-
-      const filteredSeries = tvResponse.results
-        .filter((s) => s.vote_average >= voteThreshold)
-        .slice(0, limit)
-        .map(mapTMDBTVShowToSeries);
-
-      setMovies(filteredMovies);
-      setSeries(filteredSeries);
+      setMovies(movieRes.items as Movie[]);
+      setSeries(seriesRes.items as Series[]);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to fetch kids content"));
       setMovies([]);
@@ -208,7 +158,7 @@ export function useKidsContent(options: UseKidsContentOptions = {}): KidsContent
     } finally {
       setLoading(false);
     }
-  }, [language, page, limit, ageRange, getGenreIds, getVoteThreshold]);
+  }, [page, limit, ageRange]);
 
   useEffect(() => {
     fetchContent();
@@ -219,7 +169,6 @@ export function useKidsContent(options: UseKidsContentOptions = {}): KidsContent
 
 // Hook for featured kids shows
 export function useFeaturedKidsShows(): KidsContentResult {
-  const { language } = useLanguage();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
@@ -230,34 +179,24 @@ export function useFeaturedKidsShows(): KidsContentResult {
       setLoading(true);
       setError(null);
 
-      // Get top-rated family/animation content
-      const [movieResponse, tvResponse] = await Promise.all([
-        tmdbClient.discoverMovies({
-          language,
-          page: 1,
-          with_genres: `${KIDS_GENRE_IDS.animation}`,
-          sort_by: "vote_average.desc",
-        }),
-        tmdbClient.discoverTVShows({
-          language,
-          page: 1,
-          with_genres: `${KIDS_GENRE_IDS.kidsTV}`,
-          sort_by: "vote_average.desc",
-        }),
+      // Get top-rated kids content from backend
+      const [movieRes, seriesRes] = await Promise.all([
+        contentApi.getContent({ isKids: true, type: "movie", featured: true, sort: "rating", order: "DESC", limit: 6 }),
+        contentApi.getContent({ isKids: true, type: "series", featured: true, sort: "rating", order: "DESC", limit: 6 }),
       ]);
 
-      const topMovies = movieResponse.results
-        .filter((m) => m.vote_average >= 7.5 && m.vote_count >= 500 && !m.adult)
-        .slice(0, 6)
-        .map(mapTMDBMovieToMovie);
-
-      const topSeries = tvResponse.results
-        .filter((s) => s.vote_average >= 7.0)
-        .slice(0, 6)
-        .map(mapTMDBTVShowToSeries);
-
-      setMovies(topMovies);
-      setSeries(topSeries);
+      // Fallback: if no featured kids content, get regular top-rated kids content
+      if (movieRes.items.length === 0 && seriesRes.items.length === 0) {
+        const [movieFallback, seriesFallback] = await Promise.all([
+          contentApi.getContent({ isKids: true, type: "movie", sort: "rating", order: "DESC", limit: 6 }),
+          contentApi.getContent({ isKids: true, type: "series", sort: "rating", order: "DESC", limit: 6 }),
+        ]);
+        setMovies(movieFallback.items as Movie[]);
+        setSeries(seriesFallback.items as Series[]);
+      } else {
+        setMovies(movieRes.items as Movie[]);
+        setSeries(seriesRes.items as Series[]);
+      }
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to fetch featured kids content"));
       setMovies([]);
@@ -265,7 +204,7 @@ export function useFeaturedKidsShows(): KidsContentResult {
     } finally {
       setLoading(false);
     }
-  }, [language]);
+  }, []);
 
   useEffect(() => {
     fetchFeatured();
@@ -276,7 +215,6 @@ export function useFeaturedKidsShows(): KidsContentResult {
 
 // Hook for kids content by category
 export function useKidsCategoryContent(categoryId: string): KidsContentResult {
-  const { language } = useLanguage();
   const [movies, setMovies] = useState<Movie[]>([]);
   const [series, setSeries] = useState<Series[]>([]);
   const [loading, setLoading] = useState(true);
@@ -299,71 +237,30 @@ export function useKidsCategoryContent(categoryId: string): KidsContentResult {
       setLoading(true);
       setError(null);
 
-      // For Iranian content, use language filter
+      // For Iranian content, filter by language
+      const extraParams: Record<string, any> = {};
       if (categoryId === "iranian") {
-        const [movieResponse, tvResponse] = await Promise.all([
-          tmdbClient.discoverMovies({
-            language,
-            page: 1,
-            with_genres: `${KIDS_GENRE_IDS.animation}`,
-            with_original_language: "fa",
-            sort_by: "popularity.desc",
-          }),
-          tmdbClient.discoverTVShows({
-            language,
-            page: 1,
-            with_genres: `${KIDS_GENRE_IDS.animation}|${KIDS_GENRE_IDS.kidsTV}`,
-            with_original_language: "fa",
-            sort_by: "popularity.desc",
-          }),
-        ]);
-
-        setMovies(movieResponse.results.slice(0, 12).map(mapTMDBMovieToMovie));
-        setSeries(tvResponse.results.slice(0, 12).map(mapTMDBTVShowToSeries));
-        return;
+        extraParams.language = "fa";
+      } else if (categoryId === "educational") {
+        extraParams.genre = "education";
+      } else if (categoryId === "music") {
+        extraParams.genre = "music";
+      } else if (categoryId === "science") {
+        extraParams.genre = "documentary";
+      } else if (categoryId === "animals") {
+        extraParams.genre = "animation";
+      } else if (categoryId === "classics") {
+        extraParams.sort = "year";
+        extraParams.order = "ASC";
       }
 
-      // For other categories, use keyword search combined with genre filter
-      const keywords = category.keywords || [];
-      
-      if (keywords.length > 0) {
-        const searchPromises = keywords.map((keyword) => 
-          tmdbClient.searchMovies(keyword, language)
-        );
-        
-        const searchResults = await Promise.all(searchPromises);
-        
-        const allMovies = searchResults
-          .flatMap((r) => r.results)
-          .filter((m) => 
-            m.genre_ids.includes(KIDS_GENRE_IDS.animation) || 
-            m.genre_ids.includes(KIDS_GENRE_IDS.family)
-          )
-          .filter((m, i, arr) => arr.findIndex((x) => x.id === m.id) === i) // Dedupe
-          .slice(0, 12)
-          .map(mapTMDBMovieToMovie);
+      const [movieRes, seriesRes] = await Promise.all([
+        contentApi.getContent({ isKids: true, type: "movie", sort: "rating", order: "DESC", limit: 12, ...extraParams }),
+        contentApi.getContent({ isKids: true, type: "series", sort: "rating", order: "DESC", limit: 12, ...extraParams }),
+      ]);
 
-        setMovies(allMovies);
-      } else {
-        const movieResponse = await tmdbClient.discoverMovies({
-          language,
-          page: 1,
-          with_genres: `${KIDS_GENRE_IDS.animation}`,
-          sort_by: "popularity.desc",
-        });
-        
-        setMovies(movieResponse.results.slice(0, 12).map(mapTMDBMovieToMovie));
-      }
-
-      // Fetch TV content
-      const tvResponse = await tmdbClient.discoverTVShows({
-        language,
-        page: 1,
-        with_genres: `${KIDS_GENRE_IDS.animation}|${KIDS_GENRE_IDS.kidsTV}`,
-        sort_by: "popularity.desc",
-      });
-
-      setSeries(tvResponse.results.slice(0, 12).map(mapTMDBTVShowToSeries));
+      setMovies(movieRes.items as Movie[]);
+      setSeries(seriesRes.items as Series[]);
     } catch (err) {
       setError(err instanceof Error ? err : new Error("Failed to fetch category content"));
       setMovies([]);
@@ -371,7 +268,7 @@ export function useKidsCategoryContent(categoryId: string): KidsContentResult {
     } finally {
       setLoading(false);
     }
-  }, [categoryId, category, language]);
+  }, [categoryId, category]);
 
   useEffect(() => {
     fetchCategoryContent();

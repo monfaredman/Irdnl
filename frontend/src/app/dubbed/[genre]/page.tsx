@@ -43,7 +43,9 @@ export default function DubbedGenrePage() {
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
+			currentSubGenre={{ slug: genre, nameEn: subGenreInfo.nameEn, nameFa: subGenreInfo.nameFa }}
 			basePath={`/dubbed/${genre}`}
+			genreBasePath="/dubbed"
 		/>
 	);
 }

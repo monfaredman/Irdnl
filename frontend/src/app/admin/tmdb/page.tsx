@@ -14,11 +14,11 @@ export default function TMDBPage() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-white flex items-center gap-3">
+				<h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
 					<Database className="w-8 h-8" />
 					{t("admin.menu.tmdb")}
 				</h1>
-				<p className="text-gray-400 mt-2">
+				<p className="text-gray-600 mt-2">
 					{t("admin.tmdb.description")}
 				</p>
 			</div>

@@ -43,7 +43,9 @@ export default function AnimeGenrePage() {
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
+			currentSubGenre={{ slug: genre, nameEn: subGenreInfo.nameEn, nameFa: subGenreInfo.nameFa }}
 			basePath={`/anime/${genre}`}
+			genreBasePath="/anime"
 		/>
 	);
 }

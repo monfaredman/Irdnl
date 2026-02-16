@@ -210,6 +210,11 @@ export class SaveTMDBContentDto {
   @ApiPropertyOptional({ description: 'Additional metadata as JSON' })
   @IsOptional()
   rawData?: any;
+
+  @ApiPropertyOptional({ description: 'Auto-import to content table after saving', default: false })
+  @IsOptional()
+  @IsBoolean()
+  autoImport?: boolean;
 }
 
 export class ImportTMDBToDBDto {

@@ -226,4 +226,11 @@ export class CommentsService {
       },
     };
   }
+
+  async likeComment(id: string): Promise<{ likesCount: number }> {
+    const comment = await this.findOne(id);
+    comment.likesCount = (comment.likesCount || 0) + 1;
+    await this.commentRepository.save(comment);
+    return { likesCount: comment.likesCount };
+  }
 }

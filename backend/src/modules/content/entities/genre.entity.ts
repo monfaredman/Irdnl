@@ -27,6 +27,15 @@ export class Genre {
   @Column({ name: 'category_slugs', type: 'jsonb', nullable: true, default: '[]' })
   categorySlugs: string[];
 
+  @Column({ name: 'poster_url', nullable: true })
+  posterUrl: string | null;
+
+  @Column({ name: 'logo_url', nullable: true })
+  logoUrl: string | null;
+
+  @Column({ name: 'backdrop_url', nullable: true })
+  backdropUrl: string | null;
+
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
 

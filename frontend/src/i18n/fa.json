@@ -27,6 +27,9 @@
       "settings": "تنظیمات",
       "upera": "آپرا",
       "tmdb": "TMDB",
+      "collections": "مجموعه‌ها",
+      "playlists": "لیست‌های پخش",
+      "tickets": "تیکت‌ها",
       "logout": "خروج"
     },
     "dashboard": {
@@ -42,6 +45,20 @@
       "topPerformingContent": "محتوای برتر"
     },
     "content": {
+      "title": "مدیریت محتوا",
+      "list": "لیست محتوا",
+      "createNew": "افزودن محتوای جدید",
+      "searchPlaceholder": "جستجوی محتوا...",
+      "allTypes": "همه انواع",
+      "allStatuses": "همه وضعیت‌ها",
+      "poster": "پوستر",
+      "year": "سال",
+      "actions": "عملیات",
+      "fetchFailed": "خطا در بارگذاری محتوا",
+      "deleteSuccess": "محتوا با موفقیت حذف شد",
+      "deleteFailed": "خطا در حذف محتوا",
+      "statusUpdateSuccess": "وضعیت محتوا با موفقیت تغییر کرد",
+      "statusUpdateFailed": "خطا در تغییر وضعیت محتوا",
       "movie": "فیلم",
       "series": "سریال",
       "status": {
@@ -672,25 +689,41 @@
       "saved": {
         "title": "محتوای ذخیره شده TMDB",
         "description": "مدیریت محتوای ذخیره شده از TMDB",
+        "poster": "پوستر",
+        "type": "نوع",
+        "typeMovie": "فیلم",
+        "typeTv": "سریال",
+        "year": "سال",
+        "rating": "امتیاز",
+        "actions": "عملیات",
+        "import": "وارد کردن",
         "importToDb": "وارد کردن به دیتابیس",
         "importing": "در حال وارد کردن...",
         "importSuccess": "با موفقیت به دیتابیس وارد شد",
         "importFailed": "خطا در وارد کردن",
         "delete": "حذف",
-        "deleteConfirm": "آیا مطمئن هستید؟",
+        "deleteConfirm": "آیا از حذف این مورد مطمئن هستید؟",
         "deleteSuccess": "با موفقیت حذف شد",
         "deleteFailed": "خطا در حذف",
+        "search": "جستجوی عنوان...",
+        "refresh": "بروزرسانی",
         "status": {
+          "label": "وضعیت",
           "pending": "در انتظار",
           "imported": "وارد شده",
           "failed": "ناموفق"
         },
         "filterType": "نوع",
+        "filterTypeAll": "همه انواع",
         "filterStatus": "وضعیت",
+        "filterStatusAll": "همه وضعیت‌ها",
         "all": "همه",
         "searchPlaceholder": "جستجوی عنوان...",
         "noSavedContent": "محتوای ذخیره شده‌ای وجود ندارد",
-        "totalSaved": "تعداد کل ذخیره شده"
+        "totalSaved": "تعداد کل ذخیره شده",
+        "previous": "قبلی",
+        "next": "بعدی",
+        "page": "صفحه"
       }
     },
     "comments": {
@@ -718,6 +751,59 @@
         "rejected": "رد شده",
         "spam": "اسپم"
       }
+    },
+    "blog": {
+      "title": "مدیریت بلاگ",
+      "description": "مدیریت مقالات و محتوای بلاگ",
+      "createNew": "مقاله جدید",
+      "search": "جستجو در مقالات...",
+      "refresh": "بروزرسانی",
+      "author": "نویسنده",
+      "views": "بازدید",
+      "likes": "لایک",
+      "date": "تاریخ",
+      "actions": "عملیات",
+      "status": {
+        "label": "وضعیت",
+        "draft": "پیش‌نویس",
+        "published": "منتشر شده",
+        "scheduled": "زمان‌بندی شده",
+        "archived": "بایگانی"
+      },
+      "category": {
+        "label": "دسته‌بندی",
+        "news": "اخبار",
+        "reviews": "نقد و بررسی",
+        "interviews": "مصاحبه",
+        "behind_scenes": "پشت صحنه",
+        "industry": "صنعت",
+        "technology": "تکنولوژی",
+        "opinion": "نظر",
+        "tutorials": "آموزش"
+      }
+    },
+    "profile": {
+      "title": "پروفایل کاربری",
+      "subtitle": "مدیریت اطلاعات حساب و تغییر رمز عبور",
+      "personalInfo": "اطلاعات شخصی",
+      "name": "نام",
+      "namePlaceholder": "نام خود را وارد کنید",
+      "avatarUrl": "تصویر پروفایل",
+      "clickToChangeAvatar": "برای تغییر تصویر کلیک کنید",
+      "roleAdmin": "مدیر",
+      "saveChanges": "ذخیره تغییرات",
+      "saving": "در حال ذخیره...",
+      "updateSuccess": "پروفایل با موفقیت به‌روزرسانی شد",
+      "updateFailed": "خطا در به‌روزرسانی پروفایل",
+      "changePassword": "تغییر رمز عبور",
+      "currentPassword": "رمز عبور فعلی",
+      "newPassword": "رمز عبور جدید",
+      "confirmPassword": "تکرار رمز عبور جدید",
+      "updatePassword": "تغییر رمز عبور",
+      "passwordSuccess": "رمز عبور با موفقیت تغییر کرد",
+      "passwordFailed": "خطا در تغییر رمز عبور",
+      "passwordMismatch": "رمز عبور جدید و تکرار آن یکسان نیستند",
+      "passwordMinLength": "رمز عبور باید حداقل ۶ کاراکتر باشد"
     }
   }
 }

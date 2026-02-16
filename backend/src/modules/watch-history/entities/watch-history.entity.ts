@@ -27,7 +27,7 @@ export class WatchHistory {
   @Column({ name: 'content_id' })
   contentId: string;
 
-  @ManyToOne(() => Content, (content) => content.watchHistory)
+  @ManyToOne(() => Content, (content) => content.watchHistory, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'content_id' })
   content: Content;
 

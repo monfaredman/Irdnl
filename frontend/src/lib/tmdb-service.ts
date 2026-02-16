@@ -472,7 +472,7 @@ class TMDBClient {
 
 	getImageUrl(
 		path: string | null,
-		size: "w200" | "w500" | "original" = "w500",
+		size: "w200" | "w500" | "w780" | "original" = "w780",
 	): string {
 		if (!path) return "/images/placeholder.jpg";
 		return `${TMDB_CONFIG.imageBaseUrl}/${size}${path}`;
@@ -520,7 +520,7 @@ export function mapTMDBMovieToMovie(tmdbMovie: TMDBMovie): Movie {
 		title: tmdbMovie.title,
 		slug: tmdbMovie.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
 		description: tmdbMovie.overview || "No description available.",
-		poster: tmdbClient.getImageUrl(tmdbMovie.poster_path, "w500"),
+		poster: tmdbClient.getImageUrl(tmdbMovie.poster_path, "w780"),
 		backdrop: tmdbClient.getImageUrl(tmdbMovie.backdrop_path, "original"),
 		year: tmdbMovie.release_date
 			? new Date(tmdbMovie.release_date).getFullYear()
@@ -567,7 +567,7 @@ export function mapTMDBTVShowToSeries(tmdbShow: TMDBTVShow): Series {
 		title: tmdbShow.name,
 		slug: tmdbShow.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
 		description: tmdbShow.overview || "No description available.",
-		poster: tmdbClient.getImageUrl(tmdbShow.poster_path, "w500"),
+		poster: tmdbClient.getImageUrl(tmdbShow.poster_path, "w780"),
 		backdrop: tmdbClient.getImageUrl(tmdbShow.backdrop_path, "original"),
 		year: tmdbShow.first_air_date
 			? new Date(tmdbShow.first_air_date).getFullYear()
@@ -631,7 +631,7 @@ export function mapTMDBCollection(collection: TMDBCollection): MappedCollection 
 		id: collection.id,
 		name: collection.name,
 		overview: collection.overview || "No description available.",
-		poster: tmdbClient.getImageUrl(collection.poster_path, "w500"),
+		poster: tmdbClient.getImageUrl(collection.poster_path, "w780"),
 		backdrop: tmdbClient.getImageUrl(collection.backdrop_path, "original"),
 		movieCount: collection.parts.length,
 		movies,

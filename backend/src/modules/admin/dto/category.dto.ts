@@ -5,6 +5,7 @@ import {
   IsInt,
   IsArray,
   IsObject,
+  IsUUID,
   Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
@@ -70,10 +71,30 @@ export class CreateCategoryDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsBoolean()
+  showInMenu?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  showInLanding?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
   sortOrder?: number;
+
+  @ApiPropertyOptional({ description: 'Parent category ID for nested menu items' })
+  @IsOptional()
+  @IsUUID()
+  parentId?: string;
+
+  @ApiPropertyOptional({ description: 'URL path segment (e.g. "foreign", "action")' })
+  @IsOptional()
+  @IsString()
+  urlPath?: string;
 }
 
 export class UpdateCategoryDto {
@@ -139,8 +160,28 @@ export class UpdateCategoryDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsBoolean()
+  showInMenu?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  showInLanding?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(0)
   sortOrder?: number;
+
+  @ApiPropertyOptional({ description: 'Parent category ID for nested menu items' })
+  @IsOptional()
+  @IsUUID()
+  parentId?: string | null;
+
+  @ApiPropertyOptional({ description: 'URL path segment (e.g. "foreign", "action")' })
+  @IsOptional()
+  @IsString()
+  urlPath?: string;
 }

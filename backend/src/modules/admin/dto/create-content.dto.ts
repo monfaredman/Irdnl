@@ -16,7 +16,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ContentType, ContentStatus } from '../../content/entities/content.entity';
+import { ContentType, ContentStatus, AccessType } from '../../content/entities/content.entity';
 
 class SeoDto {
   @ApiPropertyOptional()
@@ -526,6 +526,26 @@ export class CreateContentDto {
   @IsBoolean()
   featured?: boolean;
 
+  @ApiPropertyOptional({ example: false, description: 'Flag for kids content' })
+  @IsOptional()
+  @IsBoolean()
+  isKids?: boolean;
+
+  @ApiPropertyOptional({ example: false, description: 'Flag for coming soon content' })
+  @IsOptional()
+  @IsBoolean()
+  isComingSoon?: boolean;
+
+  @ApiPropertyOptional({ example: false, description: 'Flag for dubbed content' })
+  @IsOptional()
+  @IsBoolean()
+  isDubbed?: boolean;
+
+  @ApiPropertyOptional({ example: null, description: 'Collection UUID this content belongs to' })
+  @IsOptional()
+  @IsString()
+  collectionId?: string;
+
   @ApiPropertyOptional({ example: 0 })
   @IsOptional()
   @IsInt()
@@ -541,6 +561,15 @@ export class CreateContentDto {
   @IsEnum(ContentStatus)
   status?: ContentStatus;
 
+  @ApiPropertyOptional({
+    enum: AccessType,
+    default: 'free',
+    description: 'Access type: free (in-site player), subscription/single_purchase/traffic (Upera redirect)',
+  })
+  @IsOptional()
+  @IsEnum(AccessType)
+  accessType?: AccessType;
+
   @ApiPropertyOptional({ example: { distributor: 'ABC Films', licenseDate: '2023-01-01' } })
   @IsOptional()
   @IsObject()
@@ -551,4 +580,9 @@ export class CreateContentDto {
   @ValidateNested()
   @Type(() => SeoDto)
   seo?: SeoDto;
+
+  @ApiPropertyOptional({ type: [String], description: 'Array of category UUIDs' })
+  @IsOptional()
+  @IsArray()
+  categoryIds?: string[];
 }

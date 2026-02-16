@@ -155,6 +155,7 @@ export const EmblaCarousel = ({
 											textDecoration: "none",
 											color: "inherit",
 											display: "block",
+											padding:'1rem 0'
 										}}
 									>
 										<Box

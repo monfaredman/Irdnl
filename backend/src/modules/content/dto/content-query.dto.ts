@@ -41,6 +41,35 @@ export class ContentQueryDto {
   @IsBoolean()
   featured?: boolean;
 
+  @ApiPropertyOptional({ example: true, description: 'Filter dubbed content only' })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isDubbed?: boolean;
+
+  @ApiPropertyOptional({ example: true, description: 'Filter free content only' })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isFree?: boolean;
+
+  @ApiPropertyOptional({ example: true, description: 'Filter kids content only' })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isKids?: boolean;
+
+  @ApiPropertyOptional({ example: true, description: 'Filter coming soon content only' })
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isComingSoon?: boolean;
+
+  @ApiPropertyOptional({ example: 'uuid', description: 'Filter by category ID (content must have this category in categoryIds)' })
+  @IsOptional()
+  @IsString()
+  categoryId?: string;
+
   @ApiPropertyOptional({
     example: 'rating',
     description: 'Sort field: rating, year, createdAt, priority, title',

@@ -122,6 +122,7 @@ export const OffersSection = ({ items }: OffersSectionProps) => {
 									overflow: "hidden",
 								}}
 							>
+
 								<Image
 									src={item.poster}
 									alt={item.title}

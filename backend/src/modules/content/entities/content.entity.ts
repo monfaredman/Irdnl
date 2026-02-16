@@ -24,6 +24,20 @@ export enum ContentStatus {
   UNPUBLISHED = 'unpublished',
 }
 
+/**
+ * Access types for video content:
+ * - FREE: Free content played in-site with our own player
+ * - SUBSCRIPTION: Upera subscription-based content (redirect to Upera player/gateway)
+ * - SINGLE_PURCHASE: Upera single-purchase content (redirect to Upera payment)
+ * - TRAFFIC: Upera traffic-based content (redirect to Upera player/gateway)
+ */
+export enum AccessType {
+  FREE = 'free',
+  SUBSCRIPTION = 'subscription',
+  SINGLE_PURCHASE = 'single_purchase',
+  TRAFFIC = 'traffic',
+}
+
 @Entity('content')
 export class Content {
   @PrimaryGeneratedColumn('uuid')
@@ -228,6 +242,9 @@ export class Content {
   @Column({ name: 'collection_id', nullable: true })
   collectionId: string | null;
 
+  @Column({ name: 'category_ids', type: 'jsonb', nullable: true, default: '[]' })
+  categoryIds: string[];
+
   @Column({ type: 'int', default: 0 })
   priority: number;
 
@@ -247,6 +264,14 @@ export class Content {
 
   @Column({ name: 'external_player_url', nullable: true })
   externalPlayerUrl: string | null;
+
+  @Column({
+    name: 'access_type',
+    type: 'enum',
+    enum: AccessType,
+    default: AccessType.FREE,
+  })
+  accessType: AccessType;
 
   @Column({ name: 'license_info', type: 'jsonb', nullable: true })
   licenseInfo: Record<string, any> | null;

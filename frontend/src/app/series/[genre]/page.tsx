@@ -43,7 +43,9 @@ export default function SeriesGenrePage() {
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
+			currentSubGenre={{ slug: genre, nameEn: subGenreInfo.nameEn, nameFa: subGenreInfo.nameFa }}
 			basePath={`/series/${genre}`}
+			genreBasePath="/series"
 		/>
 	);
 }

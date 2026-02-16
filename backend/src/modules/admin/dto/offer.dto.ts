@@ -41,6 +41,11 @@ export class CreateOfferDto {
   @IsString()
   linkUrl?: string;
 
+  @ApiPropertyOptional({ description: 'Content ID to link the offer to' })
+  @IsOptional()
+  @IsString()
+  contentId?: string;
+
   @ApiPropertyOptional({ example: 30 })
   @IsOptional()
   @Type(() => Number)
@@ -121,6 +126,11 @@ export class UpdateOfferDto {
   @IsOptional()
   @IsString()
   linkUrl?: string;
+
+  @ApiPropertyOptional({ description: 'Content ID to link the offer to' })
+  @IsOptional()
+  @IsString()
+  contentId?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

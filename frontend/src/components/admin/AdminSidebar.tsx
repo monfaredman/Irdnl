@@ -7,6 +7,8 @@ import {
 	FolderTree,
 	Gift,
 	LayoutDashboard,
+	Library,
+	ListMusic,
 	LogOut,
 	MapPin,
 	Tags,
@@ -17,6 +19,10 @@ import {
 	ChevronRight,
 	Upload,
 	MessageSquare,
+	BookOpen,
+	SlidersHorizontal,
+	UserCog,
+	Ticket,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -24,6 +30,8 @@ import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/store/admin-auth";
 import { useTranslation } from "@/i18n";
 import { useState } from "react";
+import { Slider, SliderMark, SliderRail } from "@mui/material";
+import { Preview } from "@mui/icons-material";
 
 interface MenuItem {
 	href?: string;
@@ -40,6 +48,8 @@ const menuItems: MenuItem[] = [
 		children: [
 			{ href: "/admin/content", labelKey: "admin.menu.contentUpload", icon: Upload },
 			{ href: "/admin/categories", labelKey: "admin.menu.categories", icon: FolderTree },
+			{ href: "/admin/collections", labelKey: "admin.menu.collections", icon: Library },
+			{ href: "/admin/sliders", labelKey: "admin.menu.sliders", icon: SlidersHorizontal },
 			{ href: "/admin/genres", labelKey: "admin.menu.genres", icon: Tags },
 			{ href: "/admin/offers", labelKey: "admin.menu.offers", icon: Gift },
 			{ href: "/admin/pins", labelKey: "admin.menu.pins", icon: MapPin },
@@ -50,8 +60,12 @@ const menuItems: MenuItem[] = [
 	{ href: "/admin/finance", labelKey: "admin.menu.finance", icon: BarChart3 },
 	{ href: "/admin/notifications", labelKey: "admin.menu.notifications", icon: Bell },
 	{ href: "/admin/comments", labelKey: "admin.comments.title", icon: MessageSquare },
+	{ href: "/admin/tickets", labelKey: "admin.menu.tickets", icon: Ticket },
+	{ href: "/admin/blog", labelKey: "admin.blog.title", icon: BookOpen },
+	{ href: "/admin/playlists", labelKey: "admin.menu.playlists", icon: ListMusic },
 	{ href: "/admin/upera", labelKey: "admin.menu.upera", icon: Globe },
 	{ href: "/admin/tmdb", labelKey: "admin.menu.tmdb", icon: Database },
+	// { href: "/admin/profile", labelKey: "admin.profile.title", icon: UserCog },
 ];
 
 export function AdminSidebar() {
@@ -137,7 +151,10 @@ export function AdminSidebar() {
 				{menuItems.map((item) => renderMenuItem(item))}
 			</nav>
 			<div className="border-t border-gray-200 p-4">
-				<div className="mb-2 flex items-center gap-3 px-3 py-2">
+				<Link
+					href="/admin/profile"
+					className="mb-2 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+				>
 					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white text-sm font-medium">
 						{user?.name?.charAt(0).toUpperCase() || "A"}
 					</div>
@@ -145,7 +162,7 @@ export function AdminSidebar() {
 						<p className="text-sm font-medium text-gray-900">{user?.name}</p>
 						<p className="text-xs text-gray-500">{user?.email}</p>
 					</div>
-				</div>
+				</Link>
 				<button
 					onClick={logout}
 					className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"

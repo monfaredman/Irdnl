@@ -166,7 +166,7 @@ export const HeroShowcase = () => {
 										}}
 									/>
 									<Chip
-										label={`${item.rating.toFixed(1)} IMDb`}
+										label={`${(Number(item.rating) || 0).toFixed(1)} IMDb`}
 										size="small"
 										sx={{
 											background: `linear-gradient(135deg, ${theme.palette.primary.main}20, ${theme.palette.secondary.main}20)`,

@@ -28,7 +28,7 @@ export class ContentService {
   ) {}
 
   async findAll(query: ContentQueryDto, isAdmin: boolean = false) {
-    const { type, genre, q, page = 1, limit = 20, year, country, language, featured, sort, order } = query;
+    const { type, genre, q, page = 1, limit = 20, year, country, language, featured, sort, order, isDubbed, isFree, isKids, isComingSoon, categoryId } = query;
     const skip = (page - 1) * limit;
 
     const queryBuilder = this.contentRepository.createQueryBuilder('content');
@@ -76,17 +76,44 @@ export class ContentService {
       queryBuilder.andWhere('content.featured = :featured', { featured });
     }
 
+    // Dubbed filtering
+    if (isDubbed !== undefined) {
+      queryBuilder.andWhere('content.is_dubbed = :isDubbed', { isDubbed });
+    }
+
+    // Free content filtering
+    if (isFree !== undefined && isFree) {
+      queryBuilder.andWhere("content.monetization::jsonb ->> 'isFree' = 'true'");
+    }
+
+    // Kids content filtering
+    if (isKids !== undefined) {
+      queryBuilder.andWhere('content.is_kids = :isKids', { isKids });
+    }
+
+    // Coming soon filtering
+    if (isComingSoon !== undefined) {
+      queryBuilder.andWhere('content.is_coming_soon = :isComingSoon', { isComingSoon });
+    }
+
+    // Category filtering via JSONB array
+    if (categoryId) {
+      queryBuilder.andWhere("content.category_ids::jsonb @> :catIdArr", {
+        catIdArr: JSON.stringify([categoryId]),
+      });
+    }
+
     // Sorting
     const sortField = sort || 'createdAt';
     const sortOrder = order || 'DESC';
     const allowedSorts: Record<string, string> = {
       rating: 'content.rating',
       year: 'content.year',
-      createdAt: 'content.created_at',
+      createdAt: 'content.createdAt',
       priority: 'content.priority',
       title: 'content.title',
     };
-    const sortColumn = allowedSorts[sortField] || 'content.created_at';
+    const sortColumn = allowedSorts[sortField] || 'content.createdAt';
     queryBuilder.orderBy(sortColumn, sortOrder as 'ASC' | 'DESC');
     
     // Load video assets relation
@@ -122,9 +149,8 @@ export class ContentService {
       throw new NotFoundException(`Content with ID ${id} not found`);
     }
 
-    if (!isAdmin && content.status !== ContentStatus.PUBLISHED) {
-      throw new NotFoundException(`Content with ID ${id} not found`);
-    }
+    // Non-admin users can view content details but won't get streaming URLs for non-published content
+    const hideStreaming = !isAdmin && content.status !== ContentStatus.PUBLISHED;
 
     // Load series data if it's a series
     if (content.type === ContentType.SERIES) {
@@ -152,6 +178,20 @@ export class ContentService {
         }
       }
       (content as any).series = series;
+    }
+
+    // Strip streaming data for non-published content (non-admin users)
+    if (hideStreaming) {
+      content.videoAssets = [];
+      if ((content as any).series?.seasons) {
+        for (const season of (content as any).series.seasons) {
+          if (season.episodes) {
+            for (const episode of season.episodes) {
+              episode.videoAsset = null;
+            }
+          }
+        }
+      }
     }
 
     // Cache for 60 seconds
@@ -289,7 +329,7 @@ export class ContentService {
     const content = await queryBuilder
       .orderBy('content.priority', 'DESC')
       .addOrderBy('content.rating', 'DESC')
-      .addOrderBy('content.created_at', 'DESC')
+      .addOrderBy('content.createdAt', 'DESC')
       .limit(limit)
       .getMany();
 

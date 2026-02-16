@@ -95,6 +95,50 @@ export class AuthService {
     return { message: 'Logged out successfully' };
   }
 
+  async googleLogin(googleUser: { email: string; name: string; avatarUrl?: string | null; googleId: string }) {
+    if (!googleUser?.email) {
+      throw new UnauthorizedException('Google authentication failed');
+    }
+
+    // Find or create user
+    let user = await this.usersService.findByEmail(googleUser.email);
+
+    if (!user) {
+      // Create new user from Google data (no password needed)
+      const randomPassword = await bcrypt.hash(Math.random().toString(36), 10);
+      user = await this.usersService.create({
+        email: googleUser.email,
+        name: googleUser.name || googleUser.email.split('@')[0],
+        passwordHash: randomPassword,
+        avatarUrl: googleUser.avatarUrl || null,
+        isActive: true,
+      });
+    }
+
+    if (!user.isActive) {
+      throw new UnauthorizedException('Account is deactivated');
+    }
+
+    // Update avatar if not set
+    if (!user.avatarUrl && googleUser.avatarUrl) {
+      await this.usersService.update(user.id, { avatarUrl: googleUser.avatarUrl } as any);
+    }
+
+    const tokens = await this.generateTokens(user);
+
+    return {
+      access_token: tokens.accessToken,
+      refresh_token: tokens.refreshToken,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        avatarUrl: user.avatarUrl || googleUser.avatarUrl,
+      },
+    };
+  }
+
   async adminLogin(loginDto: LoginDto) {
     const user = await this.usersService.findByEmail(loginDto.email);
     if (!user || !user.isActive) {

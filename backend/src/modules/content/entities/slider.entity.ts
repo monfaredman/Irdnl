@@ -29,8 +29,20 @@ export class Slider {
   @Column({ name: 'image_url', nullable: true })
   imageUrl: string | null;
 
+  @Column({ name: 'mobile_image_url', nullable: true })
+  mobileImageUrl: string | null;
+
+  @Column({ name: 'video_url', nullable: true })
+  videoUrl: string | null;
+
   @Column({ name: 'link_url', nullable: true })
   linkUrl: string | null;
+
+  @Column({ name: 'button_text', nullable: true })
+  buttonText: string | null;
+
+  @Column({ name: 'button_text_fa', nullable: true })
+  buttonTextFa: string | null;
 
   @Column({ name: 'content_id', type: 'uuid', nullable: true })
   contentId: string | null;
@@ -45,6 +57,12 @@ export class Slider {
 
   @Column({ name: 'is_active', type: 'boolean', default: true })
   isActive: boolean;
+
+  @Column({ name: 'show_slider', type: 'boolean', default: true })
+  showSlider: boolean;
+
+  @Column({ name: 'only_kids', type: 'boolean', default: false })
+  onlyKids: boolean;
 
   @Column({ name: 'sort_order', type: 'int', default: 0 })
   sortOrder: number;

@@ -69,7 +69,7 @@ const translations = {
 		contactButton: "Contact Support",
 	},
 	fa: {
-		title: "مرکز راهنما",
+		title: "راهنما",
 		subtitle: "چگونه می‌توانیم به شما کمک کنیم؟",
 		searchPlaceholder: "جستجوی راهنما...",
 		popularTopics: "موضوعات پرطرفدار",

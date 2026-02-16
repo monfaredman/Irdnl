@@ -17,6 +17,7 @@ import {
 	glassColors,
 } from "@/theme/glass-design-system";
 import type { Movie, Series } from "@/types/media";
+import { contentApi } from "@/lib/api/content";
 
 export default function WatchPage() {
 	const { id } = useParams<{ id: string }>();
@@ -34,18 +35,11 @@ export default function WatchPage() {
 		setLoading(true);
 		setError(null);
 		try {
-			const res = await fetch(`/api/content/${encodeURIComponent(id)}`, {
-				method: "GET",
-				headers: { Accept: "application/json" },
-				cache: "no-store",
-			});
-
-			if (!res.ok) {
-				throw new Error(`Content not found: ${res.status}`);
+			const content = await contentApi.getContentById(id);
+			if (!content) {
+				throw new Error("Content not found");
 			}
-
-			const json = await res.json();
-			setData(json);
+			setData(content);
 		} catch (e) {
 			setError(e instanceof Error ? e.message : "Failed to load content");
 		} finally {
@@ -120,8 +114,85 @@ export default function WatchPage() {
 
 	const movie = data as Movie;
 	const sources = movie.sources || [];
+	const contentAccessType = (data as any).accessType || "free";
 
-	// If content has an external player URL, redirect to it
+	// If this is Upera content (non-free), redirect to external URL
+	if (contentAccessType !== "free") {
+		if (typeof window !== "undefined" && data.externalPlayerUrl) {
+			window.open(data.externalPlayerUrl, "_blank", "noopener,noreferrer");
+		}
+		const accessLabels: Record<string, string> = {
+			subscription: "اشتراکی",
+			single_purchase: "تک فروشی",
+			traffic: "ترافیکی",
+		};
+		return (
+			<Box
+				sx={{
+					minHeight: "100vh",
+					background: glassColors.deepMidnight,
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "center",
+					flexDirection: "column",
+					gap: 3,
+				}}
+			>
+				<Container maxWidth="md" sx={{ textAlign: "center" }}>
+					<Alert
+						severity="info"
+						sx={{
+							borderRadius: glassBorderRadius.lg,
+							background: "rgba(59,130,246,0.12)",
+							border: "1px solid rgba(59,130,246,0.25)",
+							color: glassColors.text.primary,
+							mb: 3,
+						}}
+					>
+						{`این محتوا از نوع «${accessLabels[contentAccessType] || contentAccessType}» است. در حال انتقال به پلتفرم Upera...`}
+					</Alert>
+					{data.externalPlayerUrl && (
+						<Box
+							component="a"
+							href={data.externalPlayerUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							sx={{
+								display: "inline-flex",
+								alignItems: "center",
+								gap: 1,
+								px: 3,
+								py: 1.5,
+								borderRadius: glassBorderRadius.md,
+								background: glassColors.gold.solid,
+								color: glassColors.black,
+								textDecoration: "none",
+								fontWeight: 600,
+								fontSize: "0.875rem",
+								"&:hover": { opacity: 0.9 },
+							}}
+						>
+							رفتن به Upera
+						</Box>
+					)}
+					<Box sx={{ mt: 2 }}>
+						<Link href={`/item/${id}`}>
+							<IconButton
+								sx={{
+									color: glassColors.text.primary,
+									background: glassColors.glass.strong,
+								}}
+							>
+								<ArrowBack />
+							</IconButton>
+						</Link>
+					</Box>
+				</Container>
+			</Box>
+		);
+	}
+
+	// Free content with external player URL
 	if (data.externalPlayerUrl && sources.length === 0) {
 		if (typeof window !== "undefined") {
 			window.open(data.externalPlayerUrl, "_blank", "noopener,noreferrer");

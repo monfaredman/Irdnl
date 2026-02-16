@@ -159,6 +159,32 @@ export class AdminService {
       throw new NotFoundException(`Content with ID ${id} not found`);
     }
 
+    // Delete related records manually to avoid FK constraint errors
+    // (cascade may not be active on existing DB constraints until migration)
+    await this.videoAssetRepository.delete({ contentId: id });
+
+    // Delete series chain: episodes → seasons → series
+    const series = await this.seriesRepository.findOne({ where: { contentId: id } });
+    if (series) {
+      const seasons = await this.seasonRepository.find({ where: { seriesId: series.id } });
+      for (const season of seasons) {
+        await this.episodeRepository.delete({ seasonId: season.id });
+      }
+      await this.seasonRepository.delete({ seriesId: series.id });
+      await this.seriesRepository.delete({ contentId: id });
+    }
+
+    // Delete watchlist and watch history entries via query builder
+    await this.contentRepository.manager.query(
+      'DELETE FROM watchlist WHERE content_id = $1', [id],
+    );
+    await this.contentRepository.manager.query(
+      'DELETE FROM watch_history WHERE content_id = $1', [id],
+    );
+    await this.contentRepository.manager.query(
+      'DELETE FROM playlist_items WHERE content_id = $1', [id],
+    );
+
     await this.contentRepository.remove(content);
     await this.contentService.invalidateCache(id);
   }
@@ -473,13 +499,17 @@ export class AdminService {
 
   async listCategories() {
     const data = await this.categoryRepository.find({
+      relations: ['children', 'parent'],
       order: { sortOrder: 'ASC', createdAt: 'DESC' },
     });
     return { data, total: data.length };
   }
 
   async getCategory(id: string): Promise<Category> {
-    const cat = await this.categoryRepository.findOne({ where: { id } });
+    const cat = await this.categoryRepository.findOne({
+      where: { id },
+      relations: ['children', 'parent'],
+    });
     if (!cat) throw new NotFoundException(`Category with ID ${id} not found`);
     return cat;
   }
@@ -562,6 +592,9 @@ export class AdminService {
   }
 
   async createSlider(dto: CreateSliderDto): Promise<Slider> {
+    if (dto.imageUrl) {
+      dto.imageUrl = dto.imageUrl.replace(/\/w\d+\//g, '/w1280/');
+    }
     const slider = this.sliderRepository.create(dto);
     return this.sliderRepository.save(slider);
   }
@@ -569,6 +602,9 @@ export class AdminService {
   async updateSlider(id: string, dto: UpdateSliderDto): Promise<Slider> {
     const slider = await this.sliderRepository.findOne({ where: { id } });
     if (!slider) throw new NotFoundException(`Slider with ID ${id} not found`);
+    if (dto.imageUrl) {
+      dto.imageUrl = dto.imageUrl.replace(/\/w\d+\//g, '/w1280/');
+    }
     Object.assign(slider, dto);
     return this.sliderRepository.save(slider);
   }

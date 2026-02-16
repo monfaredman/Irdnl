@@ -1,6 +1,6 @@
 "use client";
 
-import { CssBaseline, ThemeProvider } from "@mui/material";
+import { AppBar, CssBaseline, ThemeProvider } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { PremiumLiquidGlassFooter } from "@/components/layout/PremiumLiquidGlassFooter";
 import { PremiumLiquidGlassHeader } from "@/components/layout/PremiumLiquidGlassHeader";
@@ -27,8 +27,8 @@ export function PremiumLiquidGlassLayout({
 	return (
 		<ThemeProvider theme={liquidGlassTheme}>
 			<CssBaseline />
-			<PremiumLiquidGlassHeader />
-			{children}
+			<PremiumLiquidGlassHeader  />
+		<div style={{marginTop: "52px"}}>{children}</div>
 			<PremiumLiquidGlassFooter />
 		</ThemeProvider>
 	);

@@ -38,7 +38,27 @@ export class CreateSliderDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  mobileImageUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  videoUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   linkUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buttonText?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buttonTextFa?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -54,6 +74,16 @@ export class CreateSliderDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  showSlider?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  onlyKids?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -102,7 +132,27 @@ export class UpdateSliderDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
+  mobileImageUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  videoUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
   linkUrl?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buttonText?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  buttonTextFa?: string;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -118,6 +168,16 @@ export class UpdateSliderDto {
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  showSlider?: boolean;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsBoolean()
+  onlyKids?: boolean;
 
   @ApiPropertyOptional()
   @IsOptional()

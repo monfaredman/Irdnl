@@ -30,6 +30,8 @@ interface UnifiedCategoryPageProps {
   breadcrumbs: BreadcrumbItem[];
   currentSubGenre?: SubGenre;
   basePath: string;
+  /** Path used for genre pill links. Defaults to basePath if not provided. */
+  genreBasePath?: string;
   initialFilters?: Partial<FilterState>;
   paginationMode?: "traditional" | "infinite";
 }
@@ -39,6 +41,7 @@ export function UnifiedCategoryPage({
   breadcrumbs,
   currentSubGenre,
   basePath,
+  genreBasePath,
   initialFilters,
   paginationMode = "traditional",
 }: UnifiedCategoryPageProps) {
@@ -73,6 +76,9 @@ export function UnifiedCategoryPage({
     nameEn: g.nameEn,
     nameFa: g.nameFa,
   })) || [];
+
+  // The path used for genre pill links - always the parent category path (no genre suffix)
+  const effectiveGenreBasePath = genreBasePath || basePath;
 
   // Handle page change
   const handlePageChange = useCallback((page: number) => {
@@ -120,6 +126,7 @@ export function UnifiedCategoryPage({
             breadcrumbs={breadcrumbs}
             currentSubGenre={currentSubGenre}
             totalResults={pagination.totalItems}
+            basePath={effectiveGenreBasePath}
           />
 
           {/* Main Content Area */}
@@ -178,7 +185,7 @@ export function UnifiedCategoryPage({
                 {error ? (
                   <CategoryEmptyState
                     type="error"
-                    basePath={basePath}
+                    basePath={effectiveGenreBasePath}
                     suggestedGenres={availableGenres.slice(0, 5)}
                     accentColor={accentColor}
                   />
@@ -187,7 +194,7 @@ export function UnifiedCategoryPage({
                     type={hasActiveFilters ? "no-results" : "no-content"}
                     hasActiveFilters={hasActiveFilters}
                     onClearFilters={handleClearFilters}
-                    basePath={basePath}
+                    basePath={effectiveGenreBasePath}
                     suggestedGenres={availableGenres.slice(0, 5)}
                     accentColor={accentColor}
                   />
@@ -219,7 +226,7 @@ export function UnifiedCategoryPage({
               data={sidebarData}
               loading={sidebarLoading}
               accentColor={accentColor}
-              basePath={basePath}
+              basePath={effectiveGenreBasePath}
               mobileOpen={mobileSidebarOpen}
               onMobileClose={() => setMobileSidebarOpen(false)}
             />

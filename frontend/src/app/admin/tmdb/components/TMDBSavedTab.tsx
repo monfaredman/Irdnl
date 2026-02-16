@@ -12,6 +12,12 @@ import {
 	Chip,
 	CircularProgress,
 	Alert,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	DialogActions,
+	Button as MuiButton,
 } from "@mui/material";
 import { AgGridReact } from "ag-grid-react";
 import type { ColDef, GridReadyEvent } from "ag-grid-community";
@@ -48,6 +54,12 @@ export function TMDBSavedTab() {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [statusFilter, setStatusFilter] = useState<string>("all");
 	const [typeFilter, setTypeFilter] = useState<string>("all");
+
+	// Confirm dialog
+	const [confirmDialog, setConfirmDialog] = useState<{
+		open: boolean;
+		id: string;
+	}>({ open: false, id: "" });
 	
 	const [page, setPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
@@ -89,8 +101,12 @@ export function TMDBSavedTab() {
 	}, [t, fetchSavedContent]);
 
 	const handleDelete = useCallback(async (id: string) => {
-		if (!confirm(t("admin.tmdb.saved.deleteConfirm"))) return;
-		
+		setConfirmDialog({ open: true, id });
+	}, []);
+
+	const handleConfirmDelete = useCallback(async () => {
+		const id = confirmDialog.id;
+		setConfirmDialog({ open: false, id: "" });
 		setError(null);
 		try {
 			await tmdbApi.deleteSavedContent(id);
@@ -100,7 +116,7 @@ export function TMDBSavedTab() {
 		} catch (err: any) {
 			setError(err.response?.data?.message || err.message);
 		}
-	}, [t, fetchSavedContent]);
+	}, [t, fetchSavedContent, confirmDialog.id]);
 
 	const StatusCellRenderer = (props: any) => {
 		const status = props.value;
@@ -228,7 +244,7 @@ export function TMDBSavedTab() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h3 className="text-lg font-semibold text-white flex items-center gap-2">
+				<h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
 					<Database className="w-5 h-5" />
 					{t("admin.tmdb.saved.title")}
 				</h3>
@@ -302,6 +318,7 @@ export function TMDBSavedTab() {
 					headerHeight={50}
 					domLayout="normal"
 					loading={loading}
+					enableRtl={true}
 				/>
 			</div>
 
@@ -315,7 +332,7 @@ export function TMDBSavedTab() {
 					>
 						{t("admin.tmdb.saved.previous")}
 					</Button>
-					<span className="text-sm text-gray-400">
+					<span className="text-sm text-gray-600">
 						{t("admin.tmdb.saved.page")} {page} / {totalPages}
 					</span>
 					<Button
@@ -327,6 +344,27 @@ export function TMDBSavedTab() {
 					</Button>
 				</div>
 			)}
+
+			{/* Confirm Delete Dialog */}
+			<Dialog
+				open={confirmDialog.open}
+				onClose={() => setConfirmDialog({ open: false, id: "" })}
+			>
+				<DialogTitle>{t("admin.tmdb.saved.delete")}</DialogTitle>
+				<DialogContent>
+					<DialogContentText>
+						{t("admin.tmdb.saved.deleteConfirm")}
+					</DialogContentText>
+				</DialogContent>
+				<DialogActions>
+					<MuiButton onClick={() => setConfirmDialog({ open: false, id: "" })}>
+						{t("admin.form.cancel")}
+					</MuiButton>
+					<MuiButton onClick={handleConfirmDelete} color="error" variant="contained">
+						{t("admin.tmdb.saved.delete")}
+					</MuiButton>
+				</DialogActions>
+			</Dialog>
 		</div>
 	);
 }

@@ -27,7 +27,8 @@ export function VisualRatingsDisplay({
 	const [animatedScore, setAnimatedScore] = useState(0);
 	const [animatedCriticsScore, setAnimatedCriticsScore] = useState(0);
 
-	const userPercentage = (userScore / 10) * 100;
+	const safeUserScore = Number(userScore) || 0;
+	const userPercentage = (safeUserScore / 10) * 100;
 
 	useEffect(() => {
 		// Animate scores
@@ -148,7 +149,7 @@ export function VisualRatingsDisplay({
 									lineHeight: 1,
 								}}
 							>
-								{userScore.toFixed(1)}
+								{(Number(userScore) || 0).toFixed(1)}
 							</Typography>
 							<Typography
 								sx={{

@@ -1,13 +1,13 @@
 /**
  * useCategoryContent Hook
  * 
- * Custom hook for fetching and filtering category content with TMDB integration
- * Features: Filtering, sorting, pagination, caching, error handling
+ * Custom hook for fetching and filtering category content from the backend database.
+ * All data comes from the local database via contentApi - no TMDB dependency.
  */
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useLanguage } from "@/providers/language-provider";
-import { contentApi } from "@/lib/api/content";
+import { contentApi, type ContentQueryParams } from "@/lib/api/content";
 import type { Movie, Series } from "@/types/media";
 import type {
   CategoryConfig,
@@ -33,66 +33,19 @@ const defaultFilters: FilterState = {
   viewMode: "grid",
 };
 
-// Genre ID mapping for TMDB
-const GENRE_ID_MAP: Record<string, string> = {
-  action: "28",
-  adventure: "12",
-  animation: "16",
-  comedy: "35",
-  thriller: "53",
-  crime: "80",
-  documentary: "99",
-  drama: "18",
-  family: "10751",
-  fantasy: "14",
-  historical: "36",
-  history: "36",
-  horror: "27",
-  music: "10402",
-  mystery: "9648",
-  romance: "10749",
-  "sci-fi": "878",
-  scifi: "878",
-  war: "10752",
-  western: "37",
+// Map frontend sort options to backend sort fields
+const SORT_FIELD_MAP: Record<SortOption, ContentQueryParams["sort"]> = {
+  newest: "createdAt",
+  popular: "priority",
+  rating: "rating",
+  alphabetical: "title",
 };
 
-// TV Genre ID mapping
-const TV_GENRE_ID_MAP: Record<string, string> = {
-  action: "10759", // Action & Adventure
-  adventure: "10759",
-  animation: "16",
-  comedy: "35",
-  crime: "80",
-  documentary: "99",
-  drama: "18",
-  family: "10751",
-  kids: "10762",
-  mystery: "9648",
-  news: "10763",
-  reality: "10764",
-  "sci-fi": "10765", // Sci-Fi & Fantasy
-  scifi: "10765",
-  fantasy: "10765",
-  soap: "10766",
-  talk: "10767",
-  war: "10768", // War & Politics
-  western: "37",
-};
-
-// Sort option mapping for TMDB
-const SORT_MAP: Record<SortOption, string> = {
-  newest: "primary_release_date.desc",
-  popular: "popularity.desc",
-  rating: "vote_average.desc",
-  alphabetical: "original_title.asc",
-};
-
-const TV_SORT_MAP: Record<SortOption, string> = {
-  newest: "first_air_date.desc",
-  popular: "popularity.desc",
-  rating: "vote_average.desc",
-  alphabetical: "original_name.asc",
+const SORT_ORDER_MAP: Record<SortOption, ContentQueryParams["order"]> = {
+  newest: "DESC",
+  popular: "DESC",
+  rating: "DESC",
+  alphabetical: "ASC",
 };
 
 export function useCategoryContent(
@@ -115,132 +68,93 @@ export function useCategoryContent(
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Build TMDB query parameters
-  const buildQueryParams = useCallback(() => {
-    const params: Record<string, string | number | boolean | undefined> = {
-      language: language === "fa" ? "fa" : "en",
+  // Build backend query parameters
+  const buildQueryParams = useCallback((): ContentQueryParams => {
+    const params: ContentQueryParams = {
       page: filters.page,
+      limit: filters.perPage,
     };
 
-    // Add base config params
-    if (config.tmdbParams.with_genres) {
-      params.with_genres = config.tmdbParams.with_genres;
+    // Filter by content type
+    if (config.contentType === "movie") {
+      params.type = "movie";
+    } else if (config.contentType === "series") {
+      params.type = "series";
     }
-    if (config.tmdbParams.with_original_language) {
-      params.with_original_language = config.tmdbParams.with_original_language;
-    }
-    if (config.tmdbParams.with_keywords) {
-      params.with_keywords = config.tmdbParams.with_keywords;
+    // "mixed" => no type filter
+
+    // Filter by category ID (from backend category system)
+    if (config.categoryId) {
+      params.categoryId = config.categoryId;
     }
 
-    // Add sub-genre filter
+    // Filter by genre (sub-genre from URL or tmdbParams)
     if (subGenre) {
-      const genreIdMap = config.contentType === "series" ? TV_GENRE_ID_MAP : GENRE_ID_MAP;
-      const genreId = genreIdMap[subGenre.toLowerCase()];
-      if (genreId) {
-        params.with_genres = genreId;
+      params.genre = subGenre;
+    } else if (config.tmdbParams.with_genres) {
+      // Legacy: tmdbParams might contain genre names
+      if (!config.categoryId) {
+        params.genre = config.tmdbParams.with_genres;
       }
     }
 
-    // Add additional genre filters
+    // Filter by language from config
+    if (config.tmdbParams.with_original_language) {
+      params.language = config.tmdbParams.with_original_language;
+    }
+
+    // Filter for dubbed content
+    if (config.isDubbed) {
+      params.isDubbed = true;
+    }
+
+    // Additional genre filters from filter bar
     if (filters.genres.length > 0) {
-      const genreIdMap = config.contentType === "series" ? TV_GENRE_ID_MAP : GENRE_ID_MAP;
-      const genreIds = filters.genres
-        .map(g => genreIdMap[g.toLowerCase()])
-        .filter(Boolean)
-        .join(",");
-      if (genreIds) {
-        params.with_genres = params.with_genres 
-          ? `${params.with_genres},${genreIds}` 
-          : genreIds;
-      }
+      params.genre = filters.genres[0];
     }
 
-    // Add year filter
+    // Year filter
     if (filters.yearRange[0] > 1970 || filters.yearRange[1] < new Date().getFullYear() + 1) {
-      if (config.contentType === "series") {
-        params["first_air_date.gte"] = `${filters.yearRange[0]}-01-01`;
-        params["first_air_date.lte"] = `${filters.yearRange[1]}-12-31`;
-      } else {
-        params["primary_release_date.gte"] = `${filters.yearRange[0]}-01-01`;
-        params["primary_release_date.lte"] = `${filters.yearRange[1]}-12-31`;
+      if (filters.yearRange[1] - filters.yearRange[0] <= 1) {
+        params.year = filters.yearRange[0];
       }
     }
 
-    // Add sort
-    const sortMap = config.contentType === "series" ? TV_SORT_MAP : SORT_MAP;
-    params.sort_by = sortMap[filters.sort];
-
-    // For rating sort, require minimum votes
-    if (filters.sort === "rating") {
-      params["vote_count.gte"] = 100;
+    // Country filter
+    if (filters.country && filters.country !== "all") {
+      params.country = filters.country;
     }
+
+    // Search filter
+    if (filters.searchQuery) {
+      params.q = filters.searchQuery;
+    }
+
+    // Sort
+    params.sort = SORT_FIELD_MAP[filters.sort] || "createdAt";
+    params.order = SORT_ORDER_MAP[filters.sort] || "DESC";
 
     return params;
   }, [config, subGenre, filters, language]);
 
-  // Fetch content
+  // Fetch content from backend
   const fetchContent = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
 
       const params = buildQueryParams();
-
-      let result: { items: (Movie | Series)[]; total: number; totalPages: number };
-
-      // Fetch based on content type
-      if (config.contentType === "movie" || config.contentType === "movies-foreign" as any) {
-        const response = await contentApi.discoverMovies(params as any);
-        result = {
-          items: response.items,
-          total: response.total || response.items.length,
-          totalPages: response.totalPages || 1,
-        };
-      } else if (config.contentType === "series") {
-        const response = await contentApi.discoverTVShows(params as any);
-        result = {
-          items: response.items,
-          total: response.total || response.items.length,
-          totalPages: response.totalPages || 1,
-        };
-      } else {
-        // Mixed content - fetch both
-        const [moviesRes, seriesRes] = await Promise.all([
-          contentApi.discoverMovies(params as any),
-          contentApi.discoverTVShows(params as any),
-        ]);
-        result = {
-          items: [...moviesRes.items, ...seriesRes.items],
-          total: (moviesRes.total || 0) + (seriesRes.total || 0),
-          totalPages: Math.max(moviesRes.totalPages || 1, seriesRes.totalPages || 1),
-        };
-      }
+      const response = await contentApi.getContent(params);
 
       // Transform items to ContentItem format
-      let contentItems: ContentItem[] = result.items.map((item) => ({
+      const contentItems: ContentItem[] = response.items.map((item) => ({
         ...item,
-        itemType: "duration" in item ? "movie" : "series",
+        itemType: ("duration" in item ? "movie" : "series") as "movie" | "series",
       })) as ContentItem[];
 
-      // Apply client-side search filter
-      if (filters.searchQuery) {
-        const query = filters.searchQuery.toLowerCase();
-        contentItems = contentItems.filter(
-          (item) =>
-            item.title.toLowerCase().includes(query) ||
-            item.description?.toLowerCase().includes(query)
-        );
-      }
-
-      // Apply client-side sorting for alphabetical (as TMDB may not handle Persian)
-      if (filters.sort === "alphabetical") {
-        contentItems.sort((a, b) => a.title.localeCompare(b.title, language === "fa" ? "fa" : "en"));
-      }
-
       setItems(contentItems);
-      setTotalItems(result.total);
-      setTotalPages(result.totalPages);
+      setTotalItems(response.total);
+      setTotalPages(response.totalPages || 1);
     } catch (err) {
       console.error("Failed to fetch category content:", err);
       setError(err instanceof Error ? err : new Error("Failed to fetch content"));
@@ -248,7 +162,7 @@ export function useCategoryContent(
     } finally {
       setLoading(false);
     }
-  }, [buildQueryParams, config.contentType, filters.searchQuery, filters.sort, language]);
+  }, [buildQueryParams]);
 
   // Update filters
   const updateFilters = useCallback((newFilters: Partial<FilterState>) => {
@@ -301,22 +215,27 @@ export function useCategorySidebar(
       try {
         setLoading(true);
 
-        // Build params similar to main content
-        const params: Record<string, string | number> = {
-          language: language === "fa" ? "fa" : "en",
-          page: 1,
+        // Build params for trending content in this category
+        const params: ContentQueryParams = {
+          sort: "rating",
+          order: "DESC",
+          limit: 10,
         };
 
-        if (config.tmdbParams.with_genres) {
-          params.with_genres = config.tmdbParams.with_genres;
+        if (config.contentType === "movie") {
+          params.type = "movie";
+        } else if (config.contentType === "series") {
+          params.type = "series";
         }
 
-        // Fetch trending content for this category
-        const trendingResponse = config.contentType === "series"
-          ? await contentApi.discoverTVShows({ ...params, sort_by: "popularity.desc" } as any)
-          : await contentApi.discoverMovies({ ...params, sort_by: "popularity.desc" } as any);
+        if (config.categoryId) {
+          params.categoryId = config.categoryId;
+        }
 
-        const trending = trendingResponse.items.slice(0, 6).map((item) => ({
+        // Fetch top-rated content for this category
+        const response = await contentApi.getContent(params);
+
+        const trending = response.items.slice(0, 6).map((item: Movie | Series) => ({
           id: item.id,
           title: item.title,
           titleFa: item.title,
@@ -325,8 +244,8 @@ export function useCategorySidebar(
           type: ("duration" in item ? "movie" : "series") as "movie" | "series",
         }));
 
-        // Mock upcoming data (TMDB doesn't have proper upcoming endpoint for discover)
-        const upcoming = trendingResponse.items.slice(6, 10).map((item) => ({
+        // Use remaining items as "upcoming"
+        const upcoming = response.items.slice(6, 10).map((item: Movie | Series) => ({
           id: item.id,
           title: item.title,
           titleFa: item.title,
@@ -343,20 +262,11 @@ export function useCategorySidebar(
           count: Math.floor(Math.random() * 200) + 50,
         })) || [];
 
-        // Mock top stars (would need TMDB credits API for real data)
-        const topStars = [
-          { id: "1", name: "Leonardo DiCaprio", photo: "/images/avatars/default.jpg", knownFor: ["Inception", "Titanic"] },
-          { id: "2", name: "Scarlett Johansson", photo: "/images/avatars/default.jpg", knownFor: ["Black Widow", "Lost in Translation"] },
-          { id: "3", name: "Tom Hanks", photo: "/images/avatars/default.jpg", knownFor: ["Forrest Gump", "Cast Away"] },
-          { id: "4", name: "Meryl Streep", photo: "/images/avatars/default.jpg", knownFor: ["The Devil Wears Prada"] },
-          { id: "5", name: "Denzel Washington", photo: "/images/avatars/default.jpg", knownFor: ["Training Day", "Malcolm X"] },
-        ];
-
         setData({
           trending,
           upcoming,
           relatedGenres,
-          topStars,
+          topStars: [],
         });
       } catch (err) {
         console.error("Failed to fetch sidebar data:", err);

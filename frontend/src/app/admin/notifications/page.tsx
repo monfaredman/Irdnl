@@ -64,7 +64,15 @@ export default function NotificationsPage() {
 		e.preventDefault();
 		setSending(true);
 		try {
-			await notificationsApi.create(formData);
+			const payload: { title: string; message: string; type: "push" | "email"; userId?: string } = {
+				title: formData.title,
+				message: formData.message,
+				type: formData.type,
+			};
+			if (formData.userId.trim()) {
+				payload.userId = formData.userId.trim();
+			}
+			await notificationsApi.create(payload);
 			setFormData({ title: "", message: "", type: "push", userId: "" });
 			fetchNotifications();
 			showFeedback("success", t("admin.notifications.sendSuccess"));

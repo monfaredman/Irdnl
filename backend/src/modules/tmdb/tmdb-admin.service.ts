@@ -142,7 +142,7 @@ export class TMDBAdminService {
   // ==========================================
 
   async saveContent(dto: SaveTMDBContentDto): Promise<TMDBSavedContent> {
-    const { tmdbId, mediaType, rawData } = dto;
+    const { tmdbId, mediaType, rawData, autoImport } = dto;
 
     // Check if already saved
     const existing = await this.savedContentRepository.findOne({
@@ -175,7 +175,7 @@ export class TMDBAdminService {
       originalTitle: details.original_title || details.original_name || '',
       description: details.overview || '',
       posterUrl: details.poster_path
-        ? `https://image.tmdb.org/t/p/w500${details.poster_path}`
+        ? `https://image.tmdb.org/t/p/w780${details.poster_path}`
         : null,
       backdropUrl: details.backdrop_path
         ? `https://image.tmdb.org/t/p/original${details.backdrop_path}`
@@ -193,7 +193,22 @@ export class TMDBAdminService {
       importStatus: TMDBImportStatus.PENDING,
     });
 
-    return this.savedContentRepository.save(saved);
+    const savedResult = await this.savedContentRepository.save(saved);
+
+    // Auto-import to content table if requested
+    if (autoImport) {
+      try {
+        await this.importToDatabase(savedResult.id);
+        // Refresh the saved record to get updated status
+        return this.savedContentRepository.findOne({ where: { id: savedResult.id } }) as Promise<TMDBSavedContent>;
+      } catch (error) {
+        this.logger.error(`Auto-import failed for ${tmdbId}:`, error);
+        // Return saved content even if auto-import fails
+        return savedResult;
+      }
+    }
+
+    return savedResult;
   }
 
   async saveBulkContent(items: SaveTMDBContentDto[]): Promise<TMDBSavedContent[]> {
@@ -242,7 +257,14 @@ export class TMDBAdminService {
 
     const [data, total] = await queryBuilder.getManyAndCount();
 
-    return { data, total, page, limit };
+    return {
+      items: data,
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getSavedContentById(id: string): Promise<TMDBSavedContent> {

@@ -26,7 +26,7 @@ export class Watchlist {
   @Column({ name: 'content_id' })
   contentId: string;
 
-  @ManyToOne(() => Content, (content) => content.watchlist)
+  @ManyToOne(() => Content, (content) => content.watchlist, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'content_id' })
   content: Content;
 

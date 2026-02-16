@@ -374,6 +374,7 @@ export const AuthModals = ({
 					fullWidth
 					variant="outlined"
 					startIcon={<GoogleIcon />}
+				href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"}/auth/google`}
 					sx={{
 						py: 1.5,
 						borderRadius: glassBorderRadius.lg,

@@ -24,7 +24,7 @@ export class VideoAsset {
   @Column({ name: 'content_id' })
   contentId: string;
 
-  @ManyToOne(() => Content, (content) => content.videoAssets)
+  @ManyToOne(() => Content, (content) => content.videoAssets, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'content_id' })
   content: Content;
 

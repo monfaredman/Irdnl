@@ -109,7 +109,7 @@ export class Comment {
   @JoinColumn({ name: 'user_id' })
   user: User | null;
 
-  @ManyToOne(() => Content, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Content, { nullable: true, onDelete: 'CASCADE', createForeignKeyConstraints: false })
   @JoinColumn({ name: 'content_id' })
   content: Content | null;
 

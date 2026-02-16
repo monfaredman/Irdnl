@@ -146,9 +146,7 @@ interface GridCardProps {
 function GridCard({ item, accentColor, isRTL, onItemClick, onQuickPreview }: GridCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   
-  const href = item.itemType === "movie" 
-    ? `/movies/${item.slug}` 
-    : `/series/${item.slug}`;
+  const href = `/item/${item.id}`;
 
   return (
     <Box
@@ -261,7 +259,7 @@ function GridCard({ item, accentColor, isRTL, onItemClick, onQuickPreview }: Gri
         >
           <StarIcon sx={{ fontSize: 14, color: accentColor }} />
           <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, color: glassColors.text.primary }}>
-            {item.rating.toFixed(1)}
+            {(Number(item.rating) || 0).toFixed(1)}
           </Typography>
         </Box>
       </Box>
@@ -458,9 +456,7 @@ function ListView({ items, accentColor, isRTL, onItemClick, onQuickPreview }: Vi
 function ListCard({ item, accentColor, isRTL, onItemClick, onQuickPreview }: GridCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   
-  const href = item.itemType === "movie" 
-    ? `/movies/${item.slug}` 
-    : `/series/${item.slug}`;
+  const href = `/item/${item.id}`;
 
   // Get duration or episode count
   const duration = item.itemType === "movie" 
@@ -562,7 +558,7 @@ function ListCard({ item, accentColor, isRTL, onItemClick, onQuickPreview }: Gri
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <StarIcon sx={{ fontSize: 16, color: accentColor }} />
               <Typography sx={{ fontSize: "0.875rem", fontWeight: 600, color: glassColors.text.primary }}>
-                {item.rating.toFixed(1)}
+                {(Number(item.rating) || 0).toFixed(1)}
               </Typography>
             </Box>
 

@@ -8,18 +8,22 @@ import {
 	Box,
 	Button,
 	Chip,
+	CircularProgress,
 	Grid,
 	IconButton,
+	Snackbar,
 	TextField,
 	Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/providers/language-provider";
 import {
 	glassBlur,
 	glassBorderRadius,
 	glassColors,
 } from "@/theme/glass-design-system";
+import { userApi, type UserProfile } from "@/lib/api/user";
+import { useIsAuthenticated } from "@/store/auth";
 
 const translations = {
 	en: {
@@ -64,20 +68,76 @@ export default function ProfilePage() {
 	const { language } = useLanguage();
 	const isRTL = language === "fa";
 	const t = translations[language] || translations.en;
+	const isAuthenticated = useIsAuthenticated();
 
 	const [isEditing, setIsEditing] = useState(false);
+	const [loading, setLoading] = useState(true);
+	const [saving, setSaving] = useState(false);
+	const [snackbar, setSnackbar] = useState<string | null>(null);
+	const [profile, setProfile] = useState<UserProfile | null>(null);
 	const [formData, setFormData] = useState({
-		fullName: "کاربر تست",
-		email: "test@example.com",
-		phone: "09123456789",
-		birthDate: "1990-01-01",
+		fullName: "",
+		email: "",
+		phone: "",
+		birthDate: "",
 	});
+	const [watchlistCount, setWatchlistCount] = useState(0);
+	const [historyCount, setHistoryCount] = useState(0);
+
+	useEffect(() => {
+		if (!isAuthenticated) return;
+		const fetchProfile = async () => {
+			try {
+				setLoading(true);
+				const [me, watchlist, history] = await Promise.all([
+					userApi.getMe(),
+					userApi.getWatchlist().catch(() => []),
+					userApi.getWatchHistory().catch(() => []),
+				]);
+				setProfile(me);
+				setFormData({
+					fullName: me.name || "",
+					email: me.email || "",
+					phone: "",
+					birthDate: "",
+				});
+				setWatchlistCount(Array.isArray(watchlist) ? watchlist.length : 0);
+				setHistoryCount(Array.isArray(history) ? history.length : 0);
+			} catch {
+				// fallback
+			} finally {
+				setLoading(false);
+			}
+		};
+		fetchProfile();
+	}, [isAuthenticated]);
+
+	const handleSave = async () => {
+		setSaving(true);
+		try {
+			const updated = await userApi.updateMe({ name: formData.fullName });
+			setProfile(updated);
+			setIsEditing(false);
+			setSnackbar(language === "fa" ? "پروفایل با موفقیت بروزرسانی شد" : "Profile updated successfully");
+		} catch {
+			setSnackbar(language === "fa" ? "خطا در بروزرسانی پروفایل" : "Failed to update profile");
+		} finally {
+			setSaving(false);
+		}
+	};
 
 	const stats = [
-		{ label: t.totalWatched, value: "142", unit: t.movies },
+		{ label: t.totalWatched, value: String(historyCount), unit: t.movies },
 		{ label: t.favoriteGenre, value: t.action, unit: "" },
-		{ label: t.watchlistCount, value: "28", unit: t.items },
+		{ label: t.watchlistCount, value: String(watchlistCount), unit: t.items },
 	];
+
+	const memberSinceDate = profile?.createdAt
+		? new Date(profile.createdAt).toLocaleDateString(language === "fa" ? "fa-IR" : "en-US", {
+				year: "numeric",
+				month: "long",
+			})
+		: language === "fa" ? "---" : "---";
 
 	const glassInputSx = {
 		"& .MuiOutlinedInput-root": {
@@ -108,6 +168,14 @@ export default function ProfilePage() {
 			},
 		},
 	};
+
+	if (loading) {
+		return (
+			<Box sx={{ maxWidth: 1000, mx: "auto", display: "flex", justifyContent: "center", py: 8 }}>
+				<CircularProgress sx={{ color: glassColors.persianGold }} />
+			</Box>
+		);
+	}
 
 	return (
 		<Box sx={{ maxWidth: 1000, mx: "auto" }}>
@@ -149,6 +217,7 @@ export default function ProfilePage() {
 					{/* Avatar */}
 					<Box sx={{ position: "relative" }}>
 						<Avatar
+							src={profile?.avatarUrl || undefined}
 							sx={{
 								width: 120,
 								height: 120,
@@ -158,7 +227,7 @@ export default function ProfilePage() {
 								border: `4px solid ${glassColors.glass.border}`,
 							}}
 						>
-							U
+							{profile?.name?.charAt(0)?.toUpperCase() || "U"}
 						</Avatar>
 						<IconButton
 							sx={{
@@ -217,8 +286,7 @@ export default function ProfilePage() {
 						<Typography
 							sx={{ color: glassColors.text.tertiary, fontSize: "0.875rem" }}
 						>
-							{t.memberSince}:{" "}
-							{language === "fa" ? "فروردین ۱۴۰۲" : "January 2023"}
+							{t.memberSince}: {memberSinceDate}
 						</Typography>
 					</Box>
 
@@ -368,7 +436,8 @@ export default function ProfilePage() {
 							{language === "fa" ? "انصراف" : "Cancel"}
 						</Button>
 						<Button
-							onClick={() => setIsEditing(false)}
+							onClick={handleSave}
+							disabled={saving}
 							sx={{
 								borderRadius: glassBorderRadius.lg,
 								background: `linear-gradient(135deg, ${glassColors.persianGold}, #D97706)`,
@@ -381,11 +450,30 @@ export default function ProfilePage() {
 								},
 							}}
 						>
-							{t.saveChanges}
+							{saving ? (language === "fa" ? "در حال ذخیره…" : "Saving…") : t.saveChanges}
 						</Button>
 					</Box>
 				)}
 			</Box>
+
+			{/* Snackbar */}
+			<Snackbar
+				open={!!snackbar}
+				autoHideDuration={3000}
+				onClose={() => setSnackbar(null)}
+				message={snackbar}
+				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+				sx={{
+					"& .MuiSnackbarContent-root": {
+						background: `linear-gradient(135deg, ${glassColors.glass.strong}, ${glassColors.glass.mid})`,
+						backdropFilter: "blur(20px)",
+						border: `1px solid ${glassColors.glass.border}`,
+						borderRadius: glassBorderRadius.md,
+						color: glassColors.text.primary,
+						direction: "rtl",
+					},
+				}}
+			/>
 		</Box>
 	);
 }

@@ -41,6 +41,7 @@ interface OfferItem {
 	descriptionFa: string | null;
 	imageUrl: string | null;
 	linkUrl: string | null;
+	contentId: string | null;
 	discountPercent: number | null;
 	discountCode: string | null;
 	originalPrice: number | null;
@@ -58,6 +59,7 @@ const emptyForm = {
 	descriptionFa: "",
 	imageUrl: "",
 	linkUrl: "",
+	contentId: "",
 	discountPercent: 0,
 	discountCode: "",
 	originalPrice: 0,
@@ -130,6 +132,7 @@ export default function OffersPage() {
 			descriptionFa: o.descriptionFa || "",
 			imageUrl: o.imageUrl || "",
 			linkUrl: o.linkUrl || "",
+			contentId: o.contentId || "",
 			discountPercent: o.discountPercent || 0,
 			discountCode: o.discountCode || "",
 			originalPrice: o.originalPrice || 0,
@@ -146,6 +149,7 @@ export default function OffersPage() {
 		try {
 			const payload: any = {
 				...form,
+				contentId: form.contentId || undefined,
 				discountPercent: form.discountPercent || undefined,
 				discountCode: form.discountCode || undefined,
 				originalPrice: form.originalPrice || undefined,
@@ -365,6 +369,14 @@ export default function OffersPage() {
 							onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
 							fullWidth
 							size="small"
+						/>
+						<TextField
+							label="شناسه محتوا (Content ID)"
+							value={form.contentId}
+							onChange={(e) => setForm({ ...form, contentId: e.target.value })}
+							fullWidth
+							size="small"
+							placeholder="UUID محتوای مرتبط"
 						/>
 						<TextField
 							label="درصد تخفیف"

@@ -58,4 +58,67 @@ export class NotificationsService {
   async findOne(id: string): Promise<Notification> {
     return this.notificationRepository.findOne({ where: { id } });
   }
+
+  /**
+   * Get notifications for a specific user (or broadcast notifications where userId is null)
+   */
+  async findForUser(
+    userId: string,
+    page: number = 1,
+    limit: number = 20,
+  ): Promise<{ data: Notification[]; total: number; unreadCount: number; page: number; limit: number }> {
+    const skip = (page - 1) * limit;
+
+    const queryBuilder = this.notificationRepository.createQueryBuilder('notification');
+    queryBuilder.where(
+      '(notification.user_id = :userId OR notification.user_id IS NULL)',
+      { userId },
+    );
+
+    const [data, total] = await queryBuilder
+      .orderBy('notification.createdAt', 'DESC')
+      .skip(skip)
+      .take(limit)
+      .getManyAndCount();
+
+    const unreadCount = await this.notificationRepository
+      .createQueryBuilder('notification')
+      .where('(notification.user_id = :userId OR notification.user_id IS NULL)', { userId })
+      .andWhere('notification.is_read = false')
+      .getCount();
+
+    return { data, total, unreadCount, page, limit };
+  }
+
+  /**
+   * Mark a notification as read
+   */
+  async markAsRead(id: string, userId: string): Promise<void> {
+    await this.notificationRepository.update(
+      { id, userId },
+      { isRead: true },
+    );
+    // Also mark broadcast notifications as read for this user
+    // For broadcast (userId IS NULL), we can't update per-user. 
+    // A simple approach: update if it belongs to user or is broadcast
+    await this.notificationRepository
+      .createQueryBuilder()
+      .update(Notification)
+      .set({ isRead: true })
+      .where('id = :id', { id })
+      .andWhere('(user_id = :userId OR user_id IS NULL)', { userId })
+      .execute();
+  }
+
+  /**
+   * Mark all notifications as read for a user
+   */
+  async markAllAsRead(userId: string): Promise<void> {
+    await this.notificationRepository
+      .createQueryBuilder()
+      .update(Notification)
+      .set({ isRead: true })
+      .where('(user_id = :userId OR user_id IS NULL)', { userId })
+      .execute();
+  }
 }

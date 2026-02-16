@@ -11,19 +11,42 @@ import type { Movie, Series, Genre } from "./media";
 // ============================================================================
 
 export type CategoryType = 
-  | "movies-foreign"
-  | "movies-iranian"
+  | "foreign"
+  | "foreign-action"
+  | "foreign-horror"
+  | "foreign-indian"
+  | "foreign-romance"
+  | "foreign-war"
+  | "foreign-comedy"
+  | "foreign-drama"
+  | "foreign-thriller"
+  | "foreign-crime"
+  | "foreign-adventure"
+  | "iranian"
+  | "series"
   | "series-foreign"
-  | "series-iranian"
+  | "series-turkish"
+  | "series-korean"
   | "animation"
   | "dubbed"
-  | "anime";
+  | "anime"
+  | "other"
+  | "other-top250"
+  | "other-collections"
+  | "other-coming-soon"
+  // Legacy IDs
+  | "movies-foreign"
+  | "movies-iranian"
+  | "series-iranian"
+  | string; // Allow dynamic IDs from DB
 
 export type ContentType = "movie" | "series" | "mixed";
 
 export interface CategoryConfig {
   /** Unique identifier for this category */
   id: CategoryType;
+  /** Backend category UUID (for filtering content by categoryId) */
+  categoryId?: string;
   /** Category type (for TMDB queries) */
   contentType: ContentType;
   /** Persian title */
@@ -44,6 +67,8 @@ export interface CategoryConfig {
   subGenres?: SubGenre[];
   /** Show episodes count instead of runtime */
   showEpisodes?: boolean;
+  /** Filter for dubbed content */
+  isDubbed?: boolean;
   /** Additional metadata fields to display */
   metadataFields?: string[];
 }

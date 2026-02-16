@@ -1,5 +1,14 @@
 export type MediaType = "movie" | "series" | "episode";
 
+/**
+ * Access types for video content:
+ * - free: Free content played in-site with our own player
+ * - subscription: Upera subscription-based content (اشتراکی)
+ * - single_purchase: Upera single-purchase content (تک فروشی)
+ * - traffic: Upera traffic-based content (ترافیک)
+ */
+export type AccessType = "free" | "subscription" | "single_purchase" | "traffic";
+
 export type Genre =
 	| "action"
 	| "drama"
@@ -81,6 +90,7 @@ export interface MediaBase {
 	cast: MediaPerson[];
 	tags: string[];
 	origin?: "iranian" | "foreign";
+	accessType?: AccessType;
 }
 
 export interface Movie extends MediaBase {

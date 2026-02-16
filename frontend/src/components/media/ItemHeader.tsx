@@ -223,7 +223,7 @@ export function ItemHeader({ item, type }: ItemHeaderProps) {
 								}}
 								dir="rtl"
 							>
-								{item.rating.toFixed(1)} از ۱۰
+								{(Number(item.rating) || 0).toFixed(1)} از ۱۰
 							</Typography>
 							<Typography
 								sx={{

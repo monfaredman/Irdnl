@@ -596,7 +596,7 @@ export class AdminController {
             originalTitle: result.original_title || '',
             description: result.overview || '',
             year: result.release_date ? new Date(result.release_date).getFullYear() : null,
-            posterUrl: result.poster_path ? `https://image.tmdb.org/t/p/w500${result.poster_path}` : '',
+            posterUrl: result.poster_path ? `https://image.tmdb.org/t/p/w780${result.poster_path}` : '',
             backdropUrl: result.backdrop_path ? `https://image.tmdb.org/t/p/original${result.backdrop_path}` : '',
             rating: typeof result.vote_average === 'number' ? Math.round(result.vote_average * 10) / 10 : 0,
             originalLanguage: result.original_language || '',
@@ -611,7 +611,7 @@ export class AdminController {
             originalTitle: result.original_name || '',
             description: result.overview || '',
             year: result.first_air_date ? new Date(result.first_air_date).getFullYear() : null,
-            posterUrl: result.poster_path ? `https://image.tmdb.org/t/p/w500${result.poster_path}` : '',
+            posterUrl: result.poster_path ? `https://image.tmdb.org/t/p/w780${result.poster_path}` : '',
             backdropUrl: result.backdrop_path ? `https://image.tmdb.org/t/p/original${result.backdrop_path}` : '',
             rating: typeof result.vote_average === 'number' ? Math.round(result.vote_average * 10) / 10 : 0,
             originalLanguage: result.original_language || '',
@@ -688,7 +688,7 @@ export class AdminController {
         : (data.first_air_date ? new Date(data.first_air_date).getFullYear() : null),
       description: data.overview || '',
       duration: data.runtime ? data.runtime * 60 : null, // Convert minutes to seconds
-      posterUrl: data.poster_path ? `https://image.tmdb.org/t/p/w500${data.poster_path}` : '',
+      posterUrl: data.poster_path ? `https://image.tmdb.org/t/p/w780${data.poster_path}` : '',
       bannerUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : '',
       backdropUrl: data.backdrop_path ? `https://image.tmdb.org/t/p/original${data.backdrop_path}` : '',
       rating: typeof data.vote_average === 'number' ? Math.round(data.vote_average * 10) / 10 : 0,
@@ -746,7 +746,7 @@ export class AdminController {
       name: ep.name || '',
       overview: ep.overview || '',
       runtime: ep.runtime || null, // minutes
-      stillUrl: ep.still_path ? `https://image.tmdb.org/t/p/w500${ep.still_path}` : '',
+      stillUrl: ep.still_path ? `https://image.tmdb.org/t/p/w780${ep.still_path}` : '',
       airDate: ep.air_date || '',
       voteAverage: ep.vote_average || 0,
     }));

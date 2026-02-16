@@ -21,6 +21,9 @@ import { PublicModule } from './modules/public/public.module';
 import { UperaModule } from './modules/upera/upera.module';
 import { TMDBAdminModule } from './modules/tmdb/tmdb-admin.module';
 import { CommentsModule } from './modules/comments/comments.module';
+import { BlogModule } from './modules/blog/blog.module';
+import { PlaylistsModule } from './modules/playlists/playlists.module';
+import { TicketsModule } from './modules/tickets/tickets.module';
 
 @Module({
   imports: [
@@ -89,6 +92,9 @@ import { CommentsModule } from './modules/comments/comments.module';
     UperaModule,
     TMDBAdminModule,
     CommentsModule,
+    BlogModule,
+    PlaylistsModule,
+    TicketsModule,
   ],
 })
 export class AppModule {}

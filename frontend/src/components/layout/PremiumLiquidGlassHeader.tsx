@@ -46,10 +46,10 @@ import {
 } from "@/theme/glass-design-system";
 import {
 	categoriesApi as publicCategoriesApi,
-	genresApi as publicGenresApi,
 	type Category as PublicCategory,
-	type Genre as PublicGenre,
+	type MenuCategory,
 } from "@/lib/api/public";
+import { useIsAuthenticated, useAuthStore } from "@/store/auth";
 
 type UserMenuAction =
 	| { type: "navigate"; href: string }
@@ -72,18 +72,45 @@ interface SubMenuItem {
 }
 
 // Menu structure configuration - defines order and which items have submenus
-const MENU_CONFIG = [
-	{ slug: "movies-foreign", hasSubmenu: true, icon: <Movie /> },
-	{ slug: "movies-iranian", hasSubmenu: false, icon: <Movie /> },
-	{ slug: "series-foreign", hasSubmenu: true, icon: <Tv /> },
-	{ slug: "animation", hasSubmenu: false, icon: <Category /> },
-	{ slug: "dubbed", hasSubmenu: false, icon: <Movie /> },
-	{ slug: "anime", hasSubmenu: true, icon: <Tv /> },
-	// Special static items
-	{ slug: "other", hasSubmenu: false, icon: <Category />, static: true, labelEn: "Other", labelFa: "سایر", href: "/category" },
-	{ slug: "top-250", hasSubmenu: false, icon: <Movie />, static: true, labelEn: "Top 250", labelFa: "250 فیلم برتر IMDb", href: "/top-250" },
-	{ slug: "collections", hasSubmenu: false, icon: <Category />, static: true, labelEn: "Collections", labelFa: "کالکشن", href: "/collections" },
+// Only static items that don't come from the admin categories panel
+const STATIC_MENU_ITEMS = [
+	{ slug: "top-250", icon: <Movie />, labelEn: "Top 250", labelFa: "250 فیلم برتر IMDb", href: "/top-250" },
+	{ slug: "collections", icon: <Category />, labelEn: "Collections", labelFa: "کالکشن", href: "/collections" },
 ];
+
+/**
+ * Determine icon for a category based on its contentType or slug.
+ */
+function getCategoryIcon(category: PublicCategory): React.ReactNode {
+	if (category.contentType === "series") return <Tv />;
+	if (category.contentType === "movie") return <Movie />;
+	// Slug-based heuristics for mixed types
+	if (category.slug.includes("series") || category.slug.includes("anime")) return <Tv />;
+	return <Category />;
+}
+
+/**
+ * Convert category to URL path.
+ * Uses urlPath if available, falls back to slug-based mapping.
+ * For parent categories: /movies/{urlPath}
+ * For child categories: /movies/{parent.urlPath}/{child.urlPath}
+ */
+function categoryToPath(category: PublicCategory, parent?: PublicCategory): string {
+	if (parent && parent.urlPath && category.urlPath) {
+		return `/movies/${parent.urlPath}/${category.urlPath}`;
+	}
+	if (category.urlPath) {
+		return `/movies/${category.urlPath}`;
+	}
+	// Fallback for legacy slugs
+	const slugMap: Record<string, string> = {
+		"movies-foreign": "/movies/foreign",
+		"movies-iranian": "/movies/iranian",
+		"series-foreign": "/series/foreign",
+		"series-iranian": "/series/iranian",
+	};
+	return slugMap[category.slug] || `/category/${category.slug}`;
+}
 
 export function PremiumLiquidGlassHeader() {
 	const { language } = useLanguage();
@@ -101,78 +128,56 @@ export function PremiumLiquidGlassHeader() {
 		setMounted(true);
 	}, []);
 
-	// Fetch categories and genres from backend and build menu based on MENU_CONFIG
+	// Fetch categories from backend and build menu based on parent-child structure
 	useEffect(() => {
 		const fetchNavigation = async () => {
 			try {
-				const [categoriesResponse, genresResponse] = await Promise.all([
-					publicCategoriesApi.list(),
-					publicGenresApi.list(),
-				]);
+				const categoriesResponse = await publicCategoriesApi.listMenu();
+				const categories = categoriesResponse.data as MenuCategory[];
 
-				const categories = categoriesResponse.data;
-				const genres = genresResponse.data;
-
-				// Build navigation items based on MENU_CONFIG order
+				// Build navigation items from parent-child category tree
 				const dynamicNavItems: NavItem[] = [];
 
-				for (const config of MENU_CONFIG) {
-					// Handle static items (not from backend)
-					if (config.static) {
-						dynamicNavItems.push({
-							label: config.labelEn!,
-							labelFa: config.labelFa!,
-							href: config.href!,
-							icon: config.icon,
-							isActive: true,
-						});
-						continue;
-					}
+				const sortedCategories = [...categories]
+					.filter((cat) => cat.isActive)
+					.sort((a, b) => a.sortOrder - b.sortOrder);
 
-					// Find category from backend by slug
-					const category = categories.find((cat) => cat.slug === config.slug);
-					
-					// Skip if category not found or not active
-					if (!category || !category.isActive) {
-						continue;
-					}
+				for (const category of sortedCategories) {
+					const parentHref = categoryToPath(category);
 
-					// Build submenu if configured
+					// Build submenu from child categories
 					let submenu: SubMenuItem[] | undefined;
-					if (config.hasSubmenu) {
-						const categoryGenres = genres.filter(
-							(genre) =>
-								genre.isActive &&
-								genre.categorySlugs?.includes(category.slug)
-						);
-
-						if (categoryGenres.length > 0) {
-							submenu = categoryGenres.map((genre) => ({
-								label: genre.nameEn,
-								labelFa: genre.nameFa,
-								href: `/${category.slug}/${genre.slug}`,
+					if (category.children && category.children.length > 0) {
+						submenu = category.children
+							.filter((child) => child.isActive)
+							.sort((a, b) => a.sortOrder - b.sortOrder)
+							.map((child) => ({
+								label: child.nameEn,
+								labelFa: child.nameFa,
+								href: categoryToPath(child, category),
 							}));
-						}
 					}
 
 					dynamicNavItems.push({
 						label: category.nameEn,
 						labelFa: category.nameFa,
-						href: `/${category.slug}`,
-						icon: config.icon,
+						href: parentHref,
+						icon: getCategoryIcon(category),
 						submenu,
 						isActive: category.isActive,
 					});
 				}
 
-				// Add Account link at the end
-				dynamicNavItems.push({
-					label: "Account",
-					labelFa: "حساب کاربری",
-					href: "/account",
-					icon: <Person />,
-					isActive: true,
-				});
+				// Add static items at the end
+				for (const staticItem of STATIC_MENU_ITEMS) {
+					dynamicNavItems.push({
+						label: staticItem.labelEn,
+						labelFa: staticItem.labelFa,
+						href: staticItem.href,
+						icon: staticItem.icon,
+						isActive: true,
+					});
+				}
 
 				setNavItems(dynamicNavItems);
 			} catch (error) {
@@ -184,13 +189,6 @@ export function PremiumLiquidGlassHeader() {
 						labelFa: "خانه",
 						href: "/",
 						icon: <Movie />,
-						isActive: true,
-					},
-					{
-						label: "Account",
-						labelFa: "حساب کاربری",
-						href: "/account",
-						icon: <Person />,
 						isActive: true,
 					},
 				]);
@@ -218,18 +216,9 @@ export function PremiumLiquidGlassHeader() {
 	const [userMenuBusy, setUserMenuBusy] = useState(false);
 	const [userMenuError, setUserMenuError] = useState<string | null>(null);
 
-	// NOTE: The public user auth implementation isn't wired yet in this repo.
-	// We treat presence of a token as authenticated (keeps behavior consistent with admin-auth).
-	const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-	// Hydration-safe auth detection: read localStorage only after mount.
-	useEffect(() => {
-		try {
-			setIsAuthenticated(!!localStorage.getItem("access_token"));
-		} catch {
-			setIsAuthenticated(false);
-		}
-	}, []);
+	// Reactively track auth state from Zustand store
+	const isAuthenticated = useIsAuthenticated();
+	const storeLogout = useAuthStore((s) => s.logout);
 
 	const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -293,13 +282,7 @@ export function PremiumLiquidGlassHeader() {
 				return;
 			}
 			if (action.type === "logout") {
-				// Basic client-only logout for the user surface.
-				// If/when a real auth store exists, this should call it instead.
-				if (typeof window !== "undefined") {
-					localStorage.removeItem("access_token");
-					localStorage.removeItem("refresh_token");
-					localStorage.removeItem("user");
-				}
+				storeLogout();
 				handleUserMenuClose();
 				router.refresh();
 				router.push(routes.home);
@@ -335,25 +318,40 @@ export function PremiumLiquidGlassHeader() {
 			? `linear-gradient(180deg, 
           ${glassColors.glass.mid} 0%, 
           ${glassColors.glass.base} 100%)`
-			: `linear-gradient(
-          to bottom,
-          rgba(10, 10, 10, 0.9) 0%,
-          rgba(10, 10, 10, 0.75) 30%,
-          rgba(10, 10, 10, 0.45) 65%,
-          rgba(10, 10, 10, 0) 100%
-        )`,
-		backdropFilter: scrolled
-			? `blur(${glassBlur.medium}px) saturate(180%)`
-			: `blur(4px)`,
-		WebkitBackdropFilter: scrolled
-			? `blur(${glassBlur.medium}px) saturate(180%)`
-			: `blur(${glassBlur.light}px) saturate(120%)`,
+			: `linear-gradient(180deg, 
+          ${glassColors.glass.mid} 0%, 
+          ${glassColors.glass.base} 100%)`,
+		backdropFilter: `blur(${glassBlur.medium}px) saturate(180%)`,
+		WebkitBackdropFilter: `blur(${glassBlur.medium}px) saturate(180%)`,
 		borderBottom: scrolled ? `1px solid ${glassColors.glass.border}` : "none",
 		boxShadow: scrolled
 			? `inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
          0 4px 24px -2px rgba(0, 0, 0, 0.2)`
 			: "none",
 		transition: glassAnimations.transition.spring,
+		// Blur extension below header when at top
+		"&::after": {
+			content: '""',
+			position: "absolute",
+			left: 0,
+			right: 0,
+			top: "100%",
+			height: scrolled ? 0 : "20px",
+			backdropFilter: scrolled ? "none" : `blur(6px)`,
+			WebkitBackdropFilter: scrolled ? "none" : `blur(6px)`,
+			background: scrolled
+				? "transparent"
+				: `linear-gradient(to bottom, ${glassColors.glass.base}, transparent)`,
+			maskImage: scrolled
+				? "none"
+				: "linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)",
+			WebkitMaskImage: scrolled
+				? "none"
+				: "linear-gradient(to bottom, rgba(0,0,0,0.6), transparent)",
+			pointerEvents: "none",
+			transition: "height 0.3s ease, opacity 0.3s ease",
+			opacity: scrolled ? 0 : 1,
+		},
 	};
 
 	const pillButtonStyle = (isActive: boolean) => ({
@@ -566,13 +564,13 @@ export function PremiumLiquidGlassHeader() {
 									justifyContent: "center",
 								}}
 							>
-								{navItems.slice(0, 7).map((item) => {
+								{navItems.slice(0, 7).map((item, idx) => {
 									const isActive = pathname === item.href;
 									const label = language === "fa" ? item.labelFa : item.label;
 
 									return (
 										<Box
-											key={item.href}
+											key={`nav-${idx}-${item.label}`}
 											sx={{ position: "relative" }}
 											onMouseLeave={() =>
 												item.submenu && handleSubmenuClose(item.href)
@@ -628,9 +626,9 @@ export function PremiumLiquidGlassHeader() {
 														vertical: "bottom",
 													}}
 												>
-													{item.submenu.map((subItem) => (
+													{item.submenu.map((subItem, subIdx) => (
 														<MenuItem
-															key={subItem.href}
+															key={`sub-${subIdx}-${subItem.label}`}
 															onClick={() => handleSubmenuClose(item.href)}
 															component={Link}
 															href={subItem.href}
@@ -796,19 +794,6 @@ export function PremiumLiquidGlassHeader() {
 								{language === "fa" ? "تنظیمات" : "Settings"}
 							</MenuItem>,
 							<MenuItem
-								key="account"
-								onClick={() =>
-									handleUserMenuAction({
-										type: "navigate",
-										href: routes.account,
-									})
-								}
-								disabled={userMenuBusy}
-							>
-								<Person sx={{ mr: 1, fontSize: "1.25rem" }} />
-								{language === "fa" ? "حساب کاربری" : "Account"}
-							</MenuItem>,
-							<MenuItem
 								key="logout"
 								onClick={() => handleUserMenuAction({ type: "logout" })}
 								disabled={userMenuBusy}
@@ -863,12 +848,12 @@ export function PremiumLiquidGlassHeader() {
 
 					{/* Mobile Navigation */}
 					<List>
-						{navItems.map((item) => {
+						{navItems.map((item, idx) => {
 							const isActive = pathname === item.href;
 							const label = language === "fa" ? item.labelFa : item.label;
 
 							return (
-								<ListItem key={item.href} disablePadding>
+								<ListItem key={`mobile-${idx}-${item.label}`} disablePadding>
 									<Link
 										href={item.href}
 										style={{ textDecoration: "none", width: "100%" }}

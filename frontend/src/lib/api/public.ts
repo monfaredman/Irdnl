@@ -27,10 +27,21 @@ export interface Category {
 	tmdbParams?: Record<string, any>;
 	showEpisodes?: boolean;
 	isActive: boolean;
+	showInMenu: boolean;
+	showInLanding: boolean;
 	sortOrder: number;
+	parentId?: string | null;
+	urlPath?: string | null;
+	parent?: Category | null;
+	children?: Category[];
 	createdAt: string;
 	updatedAt: string;
 }
+
+/** Menu category is a top-level category with optional nested children */
+export type MenuCategory = Category & {
+	children: Category[];
+};
 
 export interface Genre {
 	id: string;
@@ -71,6 +82,7 @@ export interface Offer {
 	discountPercent?: number;
 	discountCode?: string;
 	imageUrl?: string;
+	backdropUrl?: string;
 	linkUrl?: string;
 	contentId?: string;
 	content?: any;
@@ -96,6 +108,23 @@ export interface Pin {
 	updatedAt: string;
 }
 
+export interface Collection {
+	id: string;
+	slug: string;
+	title: string;
+	titleFa?: string;
+	description?: string;
+	descriptionFa?: string;
+	posterUrl?: string;
+	backdropUrl?: string;
+	contentIds: string[];
+	isActive: boolean;
+	sortOrder: number;
+	createdAt: string;
+	updatedAt: string;
+	contents?: any[];
+}
+
 export interface ListResponse<T> {
 	data: T[];
 	total: number;
@@ -115,10 +144,37 @@ export const categoriesApi = {
 	},
 
 	/**
+	 * List categories that should appear in menu (tree structure with children)
+	 */
+	listMenu: async (): Promise<ListResponse<MenuCategory>> => {
+		const response = await publicApi.get<ListResponse<MenuCategory>>("/categories/menu");
+		return response.data;
+	},
+
+	/**
+	 * List categories that should appear on landing page
+	 */
+	listLanding: async (): Promise<ListResponse<Category>> => {
+		const response = await publicApi.get<ListResponse<Category>>("/categories/landing");
+		return response.data;
+	},
+
+	/**
 	 * Get category by slug
 	 */
 	getBySlug: async (slug: string): Promise<Category> => {
 		const response = await publicApi.get<Category>(`/categories/${slug}`);
+		return response.data;
+	},
+
+	/**
+	 * Get category by URL path (e.g. "foreign" or "foreign" + "action")
+	 */
+	getByPath: async (parentPath: string, childPath?: string): Promise<Category> => {
+		const url = childPath
+			? `/categories/path/${parentPath}/${childPath}`
+			: `/categories/path/${parentPath}`;
+		const response = await publicApi.get<Category>(url);
 		return response.data;
 	},
 };
@@ -189,6 +245,136 @@ export const pinsApi = {
 		const response = await publicApi.get<ListResponse<Pin>>("/pins", {
 			params: section ? { section } : {},
 		});
+		return response.data;
+	},
+};
+
+// ========================================================================
+// COLLECTIONS API
+// ========================================================================
+
+export const collectionsApi = {
+	/**
+	 * List all active collections
+	 */
+	list: async (): Promise<ListResponse<Collection>> => {
+		const response = await publicApi.get<ListResponse<Collection>>("/collections");
+		return response.data;
+	},
+
+	/**
+	 * Get collection by slug with contents
+	 */
+	getBySlug: async (slug: string): Promise<Collection> => {
+		const response = await publicApi.get<Collection>(`/collections/${slug}`);
+		return response.data;
+	},
+};
+
+// ========================================================================
+// PUBLIC COMMENTS API (outside /public prefix)
+// ========================================================================
+
+const commentsPublicApi = axios.create({
+	baseURL: `${API_BASE_URL}/api/comments`,
+	headers: {
+		"Content-Type": "application/json",
+	},
+});
+
+// ========================================================================
+// BLOG PUBLIC API
+// ========================================================================
+
+const blogPublicApi = axios.create({
+	baseURL: `${API_BASE_URL}/api/blog`,
+	headers: {
+		"Content-Type": "application/json",
+	},
+});
+
+export const publicBlogApi = {
+	/** Like a blog post by slug */
+	like: async (slug: string): Promise<{ likesCount: number }> => {
+		const response = await blogPublicApi.post<{ likesCount: number }>(
+			`/${slug}/like`,
+		);
+		return response.data;
+	},
+};
+
+export interface PublicComment {
+	id: string;
+	text: string;
+	userName?: string;
+	userEmail?: string;
+	rating?: number;
+	likesCount: number;
+	status: string;
+	createdAt: string;
+	user?: {
+		id: string;
+		name: string;
+		email: string;
+		avatarUrl?: string;
+	};
+	replies?: PublicComment[];
+	parentId?: string;
+}
+
+export interface PublicCommentsResponse {
+	data: PublicComment[];
+	comments: PublicComment[];
+	total: number;
+	page: number;
+	limit: number;
+}
+
+export const publicCommentsApi = {
+	/**
+	 * Get approved comments for a content item
+	 */
+	getByContentId: async (
+		contentId: string,
+		page = 1,
+		limit = 20,
+	): Promise<PublicCommentsResponse> => {
+		const response = await commentsPublicApi.get<PublicCommentsResponse>(
+			`/content/${contentId}`,
+			{ params: { page, limit } },
+		);
+		return response.data;
+	},
+
+	/**
+	 * Create a new comment (public)
+	 */
+	create: async (data: {
+		text: string;
+		contentId: string;
+		parentId?: string;
+		userName?: string;
+		userEmail?: string;
+		rating?: number;
+	}): Promise<PublicComment> => {
+		const token =
+			typeof window !== "undefined"
+				? localStorage.getItem("access_token")
+				: null;
+
+		const response = await commentsPublicApi.post<PublicComment>("/", data, {
+			headers: token ? { Authorization: `Bearer ${token}` } : {},
+		});
+		return response.data;
+	},
+
+	/**
+	 * Like a comment
+	 */
+	like: async (commentId: string): Promise<{ likesCount: number }> => {
+		const response = await commentsPublicApi.post<{ likesCount: number }>(
+			`/${commentId}/like`,
+		);
 		return response.data;
 	},
 };

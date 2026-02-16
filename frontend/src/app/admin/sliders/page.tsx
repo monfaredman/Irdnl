@@ -48,11 +48,17 @@ interface SliderItem {
 	description: string | null;
 	descriptionFa: string | null;
 	imageUrl: string | null;
+	mobileImageUrl: string | null;
+	videoUrl: string | null;
 	linkUrl: string | null;
+	buttonText: string | null;
+	buttonTextFa: string | null;
 	contentId: string | null;
 	content?: { id: string; title: string } | null;
 	section: string;
 	isActive: boolean;
+	showSlider: boolean;
+	onlyKids: boolean;
 	sortOrder: number;
 	startDate: string | null;
 	endDate: string | null;
@@ -71,10 +77,16 @@ const emptyForm = {
 	description: "",
 	descriptionFa: "",
 	imageUrl: "",
+	mobileImageUrl: "",
+	videoUrl: "",
 	linkUrl: "",
+	buttonText: "",
+	buttonTextFa: "",
 	contentId: "",
 	section: "hero",
 	isActive: true,
+	showSlider: true,
+	onlyKids: false,
 	sortOrder: 0,
 	startDate: "",
 	endDate: "",
@@ -142,10 +154,16 @@ export default function SlidersPage() {
 			description: s.description || "",
 			descriptionFa: s.descriptionFa || "",
 			imageUrl: s.imageUrl || "",
+			mobileImageUrl: s.mobileImageUrl || "",
+			videoUrl: s.videoUrl || "",
 			linkUrl: s.linkUrl || "",
+			buttonText: s.buttonText || "",
+			buttonTextFa: s.buttonTextFa || "",
 			contentId: s.contentId || "",
 			section: s.section,
 			isActive: s.isActive,
+			showSlider: s.showSlider !== false,
+			onlyKids: s.onlyKids || false,
 			sortOrder: s.sortOrder,
 			startDate: s.startDate ? s.startDate.split("T")[0] : "",
 			endDate: s.endDate ? s.endDate.split("T")[0] : "",
@@ -155,8 +173,23 @@ export default function SlidersPage() {
 
 	const handleSave = async () => {
 		try {
+			// Upgrade TMDB image quality from w500 to w1280
+			let imageUrl = form.imageUrl;
+			if (imageUrl) {
+				imageUrl = imageUrl.replace(/\/w\d+\//g, '/w1280/');
+			}
+			let mobileImageUrl = form.mobileImageUrl;
+			if (mobileImageUrl) {
+				mobileImageUrl = mobileImageUrl.replace(/\/w\d+\//g, '/w1280/');
+			}
 			const payload: any = {
 				...form,
+				imageUrl: imageUrl || undefined,
+				mobileImageUrl: mobileImageUrl || undefined,
+				videoUrl: form.videoUrl || undefined,
+				linkUrl: form.linkUrl || (form.contentId ? `/item/${form.contentId}` : undefined),
+				buttonText: form.buttonText || undefined,
+				buttonTextFa: form.buttonTextFa || undefined,
 				contentId: form.contentId || undefined,
 				startDate: form.startDate || undefined,
 				endDate: form.endDate || undefined,
@@ -433,12 +466,44 @@ export default function SlidersPage() {
 							placeholder="https://..."
 						/>
 						<TextField
+							label="تصویر موبایل"
+							value={form.mobileImageUrl}
+							onChange={(e) => setForm({ ...form, mobileImageUrl: e.target.value })}
+							fullWidth
+							size="small"
+							placeholder="https://... (تصویر مخصوص موبایل)"
+						/>
+						<TextField
+							label="لینک ویدیو"
+							value={form.videoUrl}
+							onChange={(e) => setForm({ ...form, videoUrl: e.target.value })}
+							fullWidth
+							size="small"
+							placeholder="https://... (ویدیو پس‌زمینه)"
+						/>
+						<TextField
 							label="لینک مقصد"
 							value={form.linkUrl}
 							onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
 							fullWidth
 							size="small"
 							placeholder="/item/..."
+						/>
+						<TextField
+							label="متن دکمه (انگلیسی)"
+							value={form.buttonText}
+							onChange={(e) => setForm({ ...form, buttonText: e.target.value })}
+							fullWidth
+							size="small"
+							placeholder="Watch Now"
+						/>
+						<TextField
+							label="متن دکمه (فارسی)"
+							value={form.buttonTextFa}
+							onChange={(e) => setForm({ ...form, buttonTextFa: e.target.value })}
+							fullWidth
+							size="small"
+							placeholder="تماشا کنید"
 						/>
 						<TextField
 							label="شناسه محتوا (Content ID)"
@@ -480,6 +545,24 @@ export default function SlidersPage() {
 								/>
 							}
 							label="فعال"
+						/>
+						<FormControlLabel
+							control={
+								<Switch
+									checked={form.showSlider}
+									onChange={(e) => setForm({ ...form, showSlider: e.target.checked })}
+								/>
+							}
+							label="نمایش اسلایدر"
+						/>
+						<FormControlLabel
+							control={
+								<Switch
+									checked={form.onlyKids}
+									onChange={(e) => setForm({ ...form, onlyKids: e.target.checked })}
+								/>
+							}
+							label="فقط کودکان"
 						/>
 						<TextField
 							label="تاریخ شروع"

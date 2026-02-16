@@ -10,13 +10,13 @@ export default function ForeignMovieGenrePage() {
 	const genre = params.genre as string;
 	
 	// Get base config and sub-genre info
-	const baseConfig = categoryConfigs["movies-foreign"];
-	const subGenreInfo = getSubGenre("movies-foreign", genre);
+	const baseConfig = categoryConfigs["foreign"] || categoryConfigs["movies-foreign"];
+	const subGenreInfo = getSubGenre("foreign", genre) || getSubGenre("movies-foreign", genre);
 	
 	// Create modified config for this specific genre
 	const config: CategoryConfig = {
 		...baseConfig,
-		id: "movies-foreign" as CategoryType, // Keep parent category type
+		id: "foreign" as CategoryType,
 		titleFa: subGenreInfo?.nameFa || genre,
 		titleEn: subGenreInfo?.nameEn || genre,
 		descriptionFa: `فیلم‌های ${subGenreInfo?.nameFa || genre} خارجی با کیفیت بالا`,
@@ -27,13 +27,15 @@ export default function ForeignMovieGenrePage() {
 		},
 	};
 	
-	const breadcrumbs = generateBreadcrumbs("movies-foreign", genre);
+	const breadcrumbs = generateBreadcrumbs("foreign", genre);
 	
 	return (
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
+			currentSubGenre={{ slug: genre, nameEn: subGenreInfo?.nameEn || genre, nameFa: subGenreInfo?.nameFa || genre }}
 			basePath={`/movies/foreign/${genre}`}
+			genreBasePath="/movies/foreign"
 		/>
 	);
 }

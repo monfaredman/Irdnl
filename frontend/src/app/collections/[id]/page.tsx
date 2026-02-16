@@ -418,7 +418,7 @@ export default function CollectionDetailPage() {
                 >
                   <Chip
                     icon={<StarIcon />}
-                    label={isRTL ? toPersianNumber(movie.rating.toFixed(1)) : movie.rating.toFixed(1)}
+                    label={isRTL ? toPersianNumber((Number(movie.rating) || 0).toFixed(1)) : (Number(movie.rating) || 0).toFixed(1)}
                     size="small"
                     sx={{
                       background: collection.color,

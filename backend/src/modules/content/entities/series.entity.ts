@@ -19,7 +19,7 @@ export class Series {
   @Column({ name: 'content_id', unique: true })
   contentId: string;
 
-  @OneToOne(() => Content, (content) => content.series)
+  @OneToOne(() => Content, (content) => content.series, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'content_id' })
   content: Content;
 
