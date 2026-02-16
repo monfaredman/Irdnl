@@ -74,7 +74,7 @@ export class UperaService {
       this.logger.log(`Fetching Upera movies: ${url}`);
 
       const response = await firstValueFrom(
-        this.httpService.post(url),
+        this.httpService.get(url),
       );
 
       return response.data;
@@ -104,7 +104,7 @@ export class UperaService {
       this.logger.log(`Fetching Upera series: ${url}`);
 
       const response = await firstValueFrom(
-        this.httpService.post(url),
+        this.httpService.get(url),
       );
 
       return response.data;
@@ -149,7 +149,7 @@ export class UperaService {
       this.logger.log(`Fetching affiliate links: ${url}`);
 
       const response = await firstValueFrom(
-        this.httpService.post(url),
+        this.httpService.get(url),
       );
 
       return response.data;
@@ -473,6 +473,32 @@ export class UperaService {
   // UPERA SITE CONTENT (api.upera.tv)
   // ==========================================
 
+  /**
+   * Transform image URLs by prepending CDN base URLs to image filenames
+   */
+  private transformImageUrls(data: any[], cdn: any): void {
+    if (!data || !cdn) return;
+
+    data.forEach((section) => {
+      if (section.data && Array.isArray(section.data)) {
+        section.data.forEach((item) => {
+          // Transform poster
+          if (item.poster && !item.poster.startsWith('http')) {
+            item.poster = `${cdn.poster}${item.poster}`;
+          }
+          // Transform backdrop
+          if (item.backdrop && !item.backdrop.startsWith('http')) {
+            item.backdrop = `${cdn.backdrop}${item.backdrop}`;
+          }
+          // Transform back_teaser if exists
+          if (item.back_teaser && !item.back_teaser.startsWith('http')) {
+            item.back_teaser = `${cdn.backdrop}${item.back_teaser}`;
+          }
+        });
+      }
+    });
+  }
+
   async getDiscover(dto: DiscoverQueryDto): Promise<any> {
     try {
       const params: Record<string, string> = {};
@@ -487,6 +513,13 @@ export class UperaService {
       const response = await firstValueFrom(
         this.httpService.get(`${this.uperaApiBaseUrl}/getV2/discover`, { params }),
       );
+      
+      // Transform image URLs using CDN
+      const data = response.data;
+      if (data?.data?.cdn && data?.data?.data) {
+        this.transformImageUrls(data.data.data, data.data.cdn);
+      }
+      
       return response.data;
     } catch (error) {
       this.logger.error('Failed to fetch discover content', error?.message);
@@ -505,6 +538,26 @@ export class UperaService {
       const response = await firstValueFrom(
         this.httpService.get(`${this.uperaApiBaseUrl}/get/slider`, { params }),
       );
+      
+      // Transform image URLs using CDN
+      const data = response.data;
+      if (data?.data?.cdn && data?.data?.data) {
+        // Sliders have a different structure - direct array
+        if (Array.isArray(data.data.data)) {
+          data.data.data.forEach((item) => {
+            if (item.poster && !item.poster.startsWith('http')) {
+              item.poster = `${data.data.cdn.poster}${item.poster}`;
+            }
+            if (item.backdrop && !item.backdrop.startsWith('http')) {
+              item.backdrop = `${data.data.cdn.backdrop}${item.backdrop}`;
+            }
+            if (item.back_teaser && !item.back_teaser.startsWith('http')) {
+              item.back_teaser = `${data.data.cdn.backdrop}${item.back_teaser}`;
+            }
+          });
+        }
+      }
+      
       return response.data;
     } catch (error) {
       this.logger.error('Failed to fetch sliders', error?.message);
@@ -521,6 +574,26 @@ export class UperaService {
       const response = await firstValueFrom(
         this.httpService.get(`${this.uperaApiBaseUrl}/get/offer`, { params }),
       );
+      
+      // Transform image URLs using CDN
+      const data = response.data;
+      if (data?.data?.cdn && data?.data?.data) {
+        // Offers have a different structure - direct array
+        if (Array.isArray(data.data.data)) {
+          data.data.data.forEach((item) => {
+            if (item.poster && !item.poster.startsWith('http')) {
+              item.poster = `${data.data.cdn.poster}${item.poster}`;
+            }
+            if (item.backdrop && !item.backdrop.startsWith('http')) {
+              item.backdrop = `${data.data.cdn.backdrop}${item.backdrop}`;
+            }
+            if (item.back_teaser && !item.back_teaser.startsWith('http')) {
+              item.back_teaser = `${data.data.cdn.backdrop}${item.back_teaser}`;
+            }
+          });
+        }
+      }
+      
       return response.data;
     } catch (error) {
       this.logger.error('Failed to fetch offers', error?.message);

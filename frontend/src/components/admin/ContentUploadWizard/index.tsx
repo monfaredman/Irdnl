@@ -152,9 +152,13 @@ export function ContentUploadWizard() {
       if (!cleanedData.thumbnailUrl) cleanedData.thumbnailUrl = undefined as any;
       if (!cleanedData.backdropUrl) cleanedData.backdropUrl = undefined as any;
       if (!cleanedData.logoUrl) cleanedData.logoUrl = undefined as any;
-      await contentApi.create(cleanedData);
+      const response = await contentApi.create(cleanedData);
+      // Save the created content ID to formData
+      if (response?.id) {
+        updateFormData({ id: response.id });
+        setSnackbar({ open: true, message: `پیش‌نویس ذخیره شد. ID: ${response.id.slice(0, 8)}...`, severity: "success" });
+      }
       setIsDirty(false);
-      router.push("/admin/content");
     } catch (error) {
       console.error("Failed to save draft:", error);
       setSnackbar({ open: true, message: "خطا در ذخیره پیش‌نویس", severity: "error" });

@@ -4,10 +4,12 @@ import { useTranslation } from "@/i18n";
 import { Input } from "@/components/admin/ui/input";
 import { Label } from "@/components/admin/ui/label";
 import { Button } from "@/components/admin/ui/button";
-import { Upload } from "lucide-react";
-import { imagesApi } from "@/lib/api/admin";
+import { Upload, Loader2 } from "lucide-react";
+import { imagesApi, videosApi } from "@/lib/api/admin";
 import { TMDBFieldButton } from "../TMDBFieldButton";
 import type { ContentFormData } from "../types";
+import { useState } from "react";
+import { Select, MenuItem, FormControl, InputLabel, LinearProgress, Typography } from "@mui/material";
 
 interface MediaAssetsStepProps {
   formData: ContentFormData;
@@ -18,6 +20,12 @@ export function MediaAssetsStep({ formData, updateFormData }: MediaAssetsStepPro
   const { t } = useTranslation();
   const tmdbId = formData.tmdbId || "";
   const mediaType = formData.type === "series" ? "series" : "movie";
+  const [videoUploadState, setVideoUploadState] = useState<{
+    file: File | null;
+    quality: string;
+    uploading: boolean;
+    needsSave: boolean;
+  }>({ file: null, quality: "1080p", uploading: false, needsSave: false });
 
   const handleImageUpload = async (file: File, type: keyof Pick<ContentFormData, "posterUrl" | "bannerUrl" | "thumbnailUrl" | "backdropUrl" | "logoUrl">) => {
     try {
@@ -26,6 +34,37 @@ export function MediaAssetsStep({ formData, updateFormData }: MediaAssetsStepPro
     } catch (error) {
       console.error("Failed to upload image:", error);
       alert(t("admin.messages.uploadError"));
+    }
+  };
+
+  const handleVideoFileSelect = (file: File | null) => {
+    if (file) {
+      setVideoUploadState(prev => ({ ...prev, file, needsSave: true }));
+    }
+  };
+
+  const handleVideoUpload = async () => {
+    if (!videoUploadState.file) {
+      alert("لطفاً فایل ویدیو را انتخاب کنید");
+      return;
+    }
+    
+    // Check if content has ID (must be saved first)
+    if (!formData.id) {
+      alert("ابتدا باید محتوا را ذخیره کنید تا Content ID ایجاد شود. روی 'ذخیره پیش‌نویس' کلیک کنید.");
+      return;
+    }
+
+    setVideoUploadState(prev => ({ ...prev, uploading: true }));
+    try {
+      await videosApi.upload(videoUploadState.file, formData.id, videoUploadState.quality);
+      alert(`ویدیو با موفقیت آپلود شد. کیفیت: ${videoUploadState.quality}`);
+      setVideoUploadState({ file: null, quality: "1080p", uploading: false, needsSave: false });
+    } catch (error) {
+      console.error("Failed to upload video:", error);
+      alert("خطا در آپلود ویدیو");
+    } finally {
+      setVideoUploadState(prev => ({ ...prev, uploading: false }));
     }
   };
 
@@ -75,28 +114,94 @@ export function MediaAssetsStep({ formData, updateFormData }: MediaAssetsStepPro
           روش ۲: آپلود فایل ویدیو داخلی
         </h3>
         <p className="text-sm text-purple-800 mb-4">
-          اگر می‌خواهید فایل ویدیو را مستقیماً در سرور آپلود کنید، ابتدا به بخش{" "}
-          <a href="/admin/videos" className="underline font-semibold" target="_blank">
-            مدیریت ویدیوها
-          </a>{" "}
-          بروید و فایل‌های ویدیو را برای این محتوا آپلود کنید. سپس آدرس‌های ویدیو را در قسمت 
-          "کیفیت‌های ویدیو" زیر وارد کنید.
+          می‌توانید فایل ویدیو را مستقیماً در همین صفحه آپلود کنید. 
+          <strong className="text-red-600"> ابتدا باید روی "ذخیره پیش‌نویس" کلیک کنید</strong> تا Content ID ایجاد شود.
         </p>
-        <div className="bg-white border border-purple-200 rounded p-3">
-          <p className="text-xs text-purple-700 mb-2">
-            💡 <strong>نکته:</strong> برای آپلود ویدیو، Content ID این محتوا را یادداشت کنید 
-            (پس از ذخیره محتوا دریافت می‌شود) و در بخش مدیریت ویدیوها هنگام آپلود وارد کنید.
-          </p>
-          {!formData.externalPlayerUrl && (
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => window.open("/admin/videos", "_blank")}
-              className="w-full mt-2"
-            >
-              🎬 رفتن به صفحه مدیریت ویدیوها
-            </Button>
+        <div className="bg-white border border-purple-200 rounded p-4 space-y-3">
+          {formData.id ? (
+            <>
+              <div className="text-xs text-green-700 bg-green-50 border border-green-200 rounded px-3 py-2">
+                ✓ Content ID: <span className="font-mono font-semibold">{formData.id}</span>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label htmlFor="video-upload" className="text-sm mb-1 block">انتخاب فایل ویدیو</Label>
+                  <input
+                    type="file"
+                    accept="video/*"
+                    id="video-upload-file"
+                    onChange={(e) => handleVideoFileSelect(e.target.files?.[0] || null)}
+                    disabled={videoUploadState.uploading}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100"
+                  />
+                  {videoUploadState.file && (
+                    <p className="text-xs text-gray-600 mt-1">
+                      {videoUploadState.file.name} ({(videoUploadState.file.size / 1024 / 1024).toFixed(2)} MB)
+                    </p>
+                  )}
+                </div>
+
+                <FormControl fullWidth size="small">
+                  <InputLabel>کیفیت ویدیو</InputLabel>
+                  <Select
+                    value={videoUploadState.quality}
+                    label="کیفیت ویدیو"
+                    onChange={(e) => setVideoUploadState(prev => ({ ...prev, quality: e.target.value }))}
+                    disabled={videoUploadState.uploading}
+                  >
+                    <MenuItem value="360p">360p</MenuItem>
+                    <MenuItem value="480p">480p</MenuItem>
+                    <MenuItem value="720p">720p</MenuItem>
+                    <MenuItem value="1080p">1080p (Full HD)</MenuItem>
+                    <MenuItem value="1440p">1440p (2K)</MenuItem>
+                    <MenuItem value="2160p">2160p (4K)</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+
+              <Button
+                type="button"
+                onClick={handleVideoUpload}
+                disabled={!videoUploadState.file || videoUploadState.uploading}
+                className="w-full"
+              >
+                {videoUploadState.uploading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 ml-2 animate-spin" />
+                    در حال آپلود...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4 ml-2" />
+                    آپلود ویدیو
+                  </>
+                )}
+              </Button>
+
+              {videoUploadState.uploading && (
+                <div className="space-y-1">
+                  <LinearProgress />
+                  <Typography variant="caption" className="text-gray-500">
+                    لطفاً صبر کنید، ویدیو در حال آپلود است...
+                  </Typography>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-purple-700 mb-3">
+                💡 برای آپلود ویدیو، ابتدا باید محتوا را ذخیره کنید تا Content ID ایجاد شود.
+              </p>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => window.open("/admin/videos", "_blank")}
+              >
+                🎬 یا رفتن به صفحه مدیریت ویدیوها
+              </Button>
+            </div>
           )}
         </div>
       </div>

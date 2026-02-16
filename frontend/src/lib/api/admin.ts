@@ -775,7 +775,7 @@ export const uperaApi = {
 		query?: string;
 		page?: number;
 	}) => {
-		const response = await adminApi.post("/upera/browse/movies", null, {
+		const response = await adminApi.get("/upera/browse/movies", {
 			params,
 		});
 		return response.data;
@@ -790,7 +790,7 @@ export const uperaApi = {
 		query?: string;
 		page?: number;
 	}) => {
-		const response = await adminApi.post("/upera/browse/series", null, {
+		const response = await adminApi.get("/upera/browse/series", {
 			params,
 		});
 		return response.data;
@@ -810,9 +810,8 @@ export const uperaApi = {
 		traffic?: number;
 		token?: string;
 	}) => {
-		const response = await adminApi.post(
+		const response = await adminApi.get(
 			"/upera/browse/affiliate-links",
-			null,
 			{ params },
 		);
 		return response.data;

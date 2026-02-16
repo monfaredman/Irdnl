@@ -77,6 +77,9 @@ export interface LocalizedContent {
 }
 
 export interface ContentFormData {
+  // ID (set after creation)
+  id?: string;
+  
   // Basic Info
   title: string;
   originalTitle?: string;

@@ -51,16 +51,14 @@ export class UperaController {
   // BROWSE UPERA CONTENT (GATEWAY CALLS)
   // ==========================================
 
-  @Post('browse/movies')
-  @HttpCode(HttpStatus.OK)
+  @Get('browse/movies')
   @ApiOperation({ summary: 'Search/browse movies from Upera (Seeko)' })
   @ApiResponse({ status: 200, description: 'Movies fetched from Upera' })
   async browseMovies(@Query() dto: SearchUperaContentDto) {
     return this.uperaService.searchMovies(dto);
   }
 
-  @Post('browse/series')
-  @HttpCode(HttpStatus.OK)
+  @Get('browse/series')
   @ApiOperation({ summary: 'Search/browse series from Upera (Seeko)' })
   @ApiResponse({ status: 200, description: 'Series fetched from Upera' })
   async browseSeries(@Query() dto: SearchUperaContentDto) {
@@ -74,8 +72,7 @@ export class UperaController {
     return this.uperaService.getSeriesEpisodes(id);
   }
 
-  @Post('browse/affiliate-links')
-  @HttpCode(HttpStatus.OK)
+  @Get('browse/affiliate-links')
   @ApiOperation({ summary: 'Get affiliate links for content from Upera' })
   @ApiResponse({ status: 200, description: 'Affiliate links fetched' })
   async getAffiliateLinks(@Query() dto: GetAffiliateLinkDto) {

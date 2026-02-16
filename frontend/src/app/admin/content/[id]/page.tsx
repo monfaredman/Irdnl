@@ -145,11 +145,11 @@ export default function ContentDetailPage() {
 		setUpdatingStatus(true);
 		try {
 			await contentApi.update(id, { status: newStatus });
-			showFeedback("success", newStatus === "published" ? "محتوا با موفقیت منتشر شد" : "محتوا به پیش‌نویس تغییر یافت");
+			showFeedback("success", newStatus === "published" ? t("admin.content.detail.publishSuccess") : t("admin.content.detail.unpublishSuccess"));
 			await refreshContent();
 		} catch (error) {
 			console.error("Failed to update status:", error);
-			showFeedback("error", "خطا در تغییر وضعیت محتوا");
+			showFeedback("error", t("admin.content.detail.statusChangeFailed"));
 		} finally {
 			setUpdatingStatus(false);
 		}
@@ -257,12 +257,12 @@ export default function ContentDetailPage() {
 				payload.externalPlayerUrl = editForm.externalPlayerUrl || undefined;
 			}
 			await contentApi.update(id, payload);
-			showFeedback("success", "محتوا با موفقیت ویرایش شد");
+			showFeedback("success", t("admin.content.detail.updateSuccess"));
 			setEditMode(false);
 			await refreshContent();
 		} catch (error) {
 			console.error("Failed to update content:", error);
-			showFeedback("error", "خطا در ویرایش محتوا");
+			showFeedback("error", t("admin.content.detail.updateFailed"));
 		} finally {
 			setSavingEdit(false);
 		}
@@ -318,14 +318,14 @@ export default function ContentDetailPage() {
 	// Movie video upload handler
 	const handleMovieVideoUpload = async (file: File) => {
 		setUploadingMovie(true);
-		setUploadProgress("در حال آپلود...");
+		setUploadProgress(t("admin.content.detail.videoUploadProgress"));
 		try {
 			await videosApi.upload(file, id, "1080p");
-			showFeedback("success", "ویدیو با موفقیت آپلود شد");
+			showFeedback("success", t("admin.content.detail.videoUploadSuccess"));
 			await refreshContent();
 		} catch (error) {
 			console.error("Failed to upload movie video:", error);
-			showFeedback("error", "خطا در آپلود ویدیو");
+			showFeedback("error", t("admin.content.detail.videoUploadFailed"));
 		} finally {
 			setUploadingMovie(false);
 			setUploadProgress("");
@@ -344,11 +344,11 @@ export default function ContentDetailPage() {
 				duration: asset.duration || 0,
 				status: "ready",
 			});
-			showFeedback("success", "وضعیت ویدیو به آماده تغییر یافت");
+			showFeedback("success", t("admin.content.detail.videoStatusSuccess"));
 			await refreshContent();
 		} catch (error) {
 			console.error("Failed to mark asset as ready:", error);
-			showFeedback("error", "خطا در تغییر وضعیت ویدیو");
+			showFeedback("error", t("admin.content.detail.videoStatusFailed"));
 		}
 	};
 
@@ -356,12 +356,12 @@ export default function ContentDetailPage() {
 	const handleSaveExternalUrl = async () => {
 		try {
 			await contentApi.update(id, { externalPlayerUrl: externalUrlInput || null });
-			showFeedback("success", "لینک پخش‌کننده خارجی ذخیره شد");
+			showFeedback("success", t("admin.content.detail.externalUrlSaveSuccess"));
 			setEditingExternalUrl(false);
 			await refreshContent();
 		} catch (error) {
 			console.error("Failed to save external URL:", error);
-			showFeedback("error", "خطا در ذخیره لینک");
+			showFeedback("error", t("admin.content.detail.externalUrlSaveFailed"));
 		}
 	};
 
@@ -369,11 +369,11 @@ export default function ContentDetailPage() {
 	const handleRemoveExternalUrl = async () => {
 		try {
 			await contentApi.update(id, { externalPlayerUrl: null });
-			showFeedback("success", "لینک پخش‌کننده خارجی حذف شد");
+			showFeedback("success", t("admin.content.detail.externalUrlRemoveSuccess"));
 			await refreshContent();
 		} catch (error) {
 			console.error("Failed to remove external URL:", error);
-			showFeedback("error", "خطا در حذف لینک");
+			showFeedback("error", t("admin.content.detail.externalUrlRemoveFailed"));
 		}
 	};
 
@@ -605,7 +605,7 @@ export default function ContentDetailPage() {
 			setShowTmdbSeasons(true);
 		} catch (error) {
 			console.error("Failed to fetch TMDB seasons:", error);
-			showFeedback("error", "خطا در دریافت فصل‌ها از TMDB");
+			showFeedback("error", t("admin.content.detail.tmdbSeasonsFetchFailed"));
 		} finally {
 			setLoadingTmdbSeasons(false);
 		}
@@ -632,14 +632,14 @@ export default function ContentDetailPage() {
 				"success",
 				created > 0
 					? `${created} فصل با موفقیت از TMDB وارد شد`
-					: "همه فصل‌ها قبلاً وجود دارند",
+					: t("admin.content.detail.tmdbSeasonsAllExist"),
 			);
 			setShowTmdbSeasons(false);
 			setTmdbSeasons([]);
 			await refreshContent();
 		} catch (error) {
 			console.error("Failed to import TMDB seasons:", error);
-			showFeedback("error", "خطا در وارد کردن فصل‌ها از TMDB");
+			showFeedback("error", t("admin.content.detail.tmdbSeasonsImportFailed"));
 		} finally {
 			setImportingSeasons(false);
 		}
@@ -652,7 +652,7 @@ export default function ContentDetailPage() {
 			return;
 		}
 		if (!activeSeason) {
-			showFeedback("error", "ابتدا یک فصل را انتخاب کنید");
+			showFeedback("error", t("admin.content.detail.tmdbSelectSeasonFirst"));
 			return;
 		}
 		setLoadingTmdbEpisodes(true);
@@ -665,7 +665,7 @@ export default function ContentDetailPage() {
 			setShowTmdbEpisodes(true);
 		} catch (error) {
 			console.error("Failed to fetch TMDB episodes:", error);
-			showFeedback("error", "خطا در دریافت قسمت‌ها از TMDB");
+			showFeedback("error", t("admin.content.detail.tmdbEpisodesFetchFailed"));
 		} finally {
 			setLoadingTmdbEpisodes(false);
 		}
@@ -697,14 +697,14 @@ export default function ContentDetailPage() {
 				"success",
 				created > 0
 					? `${created} قسمت با موفقیت از TMDB وارد شد`
-					: "همه قسمت‌ها قبلاً وجود دارند",
+					: t("admin.content.detail.tmdbEpisodesAllExist"),
 			);
 			setShowTmdbEpisodes(false);
 			setTmdbEpisodes([]);
 			await refreshContent();
 		} catch (error) {
 			console.error("Failed to import TMDB episodes:", error);
-			showFeedback("error", "خطا در وارد کردن قسمت‌ها از TMDB");
+			showFeedback("error", t("admin.content.detail.tmdbEpisodesImportFailed"));
 		} finally {
 			setImportingEpisodes(false);
 		}
@@ -851,7 +851,7 @@ export default function ContentDetailPage() {
 								title={`ID: ${id}`}
 							>
 								<Copy className="h-3 w-3" />
-								{copiedId ? "کپی شد!" : "کپی ID"}
+								{copiedId ? t("admin.content.detail.idCopied") : t("admin.content.detail.copyId")}
 							</button>
 						</div>
 					</div>
@@ -865,7 +865,7 @@ export default function ContentDetailPage() {
 							className="flex items-center gap-2"
 						>
 							<Edit2 className="h-4 w-4" />
-							ویرایش
+							{t("admin.content.detail.edit")}
 						</Button>
 					)}
 					{/* Status Toggle */}
@@ -880,7 +880,7 @@ export default function ContentDetailPage() {
 							) : (
 								<CheckCircle className="h-4 w-4" />
 							)}
-							انتشار
+							{t("admin.content.detail.publish")}
 						</Button>
 					) : (
 						<Button
@@ -894,7 +894,7 @@ export default function ContentDetailPage() {
 							) : (
 								<XCircle className="h-4 w-4" />
 							)}
-							برگرداندن به پیش‌نویس
+							{t("admin.content.detail.unpublish")}
 						</Button>
 					)}
 					{/* View on site */}
@@ -909,7 +909,7 @@ export default function ContentDetailPage() {
 								className="flex items-center gap-2"
 							>
 								<Eye className="h-4 w-4" />
-								مشاهده در سایت
+								{t("admin.content.detail.viewOnSite")}
 							</Button>
 						</a>
 					)}
@@ -927,15 +927,15 @@ export default function ContentDetailPage() {
 			{/* Content Info Card / Edit Form */}
 			<Card>
 				<CardHeader className="flex flex-row items-center justify-between">
-					<CardTitle>{editMode ? "ویرایش اطلاعات محتوا" : t("admin.content.detail.contentInfo")}</CardTitle>
+					<CardTitle>{editMode ? t("admin.content.detail.editContent") : t("admin.content.detail.contentInfo")}</CardTitle>
 					{editMode && (
 						<div className="flex gap-2">
 							<Button size="sm" onClick={handleSaveEdit} disabled={savingEdit} className="flex items-center gap-1 bg-green-600 text-white hover:bg-green-700">
 								{savingEdit ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <Save className="h-4 w-4" />}
-								ذخیره
+								{t("admin.form.save")}
 							</Button>
 							<Button size="sm" variant="outline" onClick={() => setEditMode(false)} disabled={savingEdit}>
-								انصراف
+								{t("admin.form.cancel")}
 							</Button>
 						</div>
 					)}
@@ -1318,10 +1318,10 @@ export default function ContentDetailPage() {
 																? "bg-red-100 text-red-700"
 																: "bg-gray-100 text-gray-600"
 												}`}>
-													{asset.status === "ready" ? "آماده" :
-													 asset.status === "processing" ? "در حال پردازش" :
-													 asset.status === "error" ? "خطا" :
-													 asset.status === "uploaded" ? "آپلود شده" : asset.status}
+													{asset.status === "ready" ? t("admin.content.detail.videoStatusReady") :
+													 asset.status === "processing" ? t("admin.content.detail.videoStatusProcessing") :
+													 asset.status === "error" ? t("admin.content.detail.videoStatusError") :
+													 asset.status === "uploaded" ? t("admin.content.detail.videoStatusUploaded") : asset.status}
 												</span>
 												{asset.hlsUrl && (
 													<span className="text-xs text-gray-500 truncate max-w-[300px]">

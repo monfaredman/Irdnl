@@ -66,35 +66,64 @@ export default function ContentManagementPage() {
 	const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
 	const [menuItem, setMenuItem] = useState<any>(null);
 
+	// Load last used values from localStorage
+	const getLastFormValues = (key: string, defaults: any) => {
+		if (typeof window === "undefined") return defaults;
+		try {
+			const stored = localStorage.getItem(`adminContent_${key}`);
+			return stored ? { ...defaults, ...JSON.parse(stored) } : defaults;
+		} catch {
+			return defaults;
+		}
+	};
+
+	const saveFormValues = (key: string, values: any) => {
+		if (typeof window === "undefined") return;
+		try {
+			// Extract only the user-fillable fields (exclude dynamic ones like contentId)
+			const { title, titleFa, imageUrl, discountPercent, discountCode, linkUrl, label, labelFa, ...rest } = values;
+			const toSave = { title, titleFa, imageUrl, discountPercent, discountCode, linkUrl, label, labelFa };
+			localStorage.setItem(`adminContent_${key}`, JSON.stringify(toSave));
+		} catch (e) {
+			console.error("Failed to save form values:", e);
+		}
+	};
+
 	// Slider dialog
 	const [sliderDialog, setSliderDialog] = useState(false);
-	const [sliderForm, setSliderForm] = useState({
-		title: "",
-		titleFa: "",
-		imageUrl: "",
-		section: "hero",
-		sortOrder: 0,
-	});
+	const [sliderForm, setSliderForm] = useState(() => 
+		getLastFormValues("slider", {
+			title: "",
+			titleFa: "",
+			imageUrl: "",
+			section: "hero",
+			sortOrder: 0,
+		})
+	);
 
 	// Pin dialog
 	const [pinDialog, setPinDialog] = useState(false);
-	const [pinForm, setPinForm] = useState({
-		section: "hero",
-		label: "",
-		labelFa: "",
-		sortOrder: 0,
-	});
+	const [pinForm, setPinForm] = useState(() => 
+		getLastFormValues("pin", {
+			section: "hero",
+			label: "",
+			labelFa: "",
+			sortOrder: 0,
+		})
+	);
 
 	// Offer dialog
 	const [offerDialog, setOfferDialog] = useState(false);
-	const [offerForm, setOfferForm] = useState({
-		title: "",
-		titleFa: "",
-		discountPercent: 0,
-		discountCode: "",
-		linkUrl: "",
-		sortOrder: 0,
-	});
+	const [offerForm, setOfferForm] = useState(() => 
+		getLastFormValues("offer", {
+			title: "",
+			titleFa: "",
+			discountPercent: 0,
+			discountCode: "",
+			linkUrl: "",
+			sortOrder: 0,
+		})
+	);
 
 	const SLIDER_SECTIONS = [
 		{ value: "hero", label: "اسلایدر اصلی (Hero)" },
@@ -209,46 +238,58 @@ export default function ContentManagementPage() {
 	};
 
 	const openSliderDialog = () => {
+		const lastValues = getLastFormValues("slider", {});
+		const currentItem = menuItem; // Preserve before closing menu
 		setSliderForm({
-			title: menuItem?.title || "",
-			titleFa: menuItem?.titleFa || menuItem?.title || "",
-			imageUrl: menuItem?.posterUrl || "",
-			section: "hero",
-			sortOrder: 0,
+			title: currentItem?.title || lastValues.title || "",
+			titleFa: currentItem?.titleFa || currentItem?.title || lastValues.titleFa || "",
+			imageUrl: currentItem?.posterUrl || lastValues.imageUrl || "",
+			section: lastValues.section || "hero",
+			sortOrder: lastValues.sortOrder || 0,
+			contentId: currentItem?.id, // Store the ID in the form
 		});
 		setSliderDialog(true);
 		closeActionMenu();
 	};
 
 	const openPinDialog = () => {
-		setPinForm({ section: "hero", label: "", labelFa: "", sortOrder: 0 });
+		const lastValues = getLastFormValues("pin", {});
+		const currentItem = menuItem; // Preserve before closing menu
+		setPinForm({ 
+			section: lastValues.section || "hero", 
+			label: lastValues.label || "", 
+			labelFa: lastValues.labelFa || "", 
+			sortOrder: lastValues.sortOrder || 0,
+			contentId: currentItem?.id, // Store the ID in the form
+		});
 		setPinDialog(true);
 		closeActionMenu();
 	};
 
 	const openOfferDialog = () => {
+		const lastValues = getLastFormValues("offer", {});
+		const currentItem = menuItem; // Preserve before closing menu
 		setOfferForm({
-			title: menuItem?.title || "",
-			titleFa: menuItem?.titleFa || menuItem?.title || "",
-			discountPercent: 0,
-			discountCode: "",
-			linkUrl: `/item/${menuItem?.id}`,
-			sortOrder: 0,
+			title: currentItem?.title || lastValues.title || "",
+			titleFa: currentItem?.titleFa || currentItem?.title || lastValues.titleFa || "",
+			discountPercent: lastValues.discountPercent || 0,
+			discountCode: lastValues.discountCode || "",
+			linkUrl: currentItem?.id ? `/item/${currentItem.id}` : lastValues.linkUrl || "",
+			sortOrder: lastValues.sortOrder || 0,
+			contentId: currentItem?.id, // Store the ID in the form
 		});
 		setOfferDialog(true);
 		closeActionMenu();
 	};
 
 	const handleSliderSave = async () => {
-		if (!menuItem?.id) {
+		if (!sliderForm.contentId) {
 			showFeedback("error", "شناسه محتوا یافت نشد");
 			return;
 		}
 		try {
-			await slidersApi.create({
-				...sliderForm,
-				contentId: menuItem.id,
-			});
+			await slidersApi.create(sliderForm);
+			saveFormValues("slider", sliderForm); // Save for next time
 			showFeedback("success", "محتوا به اسلایدر اضافه شد");
 			setSliderDialog(false);
 		} catch (e: any) {
@@ -257,15 +298,13 @@ export default function ContentManagementPage() {
 	};
 
 	const handlePinSave = async () => {
-		if (!menuItem?.id) {
+		if (!pinForm.contentId) {
 			showFeedback("error", "شناسه محتوا یافت نشد");
 			return;
 		}
 		try {
-			await pinsApi.create({
-				...pinForm,
-				contentId: menuItem.id,
-			});
+			await pinsApi.create(pinForm);
+			saveFormValues("pin", pinForm); // Save for next time
 			showFeedback("success", "محتوا پین شد");
 			setPinDialog(false);
 		} catch (e: any) {
@@ -279,6 +318,7 @@ export default function ContentManagementPage() {
 				...offerForm,
 				linkUrl: offerForm.linkUrl || undefined,
 			});
+			saveFormValues("offer", offerForm); // Save for next time
 			showFeedback("success", "پیشنهاد ایجاد شد");
 			setOfferDialog(false);
 		} catch (e: any) {
@@ -521,7 +561,6 @@ export default function ContentManagementPage() {
 								paginationPageSizeSelector={[10, 20, 50, 100]}
 								rowSelection={{ mode: "singleRow", enableClickSelection: false }}
 								enableRtl={true}
-								theme="legacy"
 								loading={loading}
 								animateRows={true}
 								rowHeight={70}
