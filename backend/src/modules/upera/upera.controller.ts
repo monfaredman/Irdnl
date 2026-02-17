@@ -43,7 +43,7 @@ import { UserRole } from '../users/entities/user.entity';
 @Controller('admin/upera')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER)
 export class UperaController {
   constructor(private readonly uperaService: UperaService) {}
 
@@ -84,6 +84,7 @@ export class UperaController {
   // ==========================================
 
   @Post('buy/payment-url')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get payment URL for buying content from Upera' })
   @ApiResponse({ status: 200, description: 'Payment URL received' })
@@ -92,6 +93,7 @@ export class UperaController {
   }
 
   @Post('buy/callback')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Handle Upera payment callback' })
   @ApiResponse({ status: 200, description: 'Payment callback processed' })
@@ -100,6 +102,7 @@ export class UperaController {
   }
 
   @Post('buy/get-link')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get download/streaming link after purchase' })
   @ApiResponse({ status: 200, description: 'Link received' })
@@ -112,6 +115,7 @@ export class UperaController {
   // ==========================================
 
   @Post('screening/buy')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Buy home screening from Upera' })
   @ApiResponse({ status: 200, description: 'Screening purchase initiated' })
@@ -152,6 +156,7 @@ export class UperaController {
   // ==========================================
 
   @Post('local/save-movies')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Save fetched Upera movies to local storage' })
   @ApiResponse({ status: 201, description: 'Movies saved locally' })
@@ -160,6 +165,7 @@ export class UperaController {
   }
 
   @Post('local/save-series')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Save fetched Upera series to local storage' })
   @ApiResponse({ status: 201, description: 'Series saved locally' })
@@ -194,6 +200,7 @@ export class UperaController {
   }
 
   @Post('local/import')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Import Upera content into the local database as Content' })
   @ApiResponse({ status: 201, description: 'Content imported to database' })
@@ -203,6 +210,7 @@ export class UperaController {
   }
 
   @Delete('local/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete locally saved Upera content' })
   @ApiResponse({ status: 204, description: 'Content deleted' })

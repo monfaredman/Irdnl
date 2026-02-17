@@ -159,7 +159,7 @@ export class PublicPlaylistsController {
 @Controller('admin/playlists')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER)
 export class AdminPlaylistsController {
   constructor(private readonly playlistsService: PlaylistsService) {}
 
@@ -176,6 +176,7 @@ export class AdminPlaylistsController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete playlist (admin)' })
   async delete(@Param('id') id: string) {

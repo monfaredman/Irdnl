@@ -28,11 +28,12 @@ import { User } from '../users/entities/user.entity';
 @Controller('admin/notifications')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER)
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Send notification (admin only)' })
   @ApiResponse({ status: 201, description: 'Notification sent' })

@@ -38,6 +38,8 @@ interface MenuItem {
 	labelKey: string;
 	icon: any;
 	children?: MenuItem[];
+	/** Roles that can see this menu item. If omitted, all roles can see it. */
+	roles?: string[];
 }
 
 const menuItems: MenuItem[] = [
@@ -45,6 +47,7 @@ const menuItems: MenuItem[] = [
 	{
 		labelKey: "admin.menu.content",
 		icon: Film,
+		roles: ["admin", "content_manager", "viewer"],
 		children: [
 			{ href: "/admin/content", labelKey: "admin.menu.contentUpload", icon: Upload },
 			{ href: "/admin/categories", labelKey: "admin.menu.categories", icon: FolderTree },
@@ -56,23 +59,44 @@ const menuItems: MenuItem[] = [
 			{ href: "/admin/videos", labelKey: "admin.menu.videos", icon: Video },
 		],
 	},
-	{ href: "/admin/users", labelKey: "admin.menu.users", icon: LayoutDashboard },
-	{ href: "/admin/finance", labelKey: "admin.menu.finance", icon: BarChart3 },
-	{ href: "/admin/notifications", labelKey: "admin.menu.notifications", icon: Bell },
-	{ href: "/admin/comments", labelKey: "admin.comments.title", icon: MessageSquare },
-	{ href: "/admin/tickets", labelKey: "admin.menu.tickets", icon: Ticket },
-	{ href: "/admin/blog", labelKey: "admin.blog.title", icon: BookOpen },
-	{ href: "/admin/playlists", labelKey: "admin.menu.playlists", icon: ListMusic },
-	{ href: "/admin/upera", labelKey: "admin.menu.upera", icon: Globe },
-	{ href: "/admin/tmdb", labelKey: "admin.menu.tmdb", icon: Database },
+	{ href: "/admin/users", labelKey: "admin.menu.users", icon: LayoutDashboard, roles: ["admin"] },
+	{ href: "/admin/finance", labelKey: "admin.menu.finance", icon: BarChart3, roles: ["admin", "finance"] },
+	{ href: "/admin/notifications", labelKey: "admin.menu.notifications", icon: Bell, roles: ["admin", "content_manager", "viewer"] },
+	{ href: "/admin/comments", labelKey: "admin.comments.title", icon: MessageSquare, roles: ["admin", "content_manager", "viewer"] },
+	{ href: "/admin/tickets", labelKey: "admin.menu.tickets", icon: Ticket, roles: ["admin", "content_manager", "viewer"] },
+	{ href: "/admin/blog", labelKey: "admin.blog.title", icon: BookOpen, roles: ["admin", "content_manager", "viewer"] },
+	{ href: "/admin/playlists", labelKey: "admin.menu.playlists", icon: ListMusic, roles: ["admin", "content_manager", "viewer"] },
+	{ href: "/admin/upera", labelKey: "admin.menu.upera", icon: Globe, roles: ["admin", "content_manager", "viewer"] },
+	{ href: "/admin/tmdb", labelKey: "admin.menu.tmdb", icon: Database, roles: ["admin", "content_manager", "viewer"] },
 	// { href: "/admin/profile", labelKey: "admin.profile.title", icon: UserCog },
 ];
+
+/** Filter menu items based on user role */
+function filterMenuByRole(items: MenuItem[], role: string | undefined): MenuItem[] {
+	if (!role) return [];
+	return items
+		.filter((item) => !item.roles || item.roles.includes(role))
+		.map((item) => {
+			if (item.children) {
+				return {
+					...item,
+					children: item.children.filter(
+						(child) => !child.roles || child.roles.includes(role)
+					),
+				};
+			}
+			return item;
+		})
+		.filter((item) => !item.children || item.children.length > 0);
+}
 
 export function AdminSidebar() {
 	const pathname = usePathname();
 	const { logout, user } = useAdminAuth();
 	const { t } = useTranslation();
 	const [expandedItems, setExpandedItems] = useState<string[]>(["admin.menu.content"]);
+
+	const visibleMenuItems = filterMenuByRole(menuItems, user?.role);
 
 	const toggleExpand = (labelKey: string) => {
 		setExpandedItems((prev) =>
@@ -148,7 +172,7 @@ export function AdminSidebar() {
 				<h1 className="text-xl font-bold text-gray-900">{t("admin.title")}</h1>
 			</div>
 			<nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-				{menuItems.map((item) => renderMenuItem(item))}
+				{visibleMenuItems.map((item) => renderMenuItem(item))}
 			</nav>
 			<div className="border-t border-gray-200 p-4">
 				<Link

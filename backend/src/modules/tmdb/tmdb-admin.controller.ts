@@ -36,7 +36,7 @@ import {
 @ApiTags('Admin - TMDB')
 @Controller('admin/tmdb')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER)
 @ApiBearerAuth()
 export class TMDBAdminController {
   constructor(private readonly tmdbAdminService: TMDBAdminService) {}
@@ -92,6 +92,7 @@ export class TMDBAdminController {
   // ==========================================
 
   @Post('saved')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Save TMDB content locally for later import' })
   @ApiResponse({ status: 201, description: 'Content saved locally' })
@@ -100,6 +101,7 @@ export class TMDBAdminController {
   }
 
   @Post('saved/bulk')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Save multiple TMDB content items locally' })
   @ApiResponse({ status: 201, description: 'Contents saved locally' })
@@ -140,6 +142,7 @@ export class TMDBAdminController {
   }
 
   @Post('saved/import')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Import saved TMDB content into the main database' })
   @ApiResponse({ status: 201, description: 'Content imported to database' })
@@ -149,6 +152,7 @@ export class TMDBAdminController {
   }
 
   @Delete('saved/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete saved TMDB content' })
   @ApiResponse({ status: 204, description: 'Content deleted' })

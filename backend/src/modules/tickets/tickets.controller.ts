@@ -57,7 +57,7 @@ export class UserTicketsController {
 @Controller('admin/tickets')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER)
 export class AdminTicketsController {
   constructor(private readonly ticketsService: TicketsService) {}
 
@@ -84,6 +84,7 @@ export class AdminTicketsController {
   }
 
   @Put(':id/reply')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @ApiOperation({ summary: 'Reply to a ticket' })
   @ApiResponse({ status: 200, description: 'Reply sent' })
   async replyToTicket(@Param('id') id: string, @Body() dto: AdminReplyTicketDto) {
@@ -91,6 +92,7 @@ export class AdminTicketsController {
   }
 
   @Put(':id/status')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @ApiOperation({ summary: 'Update ticket status' })
   @ApiResponse({ status: 200, description: 'Status updated' })
   async updateStatus(@Param('id') id: string, @Body() dto: UpdateTicketStatusDto) {
@@ -98,6 +100,7 @@ export class AdminTicketsController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete a ticket' })
   @ApiResponse({ status: 204, description: 'Ticket deleted' })

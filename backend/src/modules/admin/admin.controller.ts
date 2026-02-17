@@ -51,7 +51,7 @@ import { UserRole } from '../users/entities/user.entity';
 @Controller('admin')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER, UserRole.FINANCE)
 export class AdminController {
   constructor(
     private readonly adminService: AdminService,
@@ -59,6 +59,7 @@ export class AdminController {
   ) {}
 
   @Post('content')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create content (admin only)' })
   @ApiResponse({ status: 201, description: 'Content created' })
@@ -68,6 +69,7 @@ export class AdminController {
   }
 
   @Put('content/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update content (admin only)' })
   @ApiResponse({ status: 200, description: 'Content updated' })
@@ -77,6 +79,7 @@ export class AdminController {
   }
 
   @Delete('content/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete content (admin only)' })
   @ApiResponse({ status: 204, description: 'Content deleted' })
@@ -86,6 +89,7 @@ export class AdminController {
   }
 
   @Post('videos/upload')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload video file for content or episode (admin only)' })
@@ -147,6 +151,7 @@ export class AdminController {
   }
 
   @Post('videos/:assetId/mark-transcoded')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mark video asset as transcoded (admin only)' })
   @ApiResponse({ status: 200, description: 'Video asset updated' })
@@ -173,6 +178,7 @@ export class AdminController {
   }
 
   @Delete('videos/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete video asset (admin only)' })
   @ApiResponse({ status: 204, description: 'Video asset deleted' })
@@ -182,6 +188,7 @@ export class AdminController {
   }
 
   @Post('seasons')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create season (admin only)' })
   @ApiResponse({ status: 201, description: 'Season created' })
@@ -190,6 +197,7 @@ export class AdminController {
   }
 
   @Post('episodes')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create episode (admin only)' })
   @ApiResponse({ status: 201, description: 'Episode created' })
@@ -198,6 +206,7 @@ export class AdminController {
   }
 
   @Put('seasons/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update season (admin only)' })
   @ApiResponse({ status: 200, description: 'Season updated' })
@@ -207,6 +216,7 @@ export class AdminController {
   }
 
   @Delete('seasons/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete season and its episodes (admin only)' })
   @ApiResponse({ status: 204, description: 'Season deleted' })
@@ -216,6 +226,7 @@ export class AdminController {
   }
 
   @Put('episodes/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update episode (admin only)' })
   @ApiResponse({ status: 200, description: 'Episode updated' })
@@ -225,6 +236,7 @@ export class AdminController {
   }
 
   @Delete('episodes/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete episode (admin only)' })
   @ApiResponse({ status: 204, description: 'Episode deleted' })
@@ -234,6 +246,7 @@ export class AdminController {
   }
 
   @Get('users')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'List users with pagination (admin only)' })
   @ApiResponse({ status: 200, description: 'Users list' })
   async listUsers(@Query() listUsersDto: ListUsersDto) {
@@ -241,6 +254,7 @@ export class AdminController {
   }
 
   @Get('users/:id')
+  @Roles(UserRole.ADMIN)
   @ApiOperation({ summary: 'Get user by ID (admin only)' })
   @ApiResponse({ status: 200, description: 'User details' })
   async getUser(@Param('id') id: string) {
@@ -248,6 +262,7 @@ export class AdminController {
   }
 
   @Post('users')
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create new user (admin only)' })
   @ApiResponse({ status: 201, description: 'User created successfully' })
@@ -257,6 +272,7 @@ export class AdminController {
   }
 
   @Patch('users/:id')
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update user (admin only)' })
   @ApiResponse({ status: 200, description: 'User updated' })
@@ -265,6 +281,7 @@ export class AdminController {
   }
 
   @Delete('users/:id')
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete user (admin only)' })
   @ApiResponse({ status: 204, description: 'User deleted' })
@@ -273,6 +290,7 @@ export class AdminController {
   }
 
   @Post('images/upload')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Upload image (poster/banner) (admin only)' })
@@ -318,6 +336,7 @@ export class AdminController {
   }
 
   @Post('categories')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create category (admin only)' })
   @ApiResponse({ status: 201, description: 'Category created' })
@@ -326,6 +345,7 @@ export class AdminController {
   }
 
   @Put('categories/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update category (admin only)' })
   @ApiResponse({ status: 200, description: 'Category updated' })
@@ -334,6 +354,7 @@ export class AdminController {
   }
 
   @Delete('categories/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete category (admin only)' })
   @ApiResponse({ status: 204, description: 'Category deleted' })
@@ -361,6 +382,7 @@ export class AdminController {
   }
 
   @Post('genres')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create genre (admin only)' })
   @ApiResponse({ status: 201, description: 'Genre created' })
@@ -369,6 +391,7 @@ export class AdminController {
   }
 
   @Put('genres/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update genre (admin only)' })
   @ApiResponse({ status: 200, description: 'Genre updated' })
@@ -377,6 +400,7 @@ export class AdminController {
   }
 
   @Delete('genres/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete genre (admin only)' })
   @ApiResponse({ status: 204, description: 'Genre deleted' })
@@ -404,6 +428,7 @@ export class AdminController {
   }
 
   @Post('sliders')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create slider (admin only)' })
   @ApiResponse({ status: 201, description: 'Slider created' })
@@ -412,6 +437,7 @@ export class AdminController {
   }
 
   @Put('sliders/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update slider (admin only)' })
   @ApiResponse({ status: 200, description: 'Slider updated' })
@@ -420,6 +446,7 @@ export class AdminController {
   }
 
   @Delete('sliders/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete slider (admin only)' })
   @ApiResponse({ status: 204, description: 'Slider deleted' })
@@ -446,6 +473,7 @@ export class AdminController {
   }
 
   @Post('offers')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create offer (admin only)' })
   @ApiResponse({ status: 201, description: 'Offer created' })
@@ -454,6 +482,7 @@ export class AdminController {
   }
 
   @Put('offers/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update offer (admin only)' })
   @ApiResponse({ status: 200, description: 'Offer updated' })
@@ -462,6 +491,7 @@ export class AdminController {
   }
 
   @Delete('offers/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete offer (admin only)' })
   @ApiResponse({ status: 204, description: 'Offer deleted' })
@@ -489,6 +519,7 @@ export class AdminController {
   }
 
   @Post('pins')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create pin (admin only)' })
   @ApiResponse({ status: 201, description: 'Pin created' })
@@ -497,6 +528,7 @@ export class AdminController {
   }
 
   @Put('pins/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Update pin (admin only)' })
   @ApiResponse({ status: 200, description: 'Pin updated' })
@@ -505,6 +537,7 @@ export class AdminController {
   }
 
   @Delete('pins/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete pin (admin only)' })
   @ApiResponse({ status: 204, description: 'Pin deleted' })
@@ -536,6 +569,7 @@ export class AdminController {
   }
 
   @Post('collections')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create collection (admin only)' })
   @ApiResponse({ status: 201, description: 'Collection created' })
@@ -544,6 +578,7 @@ export class AdminController {
   }
 
   @Put('collections/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @ApiOperation({ summary: 'Update collection (admin only)' })
   @ApiResponse({ status: 200, description: 'Collection updated' })
   async updateCollection(
@@ -554,6 +589,7 @@ export class AdminController {
   }
 
   @Delete('collections/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete collection (admin only)' })
   @ApiResponse({ status: 204, description: 'Collection deleted' })

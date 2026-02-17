@@ -23,11 +23,12 @@ import { UserRole } from '../users/entities/user.entity';
 
 @Controller('admin/blog')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER)
 export class BlogAdminController {
   constructor(private readonly blogService: BlogService) {}
 
   @Post()
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   create(@Body() createBlogPostDto: CreateBlogPostDto, @Request() req) {
     return this.blogService.create(createBlogPostDto, req.user.id);
   }
@@ -48,11 +49,13 @@ export class BlogAdminController {
   }
 
   @Put(':id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   update(@Param('id') id: string, @Body() updateBlogPostDto: UpdateBlogPostDto) {
     return this.blogService.update(id, updateBlogPostDto);
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   remove(@Param('id') id: string) {
     return this.blogService.remove(id);
   }

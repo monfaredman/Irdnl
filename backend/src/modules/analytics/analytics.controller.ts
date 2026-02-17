@@ -10,7 +10,7 @@ import { UserRole } from '../users/entities/user.entity';
 @Controller('admin/analytics')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER, UserRole.FINANCE)
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 

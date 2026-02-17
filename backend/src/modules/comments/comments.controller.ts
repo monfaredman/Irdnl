@@ -28,7 +28,7 @@ import { UserRole } from '../users/entities/user.entity';
 @ApiTags('Admin - Comments')
 @Controller('admin/comments')
 @UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.ADMIN)
+@Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER, UserRole.VIEWER)
 @ApiBearerAuth()
 export class CommentsAdminController {
   constructor(private readonly commentsService: CommentsService) {}
@@ -52,6 +52,7 @@ export class CommentsAdminController {
   }
 
   @Put(':id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @ApiOperation({ summary: 'Update comment' })
   async update(
     @Param('id') id: string,
@@ -62,6 +63,7 @@ export class CommentsAdminController {
   }
 
   @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({ summary: 'Delete comment' })
   async remove(@Param('id') id: string) {
@@ -69,24 +71,28 @@ export class CommentsAdminController {
   }
 
   @Post(':id/approve')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @ApiOperation({ summary: 'Approve comment' })
   async approve(@Param('id') id: string, @Request() req) {
     return this.commentsService.approve(id, req.user.id);
   }
 
   @Post(':id/reject')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @ApiOperation({ summary: 'Reject comment' })
   async reject(@Param('id') id: string, @Request() req) {
     return this.commentsService.reject(id, req.user.id);
   }
 
   @Post(':id/spam')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @ApiOperation({ summary: 'Mark comment as spam' })
   async markAsSpam(@Param('id') id: string, @Request() req) {
     return this.commentsService.markAsSpam(id, req.user.id);
   }
 
   @Post('bulk-action')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
   @ApiOperation({ summary: 'Perform bulk action on comments' })
   async bulkAction(@Body() bulkActionDto: BulkActionDto, @Request() req) {
     return this.commentsService.bulkAction(bulkActionDto, req.user.id);
