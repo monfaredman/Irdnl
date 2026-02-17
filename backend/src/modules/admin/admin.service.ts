@@ -24,7 +24,7 @@ import { CreateEpisodeDto, UpdateEpisodeDto } from './dto/create-episode.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import { CreateCategoryDto, UpdateCategoryDto, CreateChildCategoryDto, UpdateChildCategoryDto } from './dto/category.dto';
 import { CreateGenreDto, UpdateGenreDto } from './dto/genre.dto';
 import { CreateSliderDto, UpdateSliderDto } from './dto/slider.dto';
 import { CreateOfferDto, UpdateOfferDto } from './dto/offer.dto';
@@ -541,6 +541,57 @@ export class AdminService {
     const cat = await this.categoryRepository.findOne({ where: { id } });
     if (!cat) throw new NotFoundException(`Category with ID ${id} not found`);
     await this.categoryRepository.remove(cat);
+  }
+
+  // ========================================================================
+  // CHILD CATEGORIES CRUD
+  // ========================================================================
+
+  async getChildrenByParentId(parentId: string) {
+    const parent = await this.categoryRepository.findOne({ where: { id: parentId } });
+    if (!parent) throw new NotFoundException(`Parent category with ID ${parentId} not found`);
+
+    const data = await this.categoryRepository.find({
+      where: { parentId },
+      order: { sortOrder: 'ASC', createdAt: 'DESC' },
+    });
+    return { data, total: data.length };
+  }
+
+  async createChildCategory(parentId: string, dto: CreateChildCategoryDto): Promise<Category> {
+    const parent = await this.categoryRepository.findOne({ where: { id: parentId } });
+    if (!parent) throw new NotFoundException(`Parent category with ID ${parentId} not found`);
+
+    const child = this.categoryRepository.create({
+      ...dto,
+      parentId,
+    });
+    return this.categoryRepository.save(child);
+  }
+
+  async updateChildCategory(parentId: string, childId: string, dto: UpdateChildCategoryDto): Promise<Category> {
+    const child = await this.categoryRepository.findOne({
+      where: { id: childId, parentId },
+    });
+    if (!child) {
+      throw new NotFoundException(
+        `Child category with ID ${childId} not found under parent ${parentId}`,
+      );
+    }
+    Object.assign(child, dto);
+    return this.categoryRepository.save(child);
+  }
+
+  async deleteChildCategory(parentId: string, childId: string): Promise<void> {
+    const child = await this.categoryRepository.findOne({
+      where: { id: childId, parentId },
+    });
+    if (!child) {
+      throw new NotFoundException(
+        `Child category with ID ${childId} not found under parent ${parentId}`,
+      );
+    }
+    await this.categoryRepository.remove(child);
   }
 
   // ========================================================================

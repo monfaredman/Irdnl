@@ -25,6 +25,7 @@ import {
   ApiConsumes,
   ApiBody,
   ApiQuery,
+  ApiParam,
 } from '@nestjs/swagger';
 import { AdminService } from './admin.service';
 import { TMDBService } from '../content/tmdb.service';
@@ -36,7 +37,7 @@ import { CreateEpisodeDto, UpdateEpisodeDto } from './dto/create-episode.dto';
 import { ListUsersDto } from './dto/list-users.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { MarkTranscodedDto } from './dto/mark-transcoded.dto';
-import { CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import { CreateCategoryDto, UpdateCategoryDto, CreateChildCategoryDto, UpdateChildCategoryDto } from './dto/category.dto';
 import { CreateGenreDto, UpdateGenreDto } from './dto/genre.dto';
 import { CreateSliderDto, UpdateSliderDto } from './dto/slider.dto';
 import { CreateOfferDto, UpdateOfferDto } from './dto/offer.dto';
@@ -360,6 +361,60 @@ export class AdminController {
   @ApiResponse({ status: 204, description: 'Category deleted' })
   async deleteCategory(@Param('id') id: string) {
     await this.adminService.deleteCategory(id);
+  }
+
+  // ========================================================================
+  // CHILD CATEGORIES CRUD
+  // ========================================================================
+
+  @Get('categories/:parentId/children')
+  @ApiOperation({ summary: 'List child categories for a parent (admin only)' })
+  @ApiParam({ name: 'parentId', description: 'Parent category ID' })
+  @ApiResponse({ status: 200, description: 'Child categories list' })
+  async getChildCategories(@Param('parentId') parentId: string) {
+    return this.adminService.getChildrenByParentId(parentId);
+  }
+
+  @Post('categories/:parentId/children')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a child category (admin only)' })
+  @ApiParam({ name: 'parentId', description: 'Parent category ID' })
+  @ApiResponse({ status: 201, description: 'Child category created' })
+  async createChildCategory(
+    @Param('parentId') parentId: string,
+    @Body() dto: CreateChildCategoryDto,
+  ) {
+    return this.adminService.createChildCategory(parentId, dto);
+  }
+
+  @Put('categories/:parentId/children/:childId')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update a child category (admin only)' })
+  @ApiParam({ name: 'parentId', description: 'Parent category ID' })
+  @ApiParam({ name: 'childId', description: 'Child category ID' })
+  @ApiResponse({ status: 200, description: 'Child category updated' })
+  async updateChildCategory(
+    @Param('parentId') parentId: string,
+    @Param('childId') childId: string,
+    @Body() dto: UpdateChildCategoryDto,
+  ) {
+    return this.adminService.updateChildCategory(parentId, childId, dto);
+  }
+
+  @Delete('categories/:parentId/children/:childId')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete a child category (admin only)' })
+  @ApiParam({ name: 'parentId', description: 'Parent category ID' })
+  @ApiParam({ name: 'childId', description: 'Child category ID' })
+  @ApiResponse({ status: 204, description: 'Child category deleted' })
+  async deleteChildCategory(
+    @Param('parentId') parentId: string,
+    @Param('childId') childId: string,
+  ) {
+    await this.adminService.deleteChildCategory(parentId, childId);
   }
 
   // ========================================================================

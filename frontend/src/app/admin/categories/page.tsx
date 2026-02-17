@@ -41,6 +41,7 @@ import {
 } from "@mui/material";
 import { categoriesApi } from "@/lib/api/admin";
 import { useTranslation } from "@/i18n";
+import ChildCategoryManager from "./components/ChildCategoryManager";
 
 interface CategoryItem {
 	id: string;
@@ -99,6 +100,11 @@ export default function CategoriesPage() {
 	const [editingId, setEditingId] = useState<string | null>(null);
 	const [form, setForm] = useState(emptyForm);
 	const [gradientInput, setGradientInput] = useState("");
+
+	// Child category manager
+	const [childManagerOpen, setChildManagerOpen] = useState(false);
+	const [selectedParentId, setSelectedParentId] = useState<string>("");
+	const [selectedParentName, setSelectedParentName] = useState<string>("");
 
 	const fetchCategories = async () => {
 		setLoading(true);
@@ -161,6 +167,12 @@ export default function CategoriesPage() {
 		});
 		setGradientInput((cat.gradientColors || []).join(", "));
 		setFormOpen(true);
+	};
+
+	const openChildManager = (cat: CategoryItem) => {
+		setSelectedParentId(cat.id);
+		setSelectedParentName(cat.nameFa);
+		setChildManagerOpen(true);
 	};
 
 	const handleSave = async () => {
@@ -356,13 +368,16 @@ export default function CategoriesPage() {
 		{
 			field: "actions",
 			headerName: "عملیات",
-			width: 120,
+			width: 180,
 			sortable: false,
 			filter: false,
 			cellRenderer: (params: any) => {
 				const category = params.data;
 				return (
 					<div className="flex gap-1">
+						<Button variant="ghost" size="sm" onClick={() => openChildManager(category)}>
+							<FolderTree className="h-4 w-4" />
+						</Button>
 						<Button variant="ghost" size="sm" onClick={() => openEditForm(category)}>
 							<Edit className="h-4 w-4" />
 						</Button>
@@ -632,6 +647,14 @@ export default function CategoriesPage() {
 					</Alert>
 				) : undefined}
 			</Snackbar>
+
+			{/* Child Category Manager */}
+			<ChildCategoryManager
+				parentId={selectedParentId}
+				parentName={selectedParentName}
+				open={childManagerOpen}
+				onClose={() => setChildManagerOpen(false)}
+			/>
 		</div>
 	);
 }

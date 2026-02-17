@@ -9,7 +9,7 @@ loadEnvConfig({ path: '.env.local', override: true });
 
 /**
  * Seed categories and genres
- * Auto-generated on 2026-02-17T11:00:20.194Z
+ * Auto-generated on 2026-02-17T12:32:18.717Z
  * 
  * Categories: 11 parents, 16 children
  * Genres: 22 total
@@ -443,25 +443,6 @@ async function seedCategoriesAndGenres() {
     }
   },
   {
-    "slug": "iranian",
-    "nameEn": "Iranian Movies",
-    "nameFa": "فیلم ایرانی",
-    "contentType": "movie",
-    "descriptionEn": "Best Iranian cinema",
-    "descriptionFa": "گلچینی از بهترین فیلم‌های سینمای ایران",
-    "gradientColors": [
-      "#059669",
-      "#047857"
-    ],
-    "showInMenu": true,
-    "showInLanding": true,
-    "showEpisodes": false,
-    "isActive": true,
-    "sortOrder": 2,
-    "urlPath": "iranian",
-    "tmdbParams": {}
-  },
-  {
     "slug": "movies-iranian",
     "nameEn": "Iranian Movies",
     "nameFa": "فیلم‌های ایرانی",
@@ -484,6 +465,25 @@ async function seedCategoriesAndGenres() {
     }
   },
   {
+    "slug": "iranian",
+    "nameEn": "Iranian Movies",
+    "nameFa": "فیلم ایرانی",
+    "contentType": "movie",
+    "descriptionEn": "Best Iranian cinema",
+    "descriptionFa": "گلچینی از بهترین فیلم‌های سینمای ایران",
+    "gradientColors": [
+      "#059669",
+      "#047857"
+    ],
+    "showInMenu": true,
+    "showInLanding": true,
+    "showEpisodes": false,
+    "isActive": true,
+    "sortOrder": 2,
+    "urlPath": "iranian",
+    "tmdbParams": {}
+  },
+  {
     "slug": "series",
     "nameEn": "Series",
     "nameFa": "سریال",
@@ -501,28 +501,6 @@ async function seedCategoriesAndGenres() {
     "sortOrder": 3,
     "urlPath": "series",
     "tmdbParams": {}
-  },
-  {
-    "slug": "series-iranian",
-    "nameEn": "Iranian Series",
-    "nameFa": "سریال‌های ایرانی",
-    "contentType": "series",
-    "descriptionEn": "Popular Iranian TV series",
-    "descriptionFa": "سریال‌های محبوب تلویزیونی ایران",
-    "gradientColors": [
-      "#10B981",
-      "#059669"
-    ],
-    "showInMenu": true,
-    "showInLanding": false,
-    "showEpisodes": false,
-    "isActive": false,
-    "sortOrder": 4,
-    "urlPath": null,
-    "tmdbParams": {
-      "include_adult": false,
-      "with_original_language": "fa"
-    }
   },
   {
     "slug": "animation",
@@ -544,6 +522,28 @@ async function seedCategoriesAndGenres() {
     "tmdbParams": {
       "with_genres": "16",
       "include_adult": false
+    }
+  },
+  {
+    "slug": "series-iranian",
+    "nameEn": "Iranian Series",
+    "nameFa": "سریال‌های ایرانی",
+    "contentType": "series",
+    "descriptionEn": "Popular Iranian TV series",
+    "descriptionFa": "سریال‌های محبوب تلویزیونی ایران",
+    "gradientColors": [
+      "#10B981",
+      "#059669"
+    ],
+    "showInMenu": true,
+    "showInLanding": false,
+    "showEpisodes": false,
+    "isActive": false,
+    "sortOrder": 4,
+    "urlPath": null,
+    "tmdbParams": {
+      "include_adult": false,
+      "with_original_language": "fa"
     }
   },
   {
@@ -715,25 +715,25 @@ async function seedCategoriesAndGenres() {
     }
   },
   {
-    "slug": "foreign-horror",
-    "nameEn": "Horror",
-    "nameFa": "ترسناک",
-    "parentSlug": "foreign",
-    "contentType": "movie",
-    "descriptionEn": "Horror under Foreign Movies",
-    "descriptionFa": "ترسناک - زیرمجموعه فیلم خارجی",
+    "slug": "series-turkish",
+    "nameEn": "Turkish Series",
+    "nameFa": "سریال ترکی",
+    "parentSlug": "series",
+    "contentType": "series",
+    "descriptionEn": "Turkish Series under Series",
+    "descriptionFa": "سریال ترکی - زیرمجموعه سریال",
     "gradientColors": [
-      "#7C3AED",
-      "#5B21B6"
+      "#EF4444",
+      "#DC2626"
     ],
     "showInMenu": false,
     "showInLanding": false,
     "showEpisodes": false,
     "isActive": true,
     "sortOrder": 2,
-    "urlPath": "horror",
+    "urlPath": "turkish",
     "tmdbParams": {
-      "with_genres": "27"
+      "with_original_language": "tr"
     }
   },
   {
@@ -757,46 +757,48 @@ async function seedCategoriesAndGenres() {
     "tmdbParams": {}
   },
   {
-    "slug": "series-turkish",
-    "nameEn": "Turkish Series",
-    "nameFa": "سریال ترکی",
-    "parentSlug": "series",
-    "contentType": "series",
-    "descriptionEn": "Turkish Series under Series",
-    "descriptionFa": "سریال ترکی - زیرمجموعه سریال",
+    "slug": "foreign-horror",
+    "nameEn": "Horror",
+    "nameFa": "ترسناک",
+    "parentSlug": "foreign",
+    "contentType": "movie",
+    "descriptionEn": "Horror under Foreign Movies",
+    "descriptionFa": "ترسناک - زیرمجموعه فیلم خارجی",
     "gradientColors": [
-      "#EF4444",
-      "#DC2626"
+      "#7C3AED",
+      "#5B21B6"
     ],
     "showInMenu": false,
     "showInLanding": false,
     "showEpisodes": false,
     "isActive": true,
     "sortOrder": 2,
-    "urlPath": "turkish",
+    "urlPath": "horror",
     "tmdbParams": {
-      "with_original_language": "tr"
+      "with_genres": "27"
     }
   },
   {
-    "slug": "other-coming-soon",
-    "nameEn": "Coming Soon",
-    "nameFa": "به زودی",
-    "parentSlug": "other",
-    "contentType": "mixed",
-    "descriptionEn": "Coming Soon under Other",
-    "descriptionFa": "به زودی - زیرمجموعه سایر",
+    "slug": "foreign-indian",
+    "nameEn": "Indian",
+    "nameFa": "هندی",
+    "parentSlug": "foreign",
+    "contentType": "movie",
+    "descriptionEn": "Indian under Foreign Movies",
+    "descriptionFa": "هندی - زیرمجموعه فیلم خارجی",
     "gradientColors": [
-      "#14B8A6",
-      "#0D9488"
+      "#F97316",
+      "#EA580C"
     ],
     "showInMenu": false,
     "showInLanding": false,
     "showEpisodes": false,
-    "isActive": true,
+    "isActive": false,
     "sortOrder": 3,
-    "urlPath": "coming-soon",
-    "tmdbParams": {}
+    "urlPath": "indian",
+    "tmdbParams": {
+      "with_original_language": "hi"
+    }
   },
   {
     "slug": "series-korean",
@@ -821,26 +823,24 @@ async function seedCategoriesAndGenres() {
     }
   },
   {
-    "slug": "foreign-indian",
-    "nameEn": "Indian",
-    "nameFa": "هندی",
-    "parentSlug": "foreign",
-    "contentType": "movie",
-    "descriptionEn": "Indian under Foreign Movies",
-    "descriptionFa": "هندی - زیرمجموعه فیلم خارجی",
+    "slug": "other-coming-soon",
+    "nameEn": "Coming Soon",
+    "nameFa": "به زودی",
+    "parentSlug": "other",
+    "contentType": "mixed",
+    "descriptionEn": "Coming Soon under Other",
+    "descriptionFa": "به زودی - زیرمجموعه سایر",
     "gradientColors": [
-      "#F97316",
-      "#EA580C"
+      "#14B8A6",
+      "#0D9488"
     ],
     "showInMenu": false,
     "showInLanding": false,
     "showEpisodes": false,
-    "isActive": false,
+    "isActive": true,
     "sortOrder": 3,
-    "urlPath": "indian",
-    "tmdbParams": {
-      "with_original_language": "hi"
-    }
+    "urlPath": "coming-soon",
+    "tmdbParams": {}
   },
   {
     "slug": "foreign-romance",

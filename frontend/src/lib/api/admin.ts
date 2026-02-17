@@ -303,6 +303,70 @@ export const categoriesApi = {
 	delete: async (id: string) => {
 		await adminApi.delete(`/categories/${id}`);
 	},
+	// Child categories
+	listChildren: async (parentId: string) => {
+		const response = await adminApi.get(`/categories/${parentId}/children`);
+		return response.data;
+	},
+	createChild: async (
+		parentId: string,
+		data: {
+			parentId: string;
+			slug: string;
+			nameEn: string;
+			nameFa: string;
+			urlPath: string;
+			contentType?: string;
+			descriptionEn?: string;
+			descriptionFa?: string;
+			gradientColors?: string[];
+			icon?: string;
+			imageUrl?: string;
+			tmdbParams?: Record<string, any>;
+			showEpisodes?: boolean;
+			isActive?: boolean;
+			showInMenu?: boolean;
+			showInLanding?: boolean;
+			sortOrder?: number;
+		},
+	) => {
+		const response = await adminApi.post(
+			`/categories/${parentId}/children`,
+			data,
+		);
+		return response.data;
+	},
+	updateChild: async (
+		parentId: string,
+		childId: string,
+		data: {
+			slug?: string;
+			nameEn?: string;
+			nameFa?: string;
+			urlPath?: string;
+			contentType?: string;
+			descriptionEn?: string;
+			descriptionFa?: string;
+			gradientColors?: string[];
+			icon?: string;
+			imageUrl?: string;
+			tmdbParams?: Record<string, any>;
+			showEpisodes?: boolean;
+			isActive?: boolean;
+			showInMenu?: boolean;
+			showInLanding?: boolean;
+			sortOrder?: number;
+		},
+	) => {
+		const response = await adminApi.put(
+			`/categories/${parentId}/children/${childId}`,
+			data,
+		);
+		return response.data;
+	},
+	deleteChild: async (parentId: string, childId: string) => {
+		await adminApi.delete(`/categories/${parentId}/children/${childId}`);
+	},
 };
 
 // ========================================================================
