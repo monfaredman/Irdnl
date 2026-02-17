@@ -75,8 +75,8 @@ interface SubMenuItem {
 // Menu structure configuration - defines order and which items have submenus
 // Only static items that don't come from the admin categories panel
 const STATIC_MENU_ITEMS = [
-	{ slug: "top-250", icon: <Movie />, labelEn: "Top 250", labelFa: "250 فیلم برتر IMDb", href: "/top-250" },
-	{ slug: "collections", icon: <Category />, labelEn: "Collections", labelFa: "کالکشن", href: "/collections" },
+	// { slug: "top-250", icon: <Movie />, labelEn: "Top 250", labelFa: "250 فیلم برتر IMDb", href: "/top-250" },
+	// { slug: "collections", icon: <Category />, labelEn: "Collections", labelFa: "کالکشن", href: "/collections" },
 ];
 
 /**

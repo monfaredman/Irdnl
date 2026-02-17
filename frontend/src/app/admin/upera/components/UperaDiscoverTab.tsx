@@ -7,6 +7,9 @@ import {
 	Tag,
 	LayoutGrid,
 	CreditCard,
+	Download,
+	CheckCircle,
+	Loader2,
 } from "lucide-react";
 import { Button } from "@/components/admin/ui/button";
 import {
@@ -21,6 +24,14 @@ import {
 	Chip,
 	ToggleButton,
 	ToggleButtonGroup,
+	Checkbox,
+	Snackbar,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogContentText,
+	DialogActions,
+	Button as MuiButton,
 } from "@mui/material";
 import { uperaApi } from "@/lib/api/admin";
 import { useTranslation } from "@/i18n";
@@ -99,28 +110,19 @@ export function UperaDiscoverTab() {
 	const [error, setError] = useState<string | null>(null);
 	const [result, setResult] = useState<any>(null);
 
-	const handleFetchDiscover = useCallback(async () => {
-		setLoading(true);
-		setError(null);
-		try {
-			const params: Record<string, any> = {};
-			if (discoverFilters.age !== "0") params.age = discoverFilters.age;
-			if (discoverFilters.country !== "0") params.country = discoverFilters.country;
-			if (discoverFilters.discover_page > 1) params.discover_page = discoverFilters.discover_page;
-			if (discoverFilters.f_type !== "0") params.f_type = discoverFilters.f_type;
-			if (discoverFilters.kids === 1) params.kids = 1;
-			if (discoverFilters.lang !== "0") params.lang = discoverFilters.lang;
-			if (discoverFilters.sortby !== "created") params.sortby = discoverFilters.sortby;
-
-			const data = await uperaApi.getDiscover(params);
-			setResult(data);
-		} catch (err: any) {
-			setError(err.response?.data?.message || err.message);
-			setResult(null);
-		} finally {
-			setLoading(false);
-		}
-	}, [discoverFilters]);
+	// Import states
+	const [importedMap, setImportedMap] = useState<Record<string, string>>({}); // uperaId → contentId
+	const [importingIds, setImportingIds] = useState<Set<string>>(new Set());
+	const [selectedItems, setSelectedItems] = useState<Map<string, any>>(new Map()); // uperaId → rawItem
+	const [bulkImporting, setBulkImporting] = useState(false);
+	const [snackbar, setSnackbar] = useState<{ open: boolean; message: string; severity: 'success' | 'error' | 'info' }>({
+		open: false, message: '', severity: 'info',
+	});
+	const [confirmDialog, setConfirmDialog] = useState<{
+		open: boolean;
+		mode: 'single' | 'bulk';
+		item?: any;
+	}>({ open: false, mode: 'single' });
 
 	const handleFetchSliders = useCallback(async () => {
 		setLoading(true);
@@ -191,6 +193,167 @@ export function UperaDiscoverTab() {
 		}
 	}, []);
 
+	/** Extract all item uperaIds from discover result for checking import status */
+	const getAllDiscoverItems = useCallback((resultData: any): any[] => {
+		const lists = resultData?.data?.data || resultData?.data || [];
+		if (!Array.isArray(lists)) return [];
+		const items: any[] = [];
+		for (const list of lists) {
+			if (list?.data && Array.isArray(list.data)) {
+				for (const item of list.data) {
+					items.push(item);
+				}
+			}
+		}
+		return items;
+	}, []);
+
+	/** After fetching discover, check which items are already imported */
+	const checkImportStatus = useCallback(async (resultData: any) => {
+		const items = getAllDiscoverItems(resultData);
+		if (items.length === 0) return;
+
+		const uperaIds = items
+			.map((item) => String(item.id || item.movie_id || item.uuid || ''))
+			.filter(Boolean);
+
+		if (uperaIds.length === 0) return;
+
+		try {
+			const map = await uperaApi.checkImportedItems(uperaIds);
+			setImportedMap(map);
+		} catch {
+			// Silently fail — import status is optional
+		}
+	}, [getAllDiscoverItems]);
+
+	/** Wrap the original handleFetchDiscover to also check import status */
+	const handleFetchDiscoverWithCheck = useCallback(async () => {
+		setSelectedItems(new Map());
+		setLoading(true);
+		setError(null);
+		try {
+			const params: Record<string, any> = {};
+			if (discoverFilters.age !== "0") params.age = discoverFilters.age;
+			if (discoverFilters.country !== "0") params.country = discoverFilters.country;
+			if (discoverFilters.discover_page > 1) params.discover_page = discoverFilters.discover_page;
+			if (discoverFilters.f_type !== "0") params.f_type = discoverFilters.f_type;
+			if (discoverFilters.kids === 1) params.kids = 1;
+			if (discoverFilters.lang !== "0") params.lang = discoverFilters.lang;
+			if (discoverFilters.sortby !== "created") params.sortby = discoverFilters.sortby;
+
+			const data = await uperaApi.getDiscover(params);
+			setResult(data);
+			await checkImportStatus(data);
+		} catch (err: any) {
+			setError(err.response?.data?.message || err.message);
+			setResult(null);
+		} finally {
+			setLoading(false);
+		}
+	}, [discoverFilters, checkImportStatus]);
+
+	/** Import a single discover item */
+	const handleImportItem = useCallback(async (item: any) => {
+		const uperaId = String(item.id || item.movie_id || item.uuid || '');
+		if (!uperaId) return;
+
+		setImportingIds((prev) => new Set(prev).add(uperaId));
+		try {
+			const content = await uperaApi.importDiscoverItem(item, item.type);
+			setImportedMap((prev) => ({ ...prev, [uperaId]: content.id }));
+			setSelectedItems((prev) => {
+				const next = new Map(prev);
+				next.delete(uperaId);
+				return next;
+			});
+			setSnackbar({
+				open: true,
+				message: `${t("admin.upera.discover.importSuccess")} — ${item.title_fa || item.title_en || uperaId}`,
+				severity: 'success',
+			});
+		} catch (err: any) {
+			setSnackbar({
+				open: true,
+				message: `${t("admin.upera.discover.importFailed")}: ${err.response?.data?.message || err.message}`,
+				severity: 'error',
+			});
+		} finally {
+			setImportingIds((prev) => {
+				const next = new Set(prev);
+				next.delete(uperaId);
+				return next;
+			});
+		}
+	}, [t]);
+
+	/** Bulk import selected items */
+	const handleBulkImport = useCallback(async () => {
+		if (selectedItems.size === 0) return;
+		setBulkImporting(true);
+		try {
+			const items = Array.from(selectedItems.values());
+			const result = await uperaApi.importDiscoverBulk(items);
+			// Update imported map
+			if (result.imported) {
+				setImportedMap((prev) => {
+					const next = { ...prev };
+					for (const item of result.imported) {
+						next[item.uperaId] = item.contentId;
+					}
+					return next;
+				});
+			}
+			setSelectedItems(new Map());
+			setSnackbar({
+				open: true,
+				message: `${t("admin.upera.discover.bulkImportResult")}: ${t("admin.upera.discover.successCount")} ${result.successCount} / ${t("admin.upera.discover.failCount")} ${result.failCount}`,
+				severity: result.failCount === 0 ? 'success' : 'info',
+			});
+		} catch (err: any) {
+			setSnackbar({
+				open: true,
+				message: `${t("admin.upera.discover.importFailed")}: ${err.response?.data?.message || err.message}`,
+				severity: 'error',
+			});
+		} finally {
+			setBulkImporting(false);
+		}
+	}, [selectedItems, t]);
+
+	/** Toggle selection of a discover item */
+	const toggleSelectItem = useCallback((item: any) => {
+		const uperaId = String(item.id || item.movie_id || item.uuid || '');
+		if (!uperaId) return;
+		setSelectedItems((prev) => {
+			const next = new Map(prev);
+			if (next.has(uperaId)) {
+				next.delete(uperaId);
+			} else {
+				next.set(uperaId, item);
+			}
+			return next;
+		});
+	}, []);
+
+	/** Select all non-imported items */
+	const selectAllItems = useCallback(() => {
+		const items = getAllDiscoverItems(result);
+		const next = new Map<string, any>();
+		for (const item of items) {
+			const uperaId = String(item.id || item.movie_id || item.uuid || '');
+			if (uperaId && !importedMap[uperaId]) {
+				next.set(uperaId, item);
+			}
+		}
+		setSelectedItems(next);
+	}, [result, importedMap, getAllDiscoverItems]);
+
+	/** Deselect all items */
+	const deselectAllItems = useCallback(() => {
+		setSelectedItems(new Map());
+	}, []);
+
 	/** Convert raw Upera CDN URLs to thumb proxy URLs for proper display */
 	const uperaThumb = (src: string | undefined, w = 142, h = 212, mode = 'c') => {
 		if (!src) return undefined;
@@ -226,6 +389,52 @@ export function UperaDiscoverTab() {
 
 		return (
 			<div className="mt-4 space-y-6">
+				{/* Selection Toolbar */}
+				{lists.some((list: any) => list?.data?.length > 0) && (
+					<div className="flex flex-wrap items-center gap-3 bg-gray-800/50 rounded-lg p-3 border border-gray-700">
+						<MuiButton
+							size="small"
+							variant="outlined"
+							onClick={selectAllItems}
+							sx={{ color: '#aaa', borderColor: '#555', fontSize: '0.75rem' }}
+						>
+							{t("admin.upera.discover.selectAll")}
+						</MuiButton>
+						<MuiButton
+							size="small"
+							variant="outlined"
+							onClick={deselectAllItems}
+							disabled={selectedItems.size === 0}
+							sx={{ color: '#aaa', borderColor: '#555', fontSize: '0.75rem' }}
+						>
+							{t("admin.upera.discover.deselectAll")}
+						</MuiButton>
+
+						{selectedItems.size > 0 && (
+							<>
+								<Chip
+									label={`${t("admin.upera.discover.selectedCount")}: ${selectedItems.size}`}
+									size="small"
+									color="primary"
+								/>
+								<MuiButton
+									size="small"
+									variant="contained"
+									color="success"
+									disabled={bulkImporting}
+									onClick={() => setConfirmDialog({ open: true, mode: 'bulk' })}
+									startIcon={bulkImporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+									sx={{ fontSize: '0.75rem' }}
+								>
+									{bulkImporting
+										? t("admin.upera.discover.importingBulk")
+										: t("admin.upera.discover.importSelected")}
+								</MuiButton>
+							</>
+						)}
+					</div>
+				)}
+
 				{lists.map((list: any, listIdx: number) => (
 					<div key={list?.id || listIdx} className="space-y-2">
 						{list?.title && (
@@ -236,11 +445,53 @@ export function UperaDiscoverTab() {
 						<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
 							{(list?.data || []).map((item: any, idx: number) => {
 								const posterUrl = item?.cdn?.poster || item?.poster || item?.cover || item?.image;
+								const uperaId = String(item?.id || item?.movie_id || '');
+								const isImported = !!importedMap[uperaId];
+								const isImporting = importingIds.has(uperaId);
+								const isSelected = selectedItems.has(uperaId);
+
 								return (
 									<div
-										key={item?.id || item?.movie_id || idx}
-										className="bg-gray-800 rounded-lg overflow-hidden border border-gray-700 hover:border-blue-500 transition-colors"
+										key={uperaId || idx}
+										className={`bg-gray-800 rounded-lg overflow-hidden border transition-colors relative group ${
+											isImported
+												? 'border-green-600/50 opacity-70'
+												: isSelected
+												? 'border-blue-500 ring-1 ring-blue-500/50'
+												: 'border-gray-700 hover:border-blue-500'
+										}`}
 									>
+										{/* Selection Checkbox */}
+										{!isImported && (
+											<div className="absolute top-1 right-1 z-10">
+												<Checkbox
+													checked={isSelected}
+													onChange={() => toggleSelectItem(item)}
+													size="small"
+													sx={{
+														color: 'rgba(255,255,255,0.5)',
+														'&.Mui-checked': { color: '#3b82f6' },
+														bgcolor: 'rgba(0,0,0,0.5)',
+														borderRadius: '4px',
+														p: '2px',
+													}}
+												/>
+											</div>
+										)}
+
+										{/* Imported Badge */}
+										{isImported && (
+											<div className="absolute top-1 right-1 z-10">
+												<Chip
+													icon={<CheckCircle className="w-3 h-3" />}
+													label={t("admin.upera.discover.imported")}
+													size="small"
+													color="success"
+													sx={{ fontSize: '0.65rem', height: 22 }}
+												/>
+											</div>
+										)}
+
 										{posterUrl && (
 											<img
 												src={uperaThumb(posterUrl, 142, 212, 'c')}
@@ -273,6 +524,24 @@ export function UperaDiscoverTab() {
 													<Chip label="دوبله" size="small" color="secondary" variant="outlined" />
 												)}
 											</div>
+
+											{/* Import Button */}
+											{!isImported && (
+												<MuiButton
+													size="small"
+													variant="contained"
+													color="primary"
+													fullWidth
+													disabled={isImporting}
+													onClick={() => setConfirmDialog({ open: true, mode: 'single', item })}
+													startIcon={isImporting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Download className="w-3 h-3" />}
+													sx={{ mt: 1, fontSize: '0.7rem', py: 0.5 }}
+												>
+													{isImporting
+														? t("admin.upera.discover.importing")
+														: t("admin.upera.discover.import")}
+												</MuiButton>
+											)}
 										</div>
 									</div>
 								);
@@ -765,7 +1034,7 @@ export function UperaDiscoverTab() {
 					</div>
 
 					<Button
-						onClick={handleFetchDiscover}
+						onClick={handleFetchDiscoverWithCheck}
 						disabled={loading}
 					>
 						{loading ? (
@@ -917,6 +1186,80 @@ export function UperaDiscoverTab() {
 					{renderResult()}
 				</div>
 			)}
+
+			{/* ====== CONFIRM DIALOG ====== */}
+			<Dialog
+				open={confirmDialog.open}
+				onClose={() => setConfirmDialog({ open: false, mode: 'single' })}
+				PaperProps={{ sx: { bgcolor: '#1e293b', color: '#fff', borderRadius: 2, minWidth: 360 } }}
+			>
+				<DialogTitle sx={{ color: '#fff', fontFamily: 'Vazirmatn' }}>
+					{t("admin.upera.discover.confirmImport")}
+				</DialogTitle>
+				<DialogContent>
+					<DialogContentText sx={{ color: '#94a3b8', fontFamily: 'Vazirmatn' }}>
+						{confirmDialog.mode === 'single'
+							? t("admin.upera.discover.confirmImportMessage")
+							: t("admin.upera.discover.confirmBulkImportMessage").replace('{count}', String(selectedItems.size))
+						}
+					</DialogContentText>
+					{confirmDialog.mode === 'single' && confirmDialog.item && (
+						<div className="mt-3 p-3 bg-gray-800 rounded-lg border border-gray-700">
+							<p className="text-sm text-white font-medium">
+								{confirmDialog.item.title_fa || confirmDialog.item.title_en || 'Untitled'}
+							</p>
+							{confirmDialog.item.title_en && (
+								<p className="text-xs text-gray-400">{confirmDialog.item.title_en}</p>
+							)}
+							<div className="flex gap-2 mt-2">
+								{confirmDialog.item.year && <Chip label={confirmDialog.item.year} size="small" variant="outlined" sx={{ color: '#aaa', borderColor: '#555' }} />}
+								{confirmDialog.item.type && <Chip label={confirmDialog.item.type === 'series' ? 'سریال' : 'فیلم'} size="small" color="info" variant="outlined" />}
+								{confirmDialog.item.imdb_rate && <Chip label={`IMDb ${confirmDialog.item.imdb_rate}`} size="small" color="warning" variant="outlined" />}
+							</div>
+						</div>
+					)}
+				</DialogContent>
+				<DialogActions sx={{ px: 3, pb: 2 }}>
+					<MuiButton
+						onClick={() => setConfirmDialog({ open: false, mode: 'single' })}
+						sx={{ color: '#94a3b8', fontFamily: 'Vazirmatn' }}
+					>
+						{t("admin.upera.discover.cancel")}
+					</MuiButton>
+					<MuiButton
+						variant="contained"
+						color="success"
+						onClick={() => {
+							setConfirmDialog({ open: false, mode: 'single' });
+							if (confirmDialog.mode === 'single' && confirmDialog.item) {
+								handleImportItem(confirmDialog.item);
+							} else {
+								handleBulkImport();
+							}
+						}}
+						sx={{ fontFamily: 'Vazirmatn' }}
+					>
+						{t("admin.upera.discover.confirm")}
+					</MuiButton>
+				</DialogActions>
+			</Dialog>
+
+			{/* ====== SNACKBAR ====== */}
+			<Snackbar
+				open={snackbar.open}
+				autoHideDuration={5000}
+				onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+			>
+				<Alert
+					onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+					severity={snackbar.severity}
+					variant="filled"
+					sx={{ width: '100%', fontFamily: 'Vazirmatn' }}
+				>
+					{snackbar.message}
+				</Alert>
+			</Snackbar>
 		</div>
 	);
 }

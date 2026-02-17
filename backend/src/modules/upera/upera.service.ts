@@ -19,6 +19,8 @@ import {
   SliderQueryDto,
   OfferQueryDto,
   GenresQueryDto,
+  ImportDiscoverItemDto,
+  ImportDiscoverBulkDto,
 } from './dto/upera.dto';
 
 @Injectable()
@@ -467,6 +469,200 @@ export class UperaService {
       throw new NotFoundException(`Upera content with ID ${id} not found`);
     }
     await this.uperaContentRepository.remove(content);
+  }
+
+  // ==========================================
+  // DISCOVER DIRECT IMPORT
+  // ==========================================
+
+  /**
+   * Import a single discover item directly into the Content table.
+   * Also saves to UperaContent for tracking (importStatus = imported).
+   */
+  async importDiscoverItem(dto: ImportDiscoverItemDto): Promise<Content> {
+    const rawItem = dto.rawItem;
+    if (!rawItem) {
+      throw new BadRequestException('rawItem is required');
+    }
+
+    const uperaId = String(rawItem.id || rawItem.movie_id || rawItem.uuid || '');
+    if (!uperaId) {
+      throw new BadRequestException('Item has no valid id');
+    }
+
+    // Check if already imported (by uperaId in licenseInfo)
+    const existingContent = await this.contentRepository
+      .createQueryBuilder('content')
+      .where("content.license_info::text LIKE :pattern", { pattern: `%"uperaId":"${uperaId}"%` })
+      .getOne();
+
+    if (existingContent) {
+      throw new BadRequestException(`This content has already been imported (Content ID: ${existingContent.id})`);
+    }
+
+    // Determine type
+    const rawType = dto.type || rawItem.type || 'movie';
+    const contentType = rawType === 'series' ? ContentType.SERIES : ContentType.MOVIE;
+    const uperaContentType = rawType === 'series' ? UperaContentType.SERIES : UperaContentType.MOVIE;
+
+    // Extract fields from discover item
+    const titleFa = rawItem.title_fa || rawItem.fa_title || rawItem.title || null;
+    const titleEn = rawItem.title_en || rawItem.en_title || null;
+    const year = rawItem.year ? parseInt(String(rawItem.year), 10) : null;
+    const imdbRating = rawItem.imdb_rate ? parseFloat(String(rawItem.imdb_rate)) : null;
+    const description = rawItem.description || rawItem.story || null;
+    const posterUrl = rawItem.cdn?.poster || rawItem.poster || rawItem.pic || null;
+    const bannerUrl = rawItem.cdn?.backdrop || rawItem.backdrop || rawItem.cover || rawItem.banner || null;
+    const isDubbed = rawItem.dubbed === 1 || rawItem.is_dubbed === 1 || rawItem.dubbed === true;
+    const isFree = rawItem.is_free === 1 || rawItem.is_free === true || rawItem.free === 1;
+    const country = rawItem.country || null;
+
+    // Parse genres
+    let genres: string[] = [];
+    if (rawItem.genre) {
+      if (typeof rawItem.genre === 'string') {
+        genres = rawItem.genre.split(',').map((g: string) => g.trim()).filter(Boolean);
+      } else if (typeof rawItem.genre === 'object') {
+        genres = Object.keys(rawItem.genre);
+      } else if (Array.isArray(rawItem.genre)) {
+        genres = rawItem.genre;
+      }
+    }
+
+    try {
+      // 1. Save to UperaContent for tracking
+      let uperaContent = await this.uperaContentRepository.findOne({
+        where: { uperaId },
+      });
+
+      if (!uperaContent) {
+        uperaContent = this.uperaContentRepository.create({
+          uperaId,
+          titleFa,
+          titleEn,
+          type: uperaContentType,
+          year,
+          description,
+          posterUrl,
+          bannerUrl,
+          imdbRating,
+          genres,
+          isFree,
+          isDubbed,
+          country,
+          rawData: rawItem,
+          importStatus: UperaImportStatus.PENDING,
+        });
+        uperaContent = await this.uperaContentRepository.save(uperaContent);
+      }
+
+      // 2. Create Content entity
+      const content = this.contentRepository.create({
+        title: titleFa || titleEn || 'Untitled',
+        originalTitle: titleEn,
+        type: contentType,
+        year,
+        description,
+        posterUrl,
+        bannerUrl,
+        rating: imdbRating,
+        genres,
+        country,
+        status: ContentStatus.DRAFT,
+        monetization: { isFree },
+        isDubbed,
+        localizedContent: {
+          fa: {
+            title: titleFa || undefined,
+            description: description || undefined,
+          },
+        },
+        licenseInfo: {
+          source: 'upera',
+          uperaId,
+          importedAt: new Date().toISOString(),
+        },
+      });
+
+      const savedContent = await this.contentRepository.save(content);
+
+      // 3. Update UperaContent tracking
+      uperaContent.importStatus = UperaImportStatus.IMPORTED;
+      uperaContent.importedContentId = savedContent.id;
+      await this.uperaContentRepository.save(uperaContent);
+
+      this.logger.log(`Imported discover item "${titleFa || titleEn}" (uperaId=${uperaId}) → Content ID: ${savedContent.id}`);
+      return savedContent;
+    } catch (error) {
+      this.logger.error(`Failed to import discover item (uperaId=${uperaId}): ${error.message}`);
+      throw new BadRequestException(`Failed to import discover item: ${error.message}`);
+    }
+  }
+
+  /**
+   * Import multiple discover items at once.
+   * Returns success/failure results for each item.
+   */
+  async importDiscoverBulk(dto: ImportDiscoverBulkDto): Promise<{
+    imported: Array<{ uperaId: string; contentId: string; title: string }>;
+    failed: Array<{ uperaId: string; title: string; error: string }>;
+    total: number;
+    successCount: number;
+    failCount: number;
+  }> {
+    const items = dto.items || [];
+    if (!items.length) {
+      throw new BadRequestException('No items provided for import');
+    }
+
+    const imported: Array<{ uperaId: string; contentId: string; title: string }> = [];
+    const failed: Array<{ uperaId: string; title: string; error: string }> = [];
+
+    for (const rawItem of items) {
+      const uperaId = String(rawItem.id || rawItem.movie_id || rawItem.uuid || '');
+      const title = rawItem.title_fa || rawItem.fa_title || rawItem.title_en || rawItem.en_title || '';
+
+      try {
+        const content = await this.importDiscoverItem({
+          rawItem,
+          type: dto.type || rawItem.type,
+        });
+        imported.push({ uperaId, contentId: content.id, title });
+      } catch (error) {
+        failed.push({ uperaId, title, error: error.message });
+      }
+    }
+
+    return {
+      imported,
+      failed,
+      total: items.length,
+      successCount: imported.length,
+      failCount: failed.length,
+    };
+  }
+
+  /**
+   * Check which discover items are already imported by their uperaIds.
+   */
+  async checkImportedItems(uperaIds: string[]): Promise<Record<string, string>> {
+    if (!uperaIds.length) return {};
+
+    const result: Record<string, string> = {};
+
+    // Check in upera_content table
+    const imported = await this.uperaContentRepository
+      .createQueryBuilder('uc')
+      .where('uc.uperaId IN (:...ids)', { ids: uperaIds })
+      .andWhere('uc.importStatus = :status', { status: UperaImportStatus.IMPORTED })
+      .select(['uc.uperaId', 'uc.importedContentId'])
+      .getMany();
+
+    for (const item of imported) {
+      result[item.uperaId] = item.importedContentId;
+    }
+
+    return result;
   }
 
   // ==========================================

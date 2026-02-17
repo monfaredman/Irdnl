@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsEnum, IsBoolean, Min } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsEnum, IsBoolean, Min, IsObject } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -395,4 +395,35 @@ export class GenresQueryDto {
   @IsOptional()
   @IsString()
   age?: string;
+}
+
+// ==========================================
+// DISCOVER IMPORT DTOs
+// ==========================================
+
+export class ImportDiscoverItemDto {
+  @ApiProperty({ description: 'Raw Upera discover item data (the item object from discover response)', type: 'object' })
+  @IsObject()
+  rawItem: any;
+
+  @ApiPropertyOptional({
+    description: 'Content type override (auto-detected from rawItem.type if not provided)',
+    enum: ['movie', 'series'],
+  })
+  @IsOptional()
+  @IsString()
+  type?: string;
+}
+
+export class ImportDiscoverBulkDto {
+  @ApiProperty({ description: 'Array of raw Upera discover items to import', type: [Object] })
+  items: any[];
+
+  @ApiPropertyOptional({
+    description: 'Content type override for all items',
+    enum: ['movie', 'series'],
+  })
+  @IsOptional()
+  @IsString()
+  type?: string;
 }

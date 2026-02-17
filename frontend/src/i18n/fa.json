@@ -642,7 +642,26 @@
         "planName": "نام پلن",
         "planPrice": "قیمت",
         "planDuration": "مدت زمان",
-        "totalItems": "تعداد کل"
+        "totalItems": "تعداد کل",
+        "import": "ایمپورت به دیتابیس",
+        "importing": "در حال ایمپورت...",
+        "imported": "ایمپورت شده",
+        "importSuccess": "با موفقیت به دیتابیس ایمپورت شد",
+        "importFailed": "خطا در ایمپورت",
+        "alreadyImported": "قبلاً ایمپورت شده",
+        "importSelected": "ایمپورت انتخاب‌شده‌ها",
+        "importingBulk": "در حال ایمپورت دسته‌ای...",
+        "bulkImportResult": "نتیجه ایمپورت دسته‌ای",
+        "successCount": "موفق",
+        "failCount": "ناموفق",
+        "selectAll": "انتخاب همه",
+        "deselectAll": "لغو انتخاب",
+        "selectedCount": "انتخاب شده",
+        "confirmImport": "تأیید ایمپورت",
+        "confirmImportMessage": "آیا از ایمپورت این محتوا به دیتابیس مطمئن هستید؟",
+        "confirmBulkImportMessage": "آیا از ایمپورت {count} محتوای انتخاب‌شده به دیتابیس مطمئن هستید?",
+        "cancel": "لغو",
+        "confirm": "تأیید"
       }
     },
     "tmdb": {

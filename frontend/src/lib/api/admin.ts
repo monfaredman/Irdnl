@@ -976,6 +976,30 @@ export const uperaApi = {
 		const response = await adminApi.get("/upera/site/plans");
 		return response.data;
 	},
+
+	// Discover Direct Import
+	importDiscoverItem: async (rawItem: Record<string, any>, type?: string) => {
+		const response = await adminApi.post("/upera/site/discover/import", {
+			rawItem,
+			type,
+		});
+		return response.data;
+	},
+
+	importDiscoverBulk: async (items: Record<string, any>[], type?: string) => {
+		const response = await adminApi.post("/upera/site/discover/import-bulk", {
+			items,
+			type,
+		});
+		return response.data;
+	},
+
+	checkImportedItems: async (uperaIds: string[]) => {
+		const response = await adminApi.post("/upera/site/discover/check-imported", {
+			uperaIds,
+		});
+		return response.data;
+	},
 };
 
 // Comments API

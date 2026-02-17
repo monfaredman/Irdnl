@@ -32,6 +32,8 @@ import {
   SliderQueryDto,
   OfferQueryDto,
   GenresQueryDto,
+  ImportDiscoverItemDto,
+  ImportDiscoverBulkDto,
 } from './dto/upera.dto';
 import { UperaContentType } from './entities/upera-content.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -228,6 +230,33 @@ export class UperaController {
   @ApiResponse({ status: 200, description: 'Discover content retrieved' })
   async getDiscover(@Query() dto: DiscoverQueryDto) {
     return this.uperaService.getDiscover(dto);
+  }
+
+  @Post('site/discover/import')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Import a single discover item directly into the Content database' })
+  @ApiResponse({ status: 201, description: 'Content imported successfully' })
+  @ApiResponse({ status: 400, description: 'Import failed or item already imported' })
+  async importDiscoverItem(@Body() dto: ImportDiscoverItemDto) {
+    return this.uperaService.importDiscoverItem(dto);
+  }
+
+  @Post('site/discover/import-bulk')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Import multiple discover items into the Content database' })
+  @ApiResponse({ status: 201, description: 'Bulk import completed' })
+  async importDiscoverBulk(@Body() dto: ImportDiscoverBulkDto) {
+    return this.uperaService.importDiscoverBulk(dto);
+  }
+
+  @Post('site/discover/check-imported')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Check which discover items are already imported' })
+  @ApiResponse({ status: 200, description: 'Map of uperaId → contentId for imported items' })
+  async checkImportedItems(@Body() body: { uperaIds: string[] }) {
+    return this.uperaService.checkImportedItems(body.uperaIds || []);
   }
 
   @Get('site/sliders')
