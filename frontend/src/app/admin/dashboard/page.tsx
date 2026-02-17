@@ -93,13 +93,13 @@ export default function AdminDashboardPage() {
 	];
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4 sm:space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900">{t("admin.dashboard.title")}</h1>
-				<p className="text-gray-600">{t("admin.dashboard.welcome")}</p>
+				<h1 className="text-2xl sm:text-3xl font-bold text-gray-900">{t("admin.dashboard.title")}</h1>
+				<p className="text-sm sm:text-base text-gray-600">{t("admin.dashboard.welcome")}</p>
 			</div>
 
-			<div className={`grid gap-4 md:grid-cols-2 ${stats.length >= 4 ? 'lg:grid-cols-4' : stats.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
+			<div className={`grid gap-3 sm:gap-4 grid-cols-1 sm:grid-cols-2 ${stats.length >= 4 ? 'lg:grid-cols-4' : stats.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
 				{stats.map((stat) => {
 					const Icon = stat.icon;
 					return (
@@ -121,23 +121,25 @@ export default function AdminDashboardPage() {
 				})}
 			</div>
 
-			<div className="grid gap-4 md:grid-cols-2">
+			<div className="grid gap-3 sm:gap-4 grid-cols-1 md:grid-cols-2">
 				{canSeeContent && (
 					<Card>
 						<CardHeader>
-							<CardTitle>{t("admin.dashboard.dailyActiveUsers")}</CardTitle>
+							<CardTitle className="text-sm sm:text-base">{t("admin.dashboard.dailyActiveUsers")}</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<ResponsiveContainer width="100%" height={300}>
-								<LineChart data={data.users?.dailyActive || []}>
-									<CartesianGrid strokeDasharray="3 3" />
-									<XAxis dataKey="date" />
-									<YAxis />
-									<Tooltip />
-									<Legend />
-									<Line type="monotone" dataKey="count" stroke="#3b82f6" />
-								</LineChart>
-							</ResponsiveContainer>
+							<div className="h-[220px] sm:h-[300px]">
+								<ResponsiveContainer width="100%" height="100%">
+									<LineChart data={data.users?.dailyActive || []}>
+										<CartesianGrid strokeDasharray="3 3" />
+										<XAxis dataKey="date" tick={{ fontSize: 11 }} />
+										<YAxis tick={{ fontSize: 11 }} />
+										<Tooltip />
+										<Legend wrapperStyle={{ fontSize: 12 }} />
+										<Line type="monotone" dataKey="count" stroke="#3b82f6" />
+									</LineChart>
+								</ResponsiveContainer>
+							</div>
 						</CardContent>
 					</Card>
 				)}
@@ -145,24 +147,29 @@ export default function AdminDashboardPage() {
 				{canSeeContent && (
 					<Card>
 						<CardHeader>
-							<CardTitle>{t("admin.dashboard.topPerformingContent")}</CardTitle>
+							<CardTitle className="text-sm sm:text-base">{t("admin.dashboard.topPerformingContent")}</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<ResponsiveContainer width="100%" height={300}>
-								<BarChart data={data.content?.topPerforming?.slice(0, 10) || []}>
-									<CartesianGrid strokeDasharray="3 3" />
-									<XAxis
-										dataKey="title"
-										angle={-45}
-										textAnchor="end"
-										height={100}
-									/>
-									<YAxis />
-									<Tooltip />
-									<Legend />
-									<Bar dataKey="views" fill="#3b82f6" />
-								</BarChart>
-							</ResponsiveContainer>
+							<div className="h-[220px] sm:h-[300px] overflow-x-auto">
+								<div className="min-w-[400px] h-full">
+									<ResponsiveContainer width="100%" height="100%">
+										<BarChart data={data.content?.topPerforming?.slice(0, 10) || []}>
+											<CartesianGrid strokeDasharray="3 3" />
+											<XAxis
+												dataKey="title"
+												angle={-45}
+												textAnchor="end"
+												height={80}
+												tick={{ fontSize: 10 }}
+											/>
+											<YAxis tick={{ fontSize: 11 }} />
+											<Tooltip />
+											<Legend wrapperStyle={{ fontSize: 12 }} />
+											<Bar dataKey="views" fill="#3b82f6" />
+										</BarChart>
+									</ResponsiveContainer>
+								</div>
+							</div>
 						</CardContent>
 					</Card>
 				)}

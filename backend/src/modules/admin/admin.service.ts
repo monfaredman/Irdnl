@@ -31,6 +31,7 @@ import { CreateOfferDto, UpdateOfferDto } from './dto/offer.dto';
 import { CreatePinDto, UpdatePinDto } from './dto/pin.dto';
 import { CreateCollectionDto, UpdateCollectionDto } from './dto/collection.dto';
 import { StorageService } from '../video-assets/storage.service';
+import { ElasticsearchService } from '../search/elasticsearch.service';
 
 @Injectable()
 export class AdminService {
@@ -63,6 +64,7 @@ export class AdminService {
     private collectionRepository: Repository<Collection>,
     private contentService: ContentService,
     private storageService: StorageService,
+    private elasticsearchService: ElasticsearchService,
   ) {}
 
   async createContent(createContentDto: CreateContentDto): Promise<Content> {
@@ -83,6 +85,9 @@ export class AdminService {
       });
       await this.seriesRepository.save(series);
     }
+
+    // Index in Elasticsearch (non-blocking)
+    this.elasticsearchService.indexContent(savedContent).catch(() => {});
 
     return savedContent;
   }
@@ -150,6 +155,9 @@ export class AdminService {
     // Invalidate cache
     await this.contentService.invalidateCache(id);
 
+    // Update Elasticsearch index (non-blocking)
+    this.elasticsearchService.indexContent(updated).catch(() => {});
+
     return updated;
   }
 
@@ -187,6 +195,9 @@ export class AdminService {
 
     await this.contentRepository.remove(content);
     await this.contentService.invalidateCache(id);
+
+    // Remove from Elasticsearch index (non-blocking)
+    this.elasticsearchService.removeContent(id).catch(() => {});
   }
 
   async uploadVideo(

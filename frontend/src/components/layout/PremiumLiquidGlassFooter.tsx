@@ -90,11 +90,11 @@ export function PremiumLiquidGlassFooter() {
 	const glassLinkStyle = {
 		color: "rgba(255, 255, 255, 0.7)",
 		textDecoration: "none",
-		fontSize: "0.875rem",
+		fontSize: { xs: "0.8125rem", sm: "0.875rem" },
 		fontWeight: 400,
 		display: "inline-block",
 		position: "relative",
-		padding: "4px 0",
+		padding: { xs: "3px 0", sm: "4px 0" },
 		transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
 		"&::after": {
 			content: '""',
@@ -182,9 +182,10 @@ export function PremiumLiquidGlassFooter() {
 			component="footer"
 			sx={{
 				position: "relative",
-				mt: 8,
-				pt: 8,
-				pb: 4,
+				mt: { xs: 4, sm: 6, md: 8 },
+				pt: { xs: 4, sm: 6, md: 8 },
+				pb: { xs: 3, md: 4 },
+				px: { xs: 1, sm: 0 },
 				overflow: "hidden",
 			}}
 		>
@@ -255,12 +256,12 @@ export function PremiumLiquidGlassFooter() {
 							sm: "repeat(2, 1fr)",
 							md: "2fr repeat(4, 1fr)",
 						},
-						gap: 4,
-						mb: 6,
+						gap: { xs: 3, sm: 4 },
+						mb: { xs: 4, md: 6 },
 					}}
 				>
 					{/* Brand Section - Persian Calligraphy */}
-					<Box>
+					<Box sx={{ textAlign: { xs: "center", md: "start" } }}>
 						<Box sx={{ mb: 3 }}>
 							{/* Logo with Persian Touch */}
 							<Box
@@ -269,13 +270,14 @@ export function PremiumLiquidGlassFooter() {
 									alignItems: "center",
 									gap: 2,
 									mb: 2,
+									justifyContent: { xs: "center", md: "flex-start" },
 								}}
 							>
 								<Box
 									sx={{
-										width: 48,
-										height: 48,
-										borderRadius: "12px",
+										width: { xs: 40, sm: 48 },
+										height: { xs: 40, sm: 48 },
+										borderRadius: { xs: "10px", sm: "12px" },
 										background: `linear-gradient(135deg, 
                       ${liquidGlassColors.persianGold}40, 
                       ${liquidGlassColors.persianGold}20)`,
@@ -285,7 +287,7 @@ export function PremiumLiquidGlassFooter() {
 										alignItems: "center",
 										justifyContent: "center",
 										fontWeight: 700,
-										fontSize: "1.5rem",
+										fontSize: { xs: "1.25rem", sm: "1.5rem" },
 										color: liquidGlassColors.persianGold,
 										boxShadow: `0 4px 16px -2px ${liquidGlassColors.persianGold}30,
                                 inset 0 1px 0 0 rgba(255, 255, 255, 0.2)`,
@@ -297,7 +299,7 @@ export function PremiumLiquidGlassFooter() {
 								<Box>
 									<Typography
 										sx={{
-											fontSize: "1.5rem",
+											fontSize: { xs: "1.25rem", sm: "1.5rem" },
 											fontWeight: 700,
 											color: "#FFFFFF",
 											letterSpacing: "-0.02em",
@@ -308,7 +310,7 @@ export function PremiumLiquidGlassFooter() {
 									</Typography>
 									<Typography
 										sx={{
-											fontSize: "0.75rem",
+											fontSize: { xs: "0.6875rem", sm: "0.75rem" },
 											color: "rgba(255, 255, 255, 0.5)",
 											fontFamily: language === "fa" ? "Vazirmatn" : "inherit",
 										}}
@@ -322,12 +324,19 @@ export function PremiumLiquidGlassFooter() {
 
 							{/* Language Switcher */}
 							<Box
-								component="button"
-								onClick={toggleLanguage}
-								sx={languageToggleStyle}
+								sx={{
+									display: "flex",
+									justifyContent: { xs: "center", md: "flex-start" },
+								}}
 							>
-								<LanguageIcon sx={{ fontSize: "1.125rem" }} />
-								{language === "fa" ? "English" : "فارسی"}
+								<Box
+									component="button"
+									onClick={toggleLanguage}
+									sx={languageToggleStyle}
+								>
+									<LanguageIcon sx={{ fontSize: "1.125rem" }} />
+									{language === "fa" ? "English" : "فارسی"}
+								</Box>
 							</Box>
 						</Box>
 					</Box>
@@ -337,10 +346,10 @@ export function PremiumLiquidGlassFooter() {
 						<Box key={index}>
 							<Typography
 								sx={{
-									fontSize: "0.875rem",
+									fontSize: { xs: "0.8125rem", sm: "0.875rem" },
 									fontWeight: 600,
 									color: "#FFFFFF",
-									mb: 2,
+									mb: { xs: 1.5, sm: 2 },
 									letterSpacing: "0.05em",
 									textTransform: "uppercase",
 									fontFamily: language === "fa" ? "Vazirmatn" : "inherit",
@@ -348,7 +357,7 @@ export function PremiumLiquidGlassFooter() {
 							>
 								{language === "fa" ? section.titleFa : section.title}
 							</Typography>
-							<Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+							<Box sx={{ display: "flex", flexDirection: "column", gap: { xs: 1, sm: 1.5 } }}>
 								{section.links.map((link, linkIndex) => (
 									<Link
 										key={linkIndex}
@@ -377,9 +386,9 @@ export function PremiumLiquidGlassFooter() {
 						display: "flex",
 						justifyContent: "center",
 						alignItems: "center",
-						gap: 2,
-						mb: 4,
-						py: 4,
+						gap: { xs: 1.5, sm: 2 },
+						mb: { xs: 3, md: 4 },
+						py: { xs: 3, md: 4 },
 						borderTop: `1px solid ${liquidGlassColors.glass.border}`,
 						borderBottom: `1px solid ${liquidGlassColors.glass.border}`,
 					}}
@@ -392,7 +401,14 @@ export function PremiumLiquidGlassFooter() {
 							rel="noopener noreferrer"
 							sx={{ textDecoration: "none" }}
 						>
-							<IconButton sx={glassIconStyle} aria-label={social.label}>
+							<IconButton
+								sx={{
+									...glassIconStyle,
+									width: { xs: 36, sm: 40 },
+									height: { xs: 36, sm: 40 },
+								}}
+								aria-label={social.label}
+							>
 								{social.icon}
 							</IconButton>
 						</MuiLink>
@@ -406,13 +422,13 @@ export function PremiumLiquidGlassFooter() {
 						flexDirection: { xs: "column", md: "row" },
 						justifyContent: "space-between",
 						alignItems: "center",
-						gap: 2,
-						pt: 3,
+						gap: { xs: 1.5, md: 2 },
+						pt: { xs: 2, md: 3 },
 					}}
 				>
 					<Typography
 						sx={{
-							fontSize: "0.75rem",
+							fontSize: { xs: "0.6875rem", sm: "0.75rem" },
 							color: "rgba(255, 255, 255, 0.5)",
 							fontFamily: language === "fa" ? "Vazirmatn" : "inherit",
 							textAlign: { xs: "center", md: "left" },
@@ -437,15 +453,15 @@ export function PremiumLiquidGlassFooter() {
 				{/* Decorative Persian Quote/Motto (Optional) */}
 				<Box
 					sx={{
-						mt: 4,
-						pt: 3,
+						mt: { xs: 3, md: 4 },
+						pt: { xs: 2, md: 3 },
 						borderTop: `1px solid ${liquidGlassColors.glass.border}`,
 						textAlign: "center",
 					}}
 				>
 					<Typography
 						sx={{
-							fontSize: "0.875rem",
+							fontSize: { xs: "0.8125rem", sm: "0.875rem" },
 							color: "rgba(255, 255, 255, 0.3)",
 							fontStyle: "italic",
 							fontFamily: language === "fa" ? "Vazirmatn" : "serif",

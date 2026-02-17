@@ -181,11 +181,11 @@ export default function VideosManagementPage() {
 	};
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+		<div className="space-y-4 sm:space-y-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900">{t("admin.videos.title")}</h1>
-					<p className="text-gray-600">{t("admin.videos.description")}</p>
+					<h1 className="text-xl sm:text-3xl font-bold text-gray-900">{t("admin.videos.title")}</h1>
+					<p className="text-sm text-gray-600">{t("admin.videos.description")}</p>
 				</div>
 				<div>
 					<input

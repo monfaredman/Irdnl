@@ -55,15 +55,15 @@ export default function FinancePage() {
 	const totalSubs = data.subscriptions?.total || 0;
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4 sm:space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900">
+				<h1 className="text-xl sm:text-3xl font-bold text-gray-900">
 					{t("admin.finance.title")}
 				</h1>
-				<p className="text-gray-600">{t("admin.finance.description")}</p>
+				<p className="text-sm text-gray-600">{t("admin.finance.description")}</p>
 			</div>
 
-			<div className="grid gap-4 md:grid-cols-4">
+			<div className="grid gap-3 sm:gap-4 grid-cols-2 md:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
 						<CardTitle className="text-sm font-medium">{t("admin.finance.totalRevenue")}</CardTitle>

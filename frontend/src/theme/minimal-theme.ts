@@ -81,28 +81,46 @@ export const minimalTheme = createTheme({
 			"sans-serif",
 		].join(","),
 		h1: {
-			fontSize: "48px",
+			fontSize: "32px",
 			fontWeight: 600,
 			lineHeight: 1.2,
 			letterSpacing: "-0.02em",
+			"@media (min-width:600px)": {
+				fontSize: "40px",
+			},
+			"@media (min-width:900px)": {
+				fontSize: "48px",
+			},
 		},
 		h2: {
-			fontSize: "32px",
+			fontSize: "24px",
 			fontWeight: 600,
 			lineHeight: 1.3,
 			letterSpacing: "-0.01em",
+			"@media (min-width:600px)": {
+				fontSize: "28px",
+			},
+			"@media (min-width:900px)": {
+				fontSize: "32px",
+			},
 		},
 		h3: {
-			fontSize: "24px",
+			fontSize: "20px",
 			fontWeight: 600,
 			lineHeight: 1.4,
 			letterSpacing: "0",
+			"@media (min-width:900px)": {
+				fontSize: "24px",
+			},
 		},
 		h4: {
-			fontSize: "20px",
+			fontSize: "18px",
 			fontWeight: 600,
 			lineHeight: 1.5,
 			letterSpacing: "0",
+			"@media (min-width:900px)": {
+				fontSize: "20px",
+			},
 		},
 		body1: {
 			fontSize: "16px",

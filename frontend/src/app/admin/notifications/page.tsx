@@ -85,13 +85,13 @@ export default function NotificationsPage() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4 sm:space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900">{t("admin.notifications.title")}</h1>
-				<p className="text-gray-600">{t("admin.notifications.description")}</p>
+				<h1 className="text-xl sm:text-3xl font-bold text-gray-900">{t("admin.notifications.title")}</h1>
+				<p className="text-sm text-gray-600">{t("admin.notifications.description")}</p>
 			</div>
 
-			<div className="grid gap-6 md:grid-cols-2">
+			<div className="grid gap-4 sm:gap-6 grid-cols-1 md:grid-cols-2">
 				<Card>
 					<CardHeader>
 						<CardTitle>{t("admin.notifications.sendNotification")}</CardTitle>

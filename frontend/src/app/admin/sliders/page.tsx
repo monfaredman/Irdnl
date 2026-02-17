@@ -341,14 +341,14 @@ export default function SlidersPage() {
 	];
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+		<div className="space-y-4 sm:space-y-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-						<Image className="h-6 w-6" />
+					<h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+						<Image className="h-5 w-5 sm:h-6 sm:w-6" />
 						مدیریت اسلایدرها
 					</h1>
-					<p className="text-gray-500 mt-1">
+					<p className="text-sm text-gray-500 mt-1">
 						بنرها و اسلایدرهای صفحه اصلی
 					</p>
 				</div>
@@ -396,7 +396,7 @@ export default function SlidersPage() {
 					) : sliders.length === 0 ? (
 						<p className="text-center py-8 text-gray-500">اسلایدری یافت نشد</p>
 					) : (
-						<div className="ag-theme-alpine" style={{ height: 600, width: "100%" }} dir="rtl">
+						<div className="ag-theme-alpine overflow-x-auto" style={{ height: "min(600px, 70vh)", width: "100%" }} dir="rtl">
 							<AgGridReact
 								rowData={sliders}
 								columnDefs={columnDefs}

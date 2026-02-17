@@ -175,11 +175,11 @@ export default function UsersManagementPage() {
 	};
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+		<div className="space-y-4 sm:space-y-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900">{t("admin.users.title")}</h1>
-					<p className="text-gray-600">{t("admin.users.description")}</p>
+					<h1 className="text-xl sm:text-3xl font-bold text-gray-900">{t("admin.users.title")}</h1>
+					<p className="text-sm text-gray-600">{t("admin.users.description")}</p>
 				</div>
 				<Button onClick={() => setCreateDialogOpen(true)}>
 					<Plus className="h-4 w-4 mr-2" />
@@ -208,6 +208,7 @@ export default function UsersManagementPage() {
 						<div className="p-6 text-center">{t("admin.messages.loading")}</div>
 					) : (
 						<>
+							<div className="overflow-x-auto -mx-4 sm:mx-0">
 							<Table>
 								<TableHeader>
 									<TableRow>
@@ -268,7 +269,8 @@ export default function UsersManagementPage() {
 									))}
 								</TableBody>
 							</Table>
-							<div className="mt-4 flex items-center justify-between">
+							</div>
+							<div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 								<div className="text-sm text-gray-600">
 									{t("admin.users.showing")} {(page - 1) * 20 + 1} {t("admin.users.to")}{" "}
 									{Math.min(page * 20, total)} {t("admin.users.of")} {total}

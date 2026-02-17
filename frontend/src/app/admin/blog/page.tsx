@@ -343,14 +343,14 @@ export default function BlogPage() {
 	);
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+		<div className="space-y-4 sm:space-y-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-						<BookOpen className="w-8 h-8" />
+					<h1 className="text-xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+						<BookOpen className="w-6 h-6 sm:w-8 sm:h-8" />
 						{t("admin.blog.title")}
 					</h1>
-					<p className="text-gray-600 mt-2">{t("admin.blog.description")}</p>
+					<p className="text-sm text-gray-600 mt-1 sm:mt-2">{t("admin.blog.description")}</p>
 				</div>
 				<Button onClick={openCreateDialog}>
 					<Plus className="w-4 h-4 ml-2" />
@@ -360,7 +360,7 @@ export default function BlogPage() {
 
 			{/* Statistics Cards */}
 			{stats && (
-				<div className="grid gap-4 md:grid-cols-5">
+				<div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="text-sm font-medium text-gray-600">
@@ -485,8 +485,8 @@ export default function BlogPage() {
 			<Card>
 				<CardContent className="p-0">
 					<div
-						className="ag-theme-alpine"
-						style={{ height: 600, width: "100%" }}
+						className="ag-theme-alpine overflow-x-auto"
+						style={{ height: "min(600px, 70vh)", width: "100%" }}
 					>
 						<AgGridReact
 							rowData={posts}

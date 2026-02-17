@@ -316,14 +316,14 @@ export default function AdminTicketsPage() {
 	];
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+		<div className="space-y-4 sm:space-y-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-						<MessageSquare className="h-6 w-6" />
+					<h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+						<MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
 						مدیریت تیکت‌ها
 					</h1>
-					<p className="text-gray-500 mt-1">
+					<p className="text-sm text-gray-500 mt-1">
 						پشتیبانی و پاسخ‌گویی به تیکت‌های کاربران
 					</p>
 				</div>
@@ -331,7 +331,7 @@ export default function AdminTicketsPage() {
 
 			{/* Stats */}
 			{stats && (
-				<div className="grid grid-cols-5 gap-4">
+				<div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
 					{[
 						{ label: "کل", value: stats.total, color: "#6366F1" },
 						{ label: "باز", value: stats.open, color: "#3B82F6" },

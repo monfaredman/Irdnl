@@ -181,19 +181,24 @@ export const MediaCard = ({ item, type }: MediaCardProps) => {
 					alignItems="center"
 					sx={{ mt: "auto", pt: 1 }}
 				>
-					<Chip
-						label={item.languages.map((lng) => lng.toUpperCase()).join(" / ")}
-						size="small"
-						sx={{
-							background:
-								theme.palette.glass?.light || "rgba(255, 255, 255, 0.03)",
-							backdropFilter: "blur(10px)",
-							border: `1px solid ${theme.palette.glass?.border || "rgba(255, 255, 255, 0.08)"}`,
-							color: "rgba(255, 255, 255, 0.5)",
-							fontSize: "0.75rem",
-							height: 24,
-						}}
-					/>
+					{item.languages && item.languages.length > 0 && (
+						<Chip
+							label={item.languages.map((lng) => lng.toUpperCase()).join(" / ")}
+							size="small"
+							sx={{
+								background:
+									theme.palette.glass?.light || "rgba(255, 255, 255, 0.03)",
+								backdropFilter: "blur(10px)",
+								border: `1px solid ${theme.palette.glass?.border || "rgba(255, 255, 255, 0.08)"}`,
+								color: "rgba(255, 255, 255, 0.5)",
+								fontSize: "0.75rem",
+								height: 24,
+							}}
+						/>
+					)}
+					{(!item.languages || item.languages.length === 0) && (
+						<Box />
+					)}
 					<Typography
 						variant="caption"
 						sx={{

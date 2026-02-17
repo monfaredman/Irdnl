@@ -1,15 +1,17 @@
 "use client";
 
-import { AppBar, CssBaseline, ThemeProvider } from "@mui/material";
+import { AppBar, Box, CssBaseline, ThemeProvider } from "@mui/material";
 import { usePathname } from "next/navigation";
 import { PremiumLiquidGlassFooter } from "@/components/layout/PremiumLiquidGlassFooter";
 import { PremiumLiquidGlassHeader } from "@/components/layout/PremiumLiquidGlassHeader";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { liquidGlassTheme } from "@/theme/liquid-glass-theme";
 
 /**
  * Premium Liquid Glass Layout
  * - Apple-inspired frosted glass aesthetic
  * - Always-on premium header + footer
+ * - Mobile bottom navigation bar (hidden on desktop)
  */
 export function PremiumLiquidGlassLayout({
 	children,
@@ -27,9 +29,10 @@ export function PremiumLiquidGlassLayout({
 	return (
 		<ThemeProvider theme={liquidGlassTheme}>
 			<CssBaseline />
-			<PremiumLiquidGlassHeader  />
-		<div style={{marginTop: "52px"}}>{children}</div>
+			<PremiumLiquidGlassHeader />
+			<Box sx={{ mt: "52px", pb: { xs: "56px", md: 0 } }}>{children}</Box>
 			<PremiumLiquidGlassFooter />
+			<MobileBottomNav />
 		</ThemeProvider>
 	);
 }

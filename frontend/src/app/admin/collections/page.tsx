@@ -272,13 +272,13 @@ export default function CollectionsPage() {
 	);
 
 	return (
-		<div className="space-y-6" dir="rtl">
+		<div className="space-y-4 sm:space-y-6" dir="rtl">
 			{/* Header */}
-			<div className="flex items-center justify-between">
-				<div className="flex items-center gap-3">
-					<Library className="w-8 h-8 text-blue-600" />
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+				<div className="flex items-center gap-2 sm:gap-3">
+					<Library className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
 					<div>
-						<h1 className="text-2xl font-bold text-gray-900">مجموعه‌ها</h1>
+						<h1 className="text-xl sm:text-2xl font-bold text-gray-900">مجموعه‌ها</h1>
 						<p className="text-gray-600 text-sm">
 							مدیریت مجموعه‌های محتوا
 						</p>
@@ -341,8 +341,8 @@ export default function CollectionsPage() {
 						</div>
 					) : (
 						<div
-							className="ag-theme-alpine"
-							style={{ height: 500, width: "100%" }}
+							className="ag-theme-alpine overflow-x-auto"
+							style={{ height: "min(500px, 70vh)", width: "100%" }}
 						>
 							<AgGridReact
 								rowData={collections}

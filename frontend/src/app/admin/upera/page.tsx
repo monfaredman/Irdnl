@@ -25,14 +25,14 @@ export default function UperaPage() {
 	};
 
 	return (
-		<div className="space-y-6 p-6">
-			<div className="flex items-center gap-3">
-				<Globe className="h-8 w-8 text-blue-600" />
+		<div className="space-y-4 sm:space-y-6 p-3 sm:p-6">
+			<div className="flex items-center gap-2 sm:gap-3">
+				<Globe className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600" />
 				<div>
-					<h1 className="text-2xl font-bold text-gray-900">
+					<h1 className="text-xl sm:text-2xl font-bold text-gray-900">
 						{t("admin.upera.title")}
 					</h1>
-					<p className="text-sm text-gray-500">
+					<p className="text-xs sm:text-sm text-gray-500">
 						{t("admin.upera.description")}
 					</p>
 				</div>

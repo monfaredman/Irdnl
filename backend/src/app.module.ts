@@ -24,6 +24,7 @@ import { CommentsModule } from './modules/comments/comments.module';
 import { BlogModule } from './modules/blog/blog.module';
 import { PlaylistsModule } from './modules/playlists/playlists.module';
 import { TicketsModule } from './modules/tickets/tickets.module';
+import { SearchModule } from './modules/search/search.module';
 
 @Module({
   imports: [
@@ -95,6 +96,7 @@ import { TicketsModule } from './modules/tickets/tickets.module';
     BlogModule,
     PlaylistsModule,
     TicketsModule,
+    SearchModule,
   ],
 })
 export class AppModule {}

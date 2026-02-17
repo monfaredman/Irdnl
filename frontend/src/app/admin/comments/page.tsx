@@ -423,18 +423,18 @@ export default function CommentsPage() {
 	);
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4 sm:space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-					<MessageSquare className="w-8 h-8" />
+				<h1 className="text-xl sm:text-3xl font-bold text-gray-900 flex items-center gap-2 sm:gap-3">
+					<MessageSquare className="w-6 h-6 sm:w-8 sm:h-8" />
 					{t("admin.comments.title")}
 				</h1>
-				<p className="text-gray-600 mt-2">{t("admin.comments.description")}</p>
+				<p className="text-sm text-gray-600 mt-1 sm:mt-2">{t("admin.comments.description")}</p>
 			</div>
 
 			{/* Statistics Cards */}
 			{stats && (
-				<div className="grid gap-4 md:grid-cols-5">
+				<div className="grid gap-3 sm:gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-5">
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="text-sm font-medium text-gray-600">
@@ -584,8 +584,8 @@ export default function CommentsPage() {
 			<Card>
 				<CardContent className="p-0">
 					<div
-						className="ag-theme-alpine"
-						style={{ height: 600, width: "100%" }}
+						className="ag-theme-alpine overflow-x-auto"
+						style={{ height: "min(600px, 70vh)", width: "100%" }}
 					>
 						<AgGridReact
 							rowData={comments}

@@ -17,6 +17,7 @@ import { Pin } from '../content/entities/pin.entity';
 import { Collection } from '../content/entities/collection.entity';
 import { ContentModule } from '../content/content.module';
 import { VideoAssetsModule } from '../video-assets/video-assets.module';
+import { SearchModule } from '../search/search.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { VideoAssetsModule } from '../video-assets/video-assets.module';
     ]),
     ContentModule,
     VideoAssetsModule,
+    SearchModule,
   ],
   controllers: [AdminController],
   providers: [AdminService],

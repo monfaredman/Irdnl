@@ -50,6 +50,7 @@ import {
 	type MenuCategory,
 } from "@/lib/api/public";
 import { useIsAuthenticated, useAuthStore } from "@/store/auth";
+import SearchAutocomplete from "@/components/search/SearchAutocomplete";
 
 type UserMenuAction =
 	| { type: "navigate"; href: string }
@@ -203,7 +204,6 @@ export function PremiumLiquidGlassHeader() {
 	// State management
 	const [scrolled, setScrolled] = useState(false);
 	const [searchExpanded, setSearchExpanded] = useState(false);
-	const [searchQuery, setSearchQuery] = useState("");
 	const [mobileOpen, setMobileOpen] = useState(false);
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const [submenuAnchor, setSubmenuAnchor] = useState<{
@@ -220,8 +220,6 @@ export function PremiumLiquidGlassHeader() {
 	const isAuthenticated = useIsAuthenticated();
 	const storeLogout = useAuthStore((s) => s.logout);
 
-	const searchInputRef = useRef<HTMLInputElement>(null);
-
 	// Scroll detection for glass effect
 	useEffect(() => {
 		const handleScroll = () => {
@@ -235,26 +233,9 @@ export function PremiumLiquidGlassHeader() {
 		return () => window.removeEventListener("scroll", handleScroll);
 	}, [scrolled]);
 
-	// Auto-focus search when expanded
-	useEffect(() => {
-		if (searchExpanded && searchInputRef.current) {
-			searchInputRef.current.focus();
-		}
-	}, [searchExpanded]);
-
 	// Handlers
 	const handleSearchToggle = () => {
 		setSearchExpanded(!searchExpanded);
-		if (searchExpanded) {
-			setSearchQuery("");
-		}
-	};
-
-	const handleSearchSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (searchQuery.trim()) {
-			window.location.href = `${routes.search}?q=${encodeURIComponent(searchQuery)}`;
-		}
 	};
 
 	const handleUserMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -400,32 +381,6 @@ export function PremiumLiquidGlassHeader() {
 			transform: "translateY(0px)",
 		},
 	});
-
-	const searchContainerStyle = {
-		display: "flex",
-		alignItems: "center",
-		width: searchExpanded ? { xs: "200px", sm: "300px" } : "40px",
-		height: "40px",
-		borderRadius: glassBorderRadius.pill,
-		background: searchExpanded
-			? `linear-gradient(135deg, ${glassColors.glass.strong}, ${glassColors.glass.mid})`
-			: "transparent",
-		border: searchExpanded
-			? `1px solid ${glassColors.glass.border}`
-			: "1px solid transparent",
-		backdropFilter: searchExpanded
-			? `blur(${glassBlur.medium}px) saturate(180%)`
-			: "none",
-		WebkitBackdropFilter: searchExpanded
-			? `blur(${glassBlur.medium}px) saturate(180%)`
-			: "none",
-		transition: glassAnimations.transition.spring,
-		overflow: "hidden",
-		boxShadow: searchExpanded
-			? `0 8px 24px -4px rgba(0, 0, 0, 0.3),
-         inset 0 1px 0 0 rgba(255, 255, 255, 0.1)`
-			: "none",
-	};
 
 	const avatarStyle = {
 		width: 40,
@@ -648,45 +603,13 @@ export function PremiumLiquidGlassHeader() {
 
 						{/* Right Section - Search & User */}
 						<Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-							{/* Glass Search Field */}
-							<Box
-								component="form"
-								onSubmit={handleSearchSubmit}
-								sx={searchContainerStyle}
-							>
-								{searchExpanded && (
-									<InputBase
-										inputRef={searchInputRef}
-										value={searchQuery}
-										onChange={(e) => setSearchQuery(e.target.value)}
-										placeholder={language === "fa" ? "جستجو..." : "Search..."}
-										sx={{
-											flex: 1,
-											px: 2,
-											color: "#FFFFFF",
-											fontSize: "0.875rem",
-											"& ::placeholder": {
-												color: "rgba(255, 255, 255, 0.5)",
-												opacity: 1,
-											},
-										}}
-									/>
-								)}
-								<IconButton
-									onClick={handleSearchToggle}
-									size="small"
-									sx={{
-										color: "#FFFFFF",
-										transition: "all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)",
-										"&:hover": {
-											transform: "rotate(90deg)",
-										},
-										margin: "-0.5rem",
-									}}
-								>
-									{searchExpanded ? <CloseIcon /> : <SearchIcon />}
-								</IconButton>
-							</Box>
+							{/* Glass Search with Autocomplete */}
+							<SearchAutocomplete
+								language={language}
+								isExpanded={searchExpanded}
+								onExpandToggle={handleSearchToggle}
+								onClose={() => setSearchExpanded(false)}
+							/>
 
 							{/* User Avatar - Desktop Only */}
 							{mounted && !isMobile && (

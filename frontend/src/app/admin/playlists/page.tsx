@@ -177,12 +177,12 @@ export default function AdminPlaylistsPage() {
 	);
 
 	return (
-		<div className="space-y-6" dir="rtl">
+		<div className="space-y-4 sm:space-y-6" dir="rtl">
 			{/* Header */}
-			<div className="flex items-center gap-3">
-				<ListMusic className="w-8 h-8 text-blue-600" />
+			<div className="flex items-center gap-2 sm:gap-3">
+				<ListMusic className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
 				<div>
-					<h1 className="text-2xl font-bold text-gray-900">لیست‌های پخش</h1>
+					<h1 className="text-xl sm:text-2xl font-bold text-gray-900">لیست‌های پخش</h1>
 					<p className="text-gray-600 text-sm">
 						مدیریت لیست‌های پخش کاربران
 					</p>

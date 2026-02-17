@@ -68,19 +68,37 @@ export const theme = createTheme({
 			"sans-serif",
 		].join(","),
 		h1: {
-			fontSize: "2.5rem",
+			fontSize: "1.75rem",
 			fontWeight: 700,
 			lineHeight: 1.2,
+			"@media (min-width:600px)": {
+				fontSize: "2.125rem",
+			},
+			"@media (min-width:900px)": {
+				fontSize: "2.5rem",
+			},
 		},
 		h2: {
-			fontSize: "2rem",
-			fontWeight: 600,
-			lineHeight: 1.3,
-		},
-		h3: {
 			fontSize: "1.5rem",
 			fontWeight: 600,
+			lineHeight: 1.3,
+			"@media (min-width:600px)": {
+				fontSize: "1.75rem",
+			},
+			"@media (min-width:900px)": {
+				fontSize: "2rem",
+			},
+		},
+		h3: {
+			fontSize: "1.25rem",
+			fontWeight: 600,
 			lineHeight: 1.4,
+			"@media (min-width:600px)": {
+				fontSize: "1.375rem",
+			},
+			"@media (min-width:900px)": {
+				fontSize: "1.5rem",
+			},
 		},
 		body1: {
 			fontSize: "1rem",

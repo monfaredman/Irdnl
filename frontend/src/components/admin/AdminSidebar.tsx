@@ -90,7 +90,7 @@ function filterMenuByRole(items: MenuItem[], role: string | undefined): MenuItem
 		.filter((item) => !item.children || item.children.length > 0);
 }
 
-export function AdminSidebar() {
+export function AdminSidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
 	const pathname = usePathname();
 	const { logout, user } = useAdminAuth();
 	const { t } = useTranslation();
@@ -152,6 +152,7 @@ export function AdminSidebar() {
 			<Link
 				key={item.labelKey}
 				href={item.href!}
+				onClick={onNavigate}
 				className={cn(
 					"flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
 					depth > 0 && "pr-6 text-xs",
@@ -167,7 +168,7 @@ export function AdminSidebar() {
 	};
 
 	return (
-		<div className="flex h-screen w-64 flex-col border-l border-gray-200 bg-white">
+		<div className="flex h-screen w-64 shrink-0 flex-col border-l border-gray-200 bg-white">
 			<div className="flex h-16 items-center border-b border-gray-200 px-6">
 				<h1 className="text-xl font-bold text-gray-900">{t("admin.title")}</h1>
 			</div>

@@ -490,13 +490,13 @@ export default function ContentManagementPage() {
 	], [t, PosterRenderer, TitleRenderer, TypeRenderer, StatusRenderer, ActionsRenderer, showFeedback]);
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+		<div className="space-y-4 sm:space-y-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-3xl font-bold text-gray-900">
+					<h1 className="text-xl sm:text-3xl font-bold text-gray-900">
 						{t("admin.content.title")}
 					</h1>
-					<p className="text-gray-600">{t("admin.content.list")}</p>
+					<p className="text-sm text-gray-600">{t("admin.content.list")}</p>
 				</div>
 				<Link href="/admin/content/new">
 					<Button>
@@ -552,7 +552,7 @@ export default function ContentManagementPage() {
 					{loading ? (
 						<div className="p-6 text-center">{t("admin.messages.loading")}</div>
 					) : (
-						<div className="ag-theme-alpine" style={{ height: 650, width: "100%" }} dir="rtl">
+						<div className="ag-theme-alpine overflow-x-auto" style={{ height: "min(650px, 70vh)", width: "100%" }} dir="rtl">
 							<AgGridReact
 								columnDefs={columnDefs}
 								rowData={content}

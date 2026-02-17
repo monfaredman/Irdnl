@@ -113,12 +113,12 @@ export default function AdminProfilePage() {
 	};
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-4 sm:space-y-6">
 			<div>
-				<h1 className="text-3xl font-bold text-gray-900">
+				<h1 className="text-xl sm:text-3xl font-bold text-gray-900">
 					{t("admin.profile.title")}
 				</h1>
-				<p className="text-gray-600">{t("admin.profile.subtitle")}</p>
+				<p className="text-sm text-gray-600">{t("admin.profile.subtitle")}</p>
 			</div>
 
 			{/* Profile Info Section */}

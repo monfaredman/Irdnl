@@ -14,6 +14,7 @@ import {
 import { useWidgetGrid, type WidgetConfig } from "@/hooks/useWidgetGrid";
 import { WidgetGrid, DraggableWidget } from "@/components/interactive";
 import { pickWidgetImage } from "@/lib/tmdb-images";
+import { useResponsiveValue } from "@/hooks/useResponsive";
 import type { Movie, Series } from "@/types/media";
 
 // ============================================================================
@@ -45,19 +46,45 @@ type ChipType = "dubbed" | "free" | "subtitle" | "offer";
 // ============================================================================
 
 const ITEM_COUNT = 7;
-const TOTAL_COLS = 4;
-const ROW_HEIGHT = 180;
 const GAP = 16;
 
-// Widget configurations matching the original grid layout
-const WIDGET_CONFIGS: WidgetConfig[] = [
-	{ id: "widget-0", colSpan: 2, rowSpan: 2, type: "large" },    // Large horizontal (688 × 374)
-	{ id: "widget-1", colSpan: 1, rowSpan: 1, type: "small" },    // Small (335 × 178)
-	{ id: "widget-2", colSpan: 1, rowSpan: 2, type: "poster" },   // Poster type (335 × 374)
-	{ id: "widget-3", colSpan: 1, rowSpan: 1, type: "small" },    // Small (335 × 178)
-	{ id: "widget-4", colSpan: 2, rowSpan: 1, type: "medium" },   // Medium horizontal (688 × 178)
-	{ id: "widget-5", colSpan: 1, rowSpan: 1, type: "small" },    // Small (335 × 178)
-	{ id: "widget-6", colSpan: 1, rowSpan: 1, type: "small" },    // Small (335 × 178)
+// Desktop: 4 columns – original layout
+const DESKTOP_COLS = 4;
+const DESKTOP_ROW_HEIGHT = 180;
+const DESKTOP_WIDGET_CONFIGS: WidgetConfig[] = [
+	{ id: "widget-0", colSpan: 2, rowSpan: 2, type: "large" },
+	{ id: "widget-1", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-2", colSpan: 1, rowSpan: 2, type: "poster" },
+	{ id: "widget-3", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-4", colSpan: 2, rowSpan: 1, type: "medium" },
+	{ id: "widget-5", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-6", colSpan: 1, rowSpan: 1, type: "small" },
+];
+
+// Tablet: 3 columns – clamp colSpan to 3
+const TABLET_COLS = 3;
+const TABLET_ROW_HEIGHT = 160;
+const TABLET_WIDGET_CONFIGS: WidgetConfig[] = [
+	{ id: "widget-0", colSpan: 2, rowSpan: 2, type: "large" },
+	{ id: "widget-1", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-2", colSpan: 1, rowSpan: 2, type: "poster" },
+	{ id: "widget-3", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-4", colSpan: 2, rowSpan: 1, type: "medium" },
+	{ id: "widget-5", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-6", colSpan: 1, rowSpan: 1, type: "small" },
+];
+
+// Mobile: 2 columns – all widgets max 2 wide, poster gets full width
+const MOBILE_COLS = 2;
+const MOBILE_ROW_HEIGHT = 150;
+const MOBILE_WIDGET_CONFIGS: WidgetConfig[] = [
+	{ id: "widget-0", colSpan: 2, rowSpan: 2, type: "large" },
+	{ id: "widget-1", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-2", colSpan: 1, rowSpan: 2, type: "poster" },
+	{ id: "widget-3", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-4", colSpan: 2, rowSpan: 1, type: "medium" },
+	{ id: "widget-5", colSpan: 1, rowSpan: 1, type: "small" },
+	{ id: "widget-6", colSpan: 1, rowSpan: 1, type: "small" },
 ];
 
 const STORAGE_KEY = "ios_widget_grid_layout";
@@ -445,6 +472,23 @@ export const IOSWidgetGridSection = memo(function IOSWidgetGridSection({
 	const { language } = useLanguage();
 	const isRTL = language === "fa";
 
+	// Responsive grid configuration
+	const responsiveCols = useResponsiveValue({
+		mobile: MOBILE_COLS,
+		tablet: TABLET_COLS,
+		desktop: DESKTOP_COLS,
+	});
+	const responsiveRowHeight = useResponsiveValue({
+		mobile: MOBILE_ROW_HEIGHT,
+		tablet: TABLET_ROW_HEIGHT,
+		desktop: DESKTOP_ROW_HEIGHT,
+	});
+	const responsiveWidgetConfigs = useResponsiveValue({
+		mobile: MOBILE_WIDGET_CONFIGS,
+		tablet: TABLET_WIDGET_CONFIGS,
+		desktop: DESKTOP_WIDGET_CONFIGS,
+	});
+
 	// Widget grid hook for state management
 	const {
 		positions,
@@ -458,8 +502,8 @@ export const IOSWidgetGridSection = memo(function IOSWidgetGridSection({
 		swapWidgets,
 	} = useWidgetGrid({
 		storageKey,
-		totalCols: TOTAL_COLS,
-		defaultWidgets: WIDGET_CONFIGS,
+		totalCols: responsiveCols,
+		defaultWidgets: responsiveWidgetConfigs,
 		itemCount: ITEM_COUNT,
 	});
 
@@ -511,8 +555,8 @@ export const IOSWidgetGridSection = memo(function IOSWidgetGridSection({
 
 	// Get widget config by ID
 	const getConfigById = useCallback((widgetId: string) => {
-		return WIDGET_CONFIGS.find((c) => c.id === widgetId);
-	}, []);
+		return responsiveWidgetConfigs.find((c: WidgetConfig) => c.id === widgetId);
+	}, [responsiveWidgetConfigs]);
 
 	// Section title
 	const sectionTitle =
@@ -537,9 +581,9 @@ export const IOSWidgetGridSection = memo(function IOSWidgetGridSection({
 			onShuffle={shuffleLayout}
 			onReset={resetLayout}
 			onDragEnd={handleDragEnd}
-			totalCols={TOTAL_COLS}
+			totalCols={responsiveCols}
 			totalRows={totalRows}
-			rowHeight={ROW_HEIGHT}
+			rowHeight={responsiveRowHeight}
 			gap={GAP}
 			title={sectionTitle}
 			subtitle={sectionSubtitle}

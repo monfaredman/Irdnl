@@ -589,3 +589,52 @@ html {
 .ag-theme-alpine .ag-header-cell {
 	font-feature-settings: "tnum" 1;
 }
+
+/* ============================================================================ */
+/* MOBILE / TABLET RESPONSIVE — Admin Panel                                    */
+/* ============================================================================ */
+
+/* AG Grid: smaller row height and font on narrow viewports */
+@media (max-width: 768px) {
+	.ag-theme-alpine {
+		--ag-font-size: 12px;
+		--ag-row-height: 56px;
+		--ag-header-height: 44px;
+		--ag-cell-horizontal-padding: 8px;
+	}
+
+	.ag-theme-alpine .ag-cell {
+		padding: 8px;
+		font-size: 12px;
+	}
+
+	.ag-theme-alpine .ag-header-cell {
+		padding: 8px;
+		font-size: 11px;
+	}
+
+	.ag-theme-alpine .ag-paging-panel {
+		padding: 8px;
+		font-size: 12px;
+		flex-wrap: wrap;
+		gap: 4px;
+		justify-content: center;
+	}
+}
+
+/* Admin page header responsive helper */
+@media (max-width: 640px) {
+	.admin-page-header {
+		flex-direction: column;
+		align-items: flex-start !important;
+		gap: 12px;
+	}
+
+	.admin-page-header h1 {
+		font-size: 1.25rem;
+	}
+
+	.admin-page-header p {
+		font-size: 0.8rem;
+	}
+}

@@ -182,14 +182,14 @@ export default function PinsPage() {
 		SECTIONS.find((s) => s.value === val)?.label || val;
 
 	return (
-		<div className="space-y-6">
-			<div className="flex items-center justify-between">
+		<div className="space-y-4 sm:space-y-6">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<div>
-					<h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-						<PinIcon className="h-6 w-6" />
+					<h1 className="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
+						<PinIcon className="h-5 w-5 sm:h-6 sm:w-6" />
 						مدیریت پین‌ها
 					</h1>
-					<p className="text-gray-500 mt-1">
+					<p className="text-sm text-gray-500 mt-1">
 						سنجاق کردن محتوا به بخش‌های مختلف صفحه اصلی
 					</p>
 				</div>
