@@ -8,12 +8,6 @@ import "ag-grid-community/styles/ag-theme-alpine.css";
 import type { ColDef, ICellRendererParams } from "ag-grid-community";
 import { Button } from "@/components/admin/ui/button";
 import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@/components/admin/ui/card";
-import {
 	Snackbar,
 	Alert,
 	Dialog,
@@ -58,25 +52,15 @@ interface ChildCategory {
 	parentId: string;
 }
 
-const emptyForm: Omit<ChildCategory, "id"> = {
-	slug: "",
-	nameEn: "",
-	nameFa: "",
-	contentType: "movie",
-	descriptionEn: "",
-	descriptionFa: "",
-	gradientColors: [],
-	icon: "",
-	imageUrl: "",
-	tmdbParams: {},
-	showEpisodes: false,
-	isActive: true,
-	showInMenu: true,
-	showInLanding: false,
-	sortOrder: 0,
-	urlPath: "",
-	parentId: "",
-};
+interface AllCategory {
+	id: string;
+	slug: string;
+	nameEn: string;
+	nameFa: string;
+	parentId: string | null;
+	sortOrder: number;
+	isActive: boolean;
+}
 
 interface ChildCategoryManagerProps {
 	parentId: string;
@@ -93,6 +77,7 @@ export default function ChildCategoryManager({
 }: ChildCategoryManagerProps) {
 	const { t } = useTranslation();
 	const [children, setChildren] = useState<ChildCategory[]>([]);
+	const [allCategories, setAllCategories] = useState<AllCategory[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [feedback, setFeedback] = useState<{
 		type: "success" | "error";
@@ -105,15 +90,23 @@ export default function ChildCategoryManager({
 		onConfirm: () => void;
 	}>({ open: false, title: "", message: "", onConfirm: () => {} });
 
-	// Form dialog
-	const [formOpen, setFormOpen] = useState(false);
-	const [editingId, setEditingId] = useState<string | null>(null);
-	const [form, setForm] = useState(emptyForm);
+	// Add child dialog (link existing category)
+	const [addOpen, setAddOpen] = useState(false);
+	const [selectedCategoryId, setSelectedCategoryId] = useState("");
+	const [addSortOrder, setAddSortOrder] = useState(0);
+	const [addIsActive, setAddIsActive] = useState(true);
+
+	// Edit dialog (edit existing child properties)
+	const [editOpen, setEditOpen] = useState(false);
+	const [editingChild, setEditingChild] = useState<ChildCategory | null>(null);
+	const [editSortOrder, setEditSortOrder] = useState(0);
+	const [editIsActive, setEditIsActive] = useState(true);
 
 	// Load children when dialog opens or parentId changes
 	useEffect(() => {
 		if (open && parentId) {
 			loadChildren();
+			loadAllCategories();
 		}
 	}, [open, parentId]);
 
@@ -132,18 +125,64 @@ export default function ChildCategoryManager({
 		}
 	};
 
-	const handleAdd = () => {
-		setEditingId(null);
-		setForm({ ...emptyForm, parentId });
-		setFormOpen(true);
+	const loadAllCategories = async () => {
+		try {
+			const result = await categoriesApi.list();
+			setAllCategories(result.data || []);
+		} catch {
+			// silent
+		}
 	};
 
-	const handleEdit = (id: string) => {
-		const item = children.find((c) => c.id === id);
-		if (item) {
-			setEditingId(id);
-			setForm(item);
-			setFormOpen(true);
+	// Filtered: exclude current parent and already-assigned children
+	const availableCategories = allCategories.filter(
+		(cat) => cat.id !== parentId && !children.some((c) => c.id === cat.id),
+	);
+
+	const handleOpenAdd = () => {
+		setSelectedCategoryId("");
+		setAddSortOrder(children.length);
+		setAddIsActive(true);
+		setAddOpen(true);
+	};
+
+	const handleAddSubmit = async () => {
+		if (!selectedCategoryId) return;
+		try {
+			await categoriesApi.linkAsChild(parentId, selectedCategoryId, addSortOrder, addIsActive);
+			setFeedback({ type: "success", message: "زیردسته با موفقیت اضافه شد" });
+			setAddOpen(false);
+			loadChildren();
+		} catch (error: any) {
+			setFeedback({
+				type: "error",
+				message: error?.response?.data?.message || "خطا در افزودن زیردسته",
+			});
+		}
+	};
+
+	const handleOpenEdit = (child: ChildCategory) => {
+		setEditingChild(child);
+		setEditSortOrder(child.sortOrder);
+		setEditIsActive(child.isActive);
+		setEditOpen(true);
+	};
+
+	const handleEditSubmit = async () => {
+		if (!editingChild) return;
+		try {
+			await categoriesApi.updateChild(parentId, editingChild.id, {
+				sortOrder: editSortOrder,
+				isActive: editIsActive,
+			});
+			setFeedback({ type: "success", message: t("admin.form.updateSuccess") });
+			setEditOpen(false);
+			loadChildren();
+		} catch (error: any) {
+			setFeedback({
+				type: "error",
+				message: error?.response?.data?.message || t("admin.form.updateFailed"),
+			});
 		}
 	};
 
@@ -168,33 +207,6 @@ export default function ChildCategoryManager({
 				}
 			},
 		});
-	};
-
-	const handleFormSubmit = async () => {
-		try {
-			if (editingId) {
-				await categoriesApi.updateChild(parentId, editingId, form);
-				setFeedback({
-					type: "success",
-					message: t("admin.form.updateSuccess"),
-				});
-			} else {
-				await categoriesApi.createChild(parentId, { ...form, parentId });
-				setFeedback({
-					type: "success",
-					message: t("admin.form.createSuccess"),
-				});
-			}
-			setFormOpen(false);
-			loadChildren();
-		} catch (error: any) {
-			setFeedback({
-				type: "error",
-				message:
-					error?.response?.data?.message ||
-					(editingId ? t("admin.form.updateFailed") : t("admin.form.createFailed")),
-			});
-		}
 	};
 
 	const handleConfirmClose = (confirmed: boolean) => {
@@ -224,12 +236,6 @@ export default function ChildCategoryManager({
 			minWidth: 150,
 		},
 		{
-			headerName: t("admin.categories.urlPath"),
-			field: "urlPath",
-			flex: 1,
-			minWidth: 120,
-		},
-		{
 			headerName: t("admin.categories.sortOrder"),
 			field: "sortOrder",
 			width: 100,
@@ -254,7 +260,7 @@ export default function ChildCategoryManager({
 					<IconButton
 						size="small"
 						color="primary"
-						onClick={() => handleEdit(params.data!.id)}
+						onClick={() => handleOpenEdit(params.data!)}
 					>
 						<Edit size={16} />
 					</IconButton>
@@ -272,20 +278,10 @@ export default function ChildCategoryManager({
 
 	return (
 		<>
-			<Dialog
-				open={open}
-				onClose={onClose}
-				maxWidth="lg"
-				fullWidth
-			>
+			{/* Main dialog: shows existing children list */}
+			<Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
 				<DialogTitle>
-					<Box
-						sx={{
-							display: "flex",
-							justifyContent: "space-between",
-							alignItems: "center",
-						}}
-					>
+					<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
 						<Typography variant="h6">
 							{t("admin.categories.manageChildCategories")}: {parentName}
 						</Typography>
@@ -296,16 +292,12 @@ export default function ChildCategoryManager({
 				</DialogTitle>
 				<DialogContent>
 					<Box sx={{ mb: 2, mt: 1 }}>
-						<Button onClick={handleAdd}>
+						<Button onClick={handleOpenAdd}>
 							<Plus className="mr-2 h-4 w-4" />
 							{t("admin.categories.addChildCategory")}
 						</Button>
 					</Box>
-
-					<div
-						className="ag-theme-alpine"
-						style={{ height: "500px", width: "100%" }}
-					>
+					<div className="ag-theme-alpine" style={{ height: "500px", width: "100%" }}>
 						<AgGridReact<ChildCategory>
 							rowData={children}
 							columnDefs={columnDefs}
@@ -313,170 +305,108 @@ export default function ChildCategoryManager({
 							loading={loading}
 							pagination={false}
 							enableRtl={true}
-							defaultColDef={{
-								sortable: true,
-								resizable: true,
-								filter: true,
-							}}
+							defaultColDef={{ sortable: true, resizable: true, filter: true }}
 						/>
 					</div>
 				</DialogContent>
 			</Dialog>
 
-			{/* Form Dialog */}
-			<Dialog
-				open={formOpen}
-				onClose={() => setFormOpen(false)}
-				maxWidth="md"
-				fullWidth
-			>
-				<DialogTitle>
-					{editingId ? t("admin.categories.editChildCategory") : t("admin.categories.addChildCategory")}
-				</DialogTitle>
+			{/* Add Child Dialog — select existing category + status + sort order */}
+			<Dialog open={addOpen} onClose={() => setAddOpen(false)} maxWidth="xs" fullWidth>
+				<DialogTitle>{t("admin.categories.addChildCategory")}</DialogTitle>
 				<DialogContent>
-					<div className="grid grid-cols-2 gap-4 mt-2">
-						<TextField
-							label={t("admin.categories.slug")}
-							value={form.slug}
-							onChange={(e) => setForm({ ...form, slug: e.target.value })}
-							fullWidth
-							size="small"
-							required
-							placeholder="foreign-action"
-						/>
-						<TextField
-							label={t("admin.categories.urlPath")}
-							value={form.urlPath}
-							onChange={(e) => setForm({ ...form, urlPath: e.target.value })}
-							fullWidth
-							size="small"
-							required
-							placeholder="action"
-							helperText={t("admin.categories.urlPathHelper")}
-						/>
-						<TextField
-							label={t("admin.categories.namePersian")}
-							value={form.nameFa}
-							onChange={(e) => setForm({ ...form, nameFa: e.target.value })}
-							fullWidth
-							size="small"
-							required
-						/>
-						<TextField
-							label={t("admin.categories.nameEnglish")}
-							value={form.nameEn}
-							onChange={(e) => setForm({ ...form, nameEn: e.target.value })}
-							fullWidth
-							size="small"
-							required
-						/>
-						<FormControl fullWidth size="small">
-							<InputLabel>{t("admin.categories.contentType")}</InputLabel>
+					<Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+						<FormControl fullWidth size="small" required>
+							<InputLabel>انتخاب دسته‌بندی</InputLabel>
 							<Select
-								value={form.contentType}
-								onChange={(e) =>
-									setForm({ ...form, contentType: e.target.value })
-								}
-								label={t("admin.categories.contentType")}
+								value={selectedCategoryId}
+								label="انتخاب دسته‌بندی"
+								onChange={(e) => setSelectedCategoryId(e.target.value)}
 							>
-								<MenuItem value="movie">{t("admin.categories.movie")}</MenuItem>
-								<MenuItem value="series">{t("admin.categories.series")}</MenuItem>
-								<MenuItem value="mixed">{t("admin.categories.mixed")}</MenuItem>
+								{availableCategories.length === 0 ? (
+									<MenuItem disabled value="">
+										دسته‌ای موجود نیست
+									</MenuItem>
+								) : (
+									availableCategories.map((cat) => (
+										<MenuItem key={cat.id} value={cat.id}>
+											{cat.nameFa} ({cat.nameEn})
+										</MenuItem>
+									))
+								)}
 							</Select>
 						</FormControl>
-						<TextField
-							label={t("admin.categories.sortOrder")}
-							type="number"
-							value={form.sortOrder}
-							onChange={(e) =>
-								setForm({ ...form, sortOrder: Number(e.target.value) })
-							}
-							fullWidth
-							size="small"
-						/>
-						<TextField
-							label={t("admin.categories.descriptionPersian")}
-							value={form.descriptionFa || ""}
-							onChange={(e) =>
-								setForm({ ...form, descriptionFa: e.target.value })
-							}
-							fullWidth
-							size="small"
-							multiline
-							rows={2}
-						/>
-						<TextField
-							label={t("admin.categories.descriptionEnglish")}
-							value={form.descriptionEn || ""}
-							onChange={(e) =>
-								setForm({ ...form, descriptionEn: e.target.value })
-							}
-							fullWidth
-							size="small"
-							multiline
-							rows={2}
-						/>
 						<FormControlLabel
 							control={
 								<Switch
-									checked={form.isActive}
-									onChange={(e) =>
-										setForm({ ...form, isActive: e.target.checked })
-									}
+									checked={addIsActive}
+									onChange={(e) => setAddIsActive(e.target.checked)}
 								/>
 							}
 							label={t("admin.categories.active")}
 						/>
-						<FormControlLabel
-							control={
-								<Switch
-									checked={form.showInMenu}
-									onChange={(e) =>
-										setForm({ ...form, showInMenu: e.target.checked })
-									}
-									color="primary"
-								/>
-							}
-							label={t("admin.categories.showInMenu")}
+						<TextField
+							label={t("admin.categories.sortOrder")}
+							type="number"
+							value={addSortOrder}
+							onChange={(e) => setAddSortOrder(Number(e.target.value))}
+							fullWidth
+							size="small"
+							inputProps={{ min: 0 }}
 						/>
-						<FormControlLabel
-							control={
-								<Switch
-									checked={form.showInLanding}
-									onChange={(e) =>
-										setForm({ ...form, showInLanding: e.target.checked })
-									}
-									color="secondary"
-								/>
-							}
-							label={t("admin.categories.showInLanding")}
-						/>
-						<FormControlLabel
-							control={
-								<Switch
-									checked={form.showEpisodes}
-									onChange={(e) =>
-										setForm({ ...form, showEpisodes: e.target.checked })
-									}
-								/>
-							}
-							label={t("admin.categories.showEpisodes")}
-						/>
-					</div>
+					</Box>
 				</DialogContent>
 				<DialogActions>
-					<MuiButton onClick={() => setFormOpen(false)}>{t("admin.form.cancel")}</MuiButton>
-					<MuiButton onClick={handleFormSubmit} variant="contained">
-						{editingId ? t("admin.form.update") : t("admin.form.create")}
+					<MuiButton onClick={() => setAddOpen(false)}>{t("admin.form.cancel")}</MuiButton>
+					<MuiButton
+						onClick={handleAddSubmit}
+						variant="contained"
+						disabled={!selectedCategoryId}
+					>
+						افزودن
 					</MuiButton>
 				</DialogActions>
 			</Dialog>
 
+			{/* Edit Child Dialog — only status + sort order */}
+			{editingChild && (
+				<Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="xs" fullWidth>
+					<DialogTitle>
+						{t("admin.categories.editChildCategory")}: {editingChild.nameFa}
+					</DialogTitle>
+					<DialogContent>
+						<Box sx={{ display: "flex", flexDirection: "column", gap: 2, mt: 1 }}>
+							<FormControlLabel
+								control={
+									<Switch
+										checked={editIsActive}
+										onChange={(e) => setEditIsActive(e.target.checked)}
+									/>
+								}
+								label={t("admin.categories.active")}
+							/>
+							<TextField
+								label={t("admin.categories.sortOrder")}
+								type="number"
+								value={editSortOrder}
+								onChange={(e) => setEditSortOrder(Number(e.target.value))}
+								fullWidth
+								size="small"
+								inputProps={{ min: 0 }}
+							/>
+						</Box>
+					</DialogContent>
+					<DialogActions>
+						<MuiButton onClick={() => setEditOpen(false)}>{t("admin.form.cancel")}</MuiButton>
+						<MuiButton onClick={handleEditSubmit} variant="contained">
+							{t("admin.form.update")}
+						</MuiButton>
+					</DialogActions>
+				</Dialog>
+			)}
+
 			{/* Confirm Delete Dialog */}
-			<Dialog
-				open={confirmDialog.open}
-				onClose={() => handleConfirmClose(false)}
-			>
+			<Dialog open={confirmDialog.open} onClose={() => handleConfirmClose(false)}>
 				<DialogTitle>{confirmDialog.title}</DialogTitle>
 				<DialogContent>
 					<DialogContentText>{confirmDialog.message}</DialogContentText>
@@ -485,11 +415,7 @@ export default function ChildCategoryManager({
 					<MuiButton onClick={() => handleConfirmClose(false)}>
 						{t("admin.form.cancel")}
 					</MuiButton>
-					<MuiButton
-						onClick={() => handleConfirmClose(true)}
-						color="error"
-						variant="contained"
-					>
+					<MuiButton onClick={() => handleConfirmClose(true)} color="error" variant="contained">
 						{t("admin.form.delete")}
 					</MuiButton>
 				</DialogActions>
@@ -503,11 +429,7 @@ export default function ChildCategoryManager({
 				anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
 			>
 				{feedback ? (
-					<Alert
-						severity={feedback.type}
-						variant="filled"
-						onClose={() => setFeedback(null)}
-					>
+					<Alert severity={feedback.type} variant="filled" onClose={() => setFeedback(null)}>
 						{feedback.message}
 					</Alert>
 				) : undefined}

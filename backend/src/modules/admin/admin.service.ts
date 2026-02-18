@@ -594,6 +594,25 @@ export class AdminService {
     await this.categoryRepository.remove(child);
   }
 
+  /** Assign an existing category (by id) as a child of parentId */
+  async linkCategoryAsChild(
+    parentId: string,
+    categoryId: string,
+    sortOrder: number,
+    isActive: boolean,
+  ): Promise<Category> {
+    const parent = await this.categoryRepository.findOne({ where: { id: parentId } });
+    if (!parent) throw new NotFoundException(`Parent category ${parentId} not found`);
+
+    const category = await this.categoryRepository.findOne({ where: { id: categoryId } });
+    if (!category) throw new NotFoundException(`Category ${categoryId} not found`);
+
+    category.parentId = parentId;
+    category.sortOrder = sortOrder;
+    category.isActive = isActive;
+    return this.categoryRepository.save(category);
+  }
+
   // ========================================================================
   // GENRES CRUD
   // ========================================================================

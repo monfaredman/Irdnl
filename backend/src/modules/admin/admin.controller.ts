@@ -417,6 +417,26 @@ export class AdminController {
     await this.adminService.deleteChildCategory(parentId, childId);
   }
 
+  @Post('categories/:parentId/link/:categoryId')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Link an existing category as child of parentId' })
+  @ApiParam({ name: 'parentId', description: 'Parent category ID' })
+  @ApiParam({ name: 'categoryId', description: 'Existing category ID to assign as child' })
+  @ApiResponse({ status: 200, description: 'Category linked as child' })
+  async linkCategoryAsChild(
+    @Param('parentId') parentId: string,
+    @Param('categoryId') categoryId: string,
+    @Body() body: { sortOrder?: number; isActive?: boolean },
+  ) {
+    return this.adminService.linkCategoryAsChild(
+      parentId,
+      categoryId,
+      body.sortOrder ?? 0,
+      body.isActive ?? true,
+    );
+  }
+
   // ========================================================================
   // GENRES CRUD
   // ========================================================================

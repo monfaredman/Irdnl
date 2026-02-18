@@ -567,6 +567,7 @@ export function PremiumLiquidGlassHeader() {
 													anchorEl={submenuAnchor[item.href]}
 													open={Boolean(submenuAnchor[item.href])}
 													onClose={() => handleSubmenuClose(item.href)}
+													disableScrollLock
 													MenuListProps={{
 														onMouseLeave: () => handleSubmenuClose(item.href),
 													}}
@@ -651,6 +652,7 @@ export function PremiumLiquidGlassHeader() {
 				anchorEl={anchorEl}
 				open={Boolean(anchorEl)}
 				onClose={handleUserMenuClose}
+				disableScrollLock
 				sx={menuStyle}
 				transformOrigin={{ horizontal: "right", vertical: "top" }}
 				anchorOrigin={{ horizontal: "right", vertical: "bottom" }}

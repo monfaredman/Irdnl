@@ -29,6 +29,100 @@ html {
 		sans-serif;
 }
 
+/* ============================================================================ */
+/* VAZIRMATN FONT - GLOBAL APPLICATION                                          */
+/* ============================================================================ */
+
+/* Ensure MUI components rendered in portals (Dialogs, Tooltips, Menus, etc.)
+   inherit the Persian Vazirmatn font even when they are mounted under <body>
+   outside of the admin `dir="rtl"` wrapper. This fixes DialogTitle/Dialog
+   not using Vazirmatn. */
+html, body {
+    /* Keep default fallbacks but prefer Vazirmatn for app-wide consistency */
+    font-family: var(--font-vazirmatn), -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+}
+
+/* Target ALL MUI components to ensure Vazirmatn is applied consistently.
+   Using !important is intentional to override MUI's default typography system. */
+.MuiDialog-root,
+.MuiModal-root,
+.MuiPaper-root,
+.MuiDialog-paper,
+.MuiDialogTitle-root,
+.MuiDialogContent-root,
+.MuiDialogContentText-root,
+.MuiDialogActions-root,
+.MuiTypography-root,
+.MuiButton-root,
+.MuiButtonBase-root,
+.MuiFormLabel-root,
+.MuiInputLabel-root,
+.MuiInputBase-root,
+.MuiInput-root,
+.MuiOutlinedInput-root,
+.MuiFilledInput-root,
+.MuiTextField-root,
+.MuiFormControl-root,
+.MuiFormControlLabel-root,
+.MuiFormHelperText-root,
+.MuiList-root,
+.MuiListItem-root,
+.MuiListItemText-root,
+.MuiMenuItem-root,
+.MuiSelect-root,
+.MuiMenu-root,
+.MuiMenu-paper,
+.MuiAutocomplete-root,
+.MuiAutocomplete-paper,
+.MuiAutocomplete-option,
+.MuiChip-root,
+.MuiChip-label,
+.MuiTab-root,
+.MuiTabs-root,
+.MuiTabPanel-root,
+.MuiAlert-root,
+.MuiSnackbar-root,
+.MuiTooltip-tooltip,
+.MuiPopover-paper,
+.MuiCard-root,
+.MuiCardContent-root,
+.MuiCardHeader-root,
+.MuiTableCell-root,
+.MuiTableHead-root,
+.MuiSwitch-root,
+.MuiCheckbox-root,
+.MuiRadio-root,
+.MuiPickersDay-root,
+.MuiDateCalendar-root,
+.MuiPickersCalendarHeader-root,
+.MuiDayCalendar-root,
+.MuiPickersYear-root,
+.MuiPickersMonth-root {
+    font-family: var(--font-vazirmatn) !important;
+}
+
+/* AG Grid - Ensure Persian font in all table elements */
+.ag-theme-alpine,
+.ag-theme-alpine *,
+.ag-root,
+.ag-header,
+.ag-header-cell,
+.ag-header-cell-label,
+.ag-header-cell-text,
+.ag-cell,
+.ag-cell-value,
+.ag-row,
+.ag-paging-panel,
+.ag-paging-row-summary-panel,
+.ag-paging-page-summary-panel,
+.ag-status-bar,
+.ag-filter,
+.ag-floating-filter,
+.ag-column-drop,
+.ag-tool-panel,
+.ag-side-bar {
+    font-family: var(--font-vazirmatn), -apple-system, sans-serif !important;
+}
 /* Improve Persian text rendering */
 [lang="fa"] {
 	font-feature-settings:
@@ -530,6 +624,201 @@ html {
 /* AG GRID PERSIAN/RTL CUSTOMIZATION */
 /* ============================================================================ */
 
+/* ============================================================================ */
+/* ADMIN PANEL DESIGN SYSTEM                                                   */
+/* ============================================================================ */
+
+:root {
+	/* Admin brand palette */
+	--admin-primary: #6366f1;
+	--admin-primary-light: #818cf8;
+	--admin-primary-dark: #4f46e5;
+	--admin-primary-50: #eef2ff;
+	--admin-primary-100: #e0e7ff;
+	--admin-primary-200: #c7d2fe;
+	--admin-accent: #f59e0b;
+	--admin-accent-light: #fbbf24;
+
+	/* Surfaces */
+	--admin-bg: #f0f2f5;
+	--admin-surface: #ffffff;
+	--admin-surface-hover: #f8f9fc;
+	--admin-sidebar-bg: linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
+	--admin-sidebar-width: 272px;
+
+	/* Text */
+	--admin-text-primary: #1e293b;
+	--admin-text-secondary: #64748b;
+	--admin-text-muted: #94a3b8;
+	--admin-text-on-dark: #e2e8f0;
+
+	/* Borders & Shadows */
+	--admin-border: #e2e8f0;
+	--admin-border-light: #f1f5f9;
+	--admin-shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+	--admin-shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+	--admin-shadow-lg: 0 8px 30px rgba(0,0,0,0.08);
+	--admin-shadow-xl: 0 20px 60px rgba(0,0,0,0.1);
+	--admin-shadow-glow: 0 0 20px rgba(99,102,241,0.15);
+
+	/* Radius */
+	--admin-radius-sm: 8px;
+	--admin-radius-md: 12px;
+	--admin-radius-lg: 16px;
+	--admin-radius-xl: 20px;
+
+	/* Transitions */
+	--admin-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+	--admin-transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+	--admin-transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+	/* Status Colors */
+	--admin-success: #10b981;
+	--admin-success-bg: #ecfdf5;
+	--admin-warning: #f59e0b;
+	--admin-warning-bg: #fffbeb;
+	--admin-error: #ef4444;
+	--admin-error-bg: #fef2f2;
+	--admin-info: #3b82f6;
+	--admin-info-bg: #eff6ff;
+}
+
+/* Admin panel entrance animations */
+@keyframes adminFadeIn {
+	from { opacity: 0; transform: translateY(8px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes adminSlideInRight {
+	from { opacity: 0; transform: translateX(24px); }
+	to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes adminSlideInLeft {
+	from { opacity: 0; transform: translateX(-24px); }
+	to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes adminScaleIn {
+	from { opacity: 0; transform: scale(0.95); }
+	to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes adminCountUp {
+	from { opacity: 0; transform: translateY(12px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes adminPulseGlow {
+	0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.2); }
+	50% { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+}
+
+@keyframes adminShimmer {
+	0% { background-position: -200% 0; }
+	100% { background-position: 200% 0; }
+}
+
+@keyframes adminSidebarItemEnter {
+	from { opacity: 0; transform: translateX(12px); }
+	to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes adminBorderGlow {
+	0%, 100% { border-color: rgba(99,102,241,0.2); }
+	50% { border-color: rgba(99,102,241,0.5); }
+}
+
+/* Admin utility classes */
+.admin-fade-in {
+	animation: adminFadeIn 0.5s ease-out forwards;
+}
+
+.admin-slide-in-right {
+	animation: adminSlideInRight 0.5s ease-out forwards;
+}
+
+.admin-scale-in {
+	animation: adminScaleIn 0.4s ease-out forwards;
+}
+
+.admin-stagger-1 { animation-delay: 0.05s; }
+.admin-stagger-2 { animation-delay: 0.1s; }
+.admin-stagger-3 { animation-delay: 0.15s; }
+.admin-stagger-4 { animation-delay: 0.2s; }
+.admin-stagger-5 { animation-delay: 0.25s; }
+.admin-stagger-6 { animation-delay: 0.3s; }
+
+/* Admin card hover micro-interaction */
+.admin-card-hover {
+	transition: all var(--admin-transition);
+}
+
+.admin-card-hover:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--admin-shadow-lg);
+}
+
+/* Admin glass effect for sidebar */
+.admin-glass {
+	backdrop-filter: blur(20px) saturate(180%);
+	-webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+
+/* Custom admin scrollbar */
+.admin-scrollbar::-webkit-scrollbar {
+	width: 4px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.2);
+	border-radius: 4px;
+}
+
+.admin-scrollbar::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.35);
+}
+
+/* Light scrollbar variant */
+.admin-scrollbar-light::-webkit-scrollbar {
+	width: 5px;
+}
+
+.admin-scrollbar-light::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.admin-scrollbar-light::-webkit-scrollbar-thumb {
+	background: #e2e8f0;
+	border-radius: 4px;
+}
+
+.admin-scrollbar-light::-webkit-scrollbar-thumb:hover {
+	background: #cbd5e1;
+}
+
+/* Stat card gradient backgrounds */
+.admin-stat-gradient-1 {
+	background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+.admin-stat-gradient-2 {
+	background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+}
+.admin-stat-gradient-3 {
+	background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+}
+.admin-stat-gradient-4 {
+	background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+}
+
+/* ============================================================================ */
+/* AG GRID PERSIAN/RTL CUSTOMIZATION (MODERNIZED)                              */
+/* ============================================================================ */
+
 /* AG Grid RTL support with Persian typography */
 .ag-theme-alpine {
 	--ag-font-family: var(--font-vazirmatn), -apple-system, sans-serif;
@@ -537,12 +826,15 @@ html {
 	--ag-row-height: 70px;
 	--ag-header-height: 56px;
 	--ag-cell-horizontal-padding: 16px;
-	--ag-row-border-color: #e5e7eb;
-	--ag-header-background-color: #f9fafb;
+	--ag-row-border-color: var(--admin-border-light);
+	--ag-header-background-color: var(--admin-primary-50);
 	--ag-odd-row-background-color: #ffffff;
-	--ag-header-foreground-color: #111827;
-	--ag-foreground-color: #374151;
-	--ag-border-radius: 8px;
+	--ag-header-foreground-color: var(--admin-text-primary);
+	--ag-foreground-color: var(--admin-text-secondary);
+	--ag-border-radius: var(--admin-radius-md);
+	--ag-borders: none;
+	--ag-border-color: var(--admin-border);
+	--ag-selected-row-background-color: var(--admin-primary-50);
 }
 
 /* Better cell padding and alignment */
@@ -553,17 +845,28 @@ html {
 	line-height: 1.6;
 }
 
+/* Root wrapper */
+.ag-theme-alpine .ag-root-wrapper {
+	border-radius: var(--admin-radius-md);
+	border: 1px solid var(--admin-border);
+	overflow: hidden;
+}
+
 /* Header styling */
+.ag-theme-alpine .ag-header {
+	border-bottom: 2px solid var(--admin-primary-200);
+}
+
 .ag-theme-alpine .ag-header-cell {
 	font-weight: 600;
 	font-size: 13px;
-	color: #111827;
+	color: var(--admin-text-primary);
 	padding: 12px 16px;
 }
 
 /* Row hover effect */
 .ag-theme-alpine .ag-row-hover {
-	background-color: #f3f4f6 !important;
+	background-color: var(--admin-surface-hover) !important;
 }
 
 /* RTL text alignment */
@@ -574,12 +877,12 @@ html {
 
 /* Smooth transitions */
 .ag-theme-alpine .ag-row {
-	transition: background-color 0.2s ease;
+	transition: background-color var(--admin-transition-fast);
 }
 
 /* Better pagination styling */
 .ag-theme-alpine .ag-paging-panel {
-	border-top: 2px solid #e5e7eb;
+	border-top: 2px solid var(--admin-border-light);
 	padding: 16px;
 	font-family: var(--font-vazirmatn), sans-serif;
 }

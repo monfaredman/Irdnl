@@ -15,6 +15,7 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
+import { PersianDatePicker } from "@/components/admin/ui/persian-date-picker";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/providers/language-provider";
 import {
@@ -404,17 +405,14 @@ export default function ProfilePage() {
 						/>
 					</Grid>
 					<Grid size={{ xs: 12, sm: 6 }}>
-						<TextField
+						<PersianDatePicker
 							fullWidth
 							label={t.birthDate}
-							type="date"
 							value={formData.birthDate}
-							onChange={(e) =>
-								setFormData({ ...formData, birthDate: e.target.value })
+							onChange={(value) =>
+								setFormData({ ...formData, birthDate: value || "" })
 							}
 							disabled={!isEditing}
-							sx={glassInputSx}
-							InputLabelProps={{ shrink: true }}
 						/>
 					</Grid>
 				</Grid>

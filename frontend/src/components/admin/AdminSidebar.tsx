@@ -23,6 +23,7 @@ import {
 	SlidersHorizontal,
 	UserCog,
 	Ticket,
+	Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -30,8 +31,6 @@ import { cn } from "@/lib/utils";
 import { useAdminAuth } from "@/store/admin-auth";
 import { useTranslation } from "@/i18n";
 import { useState } from "react";
-import { Slider, SliderMark, SliderRail } from "@mui/material";
-import { Preview } from "@mui/icons-material";
 
 interface MenuItem {
 	href?: string;
@@ -68,7 +67,6 @@ const menuItems: MenuItem[] = [
 	{ href: "/admin/playlists", labelKey: "admin.menu.playlists", icon: ListMusic, roles: ["admin", "content_manager", "viewer"] },
 	{ href: "/admin/upera", labelKey: "admin.menu.upera", icon: Globe, roles: ["admin", "content_manager", "viewer"] },
 	{ href: "/admin/tmdb", labelKey: "admin.menu.tmdb", icon: Database, roles: ["admin", "content_manager", "viewer"] },
-	// { href: "/admin/profile", labelKey: "admin.profile.title", icon: UserCog },
 ];
 
 /** Filter menu items based on user role */
@@ -106,44 +104,52 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
 		);
 	};
 
-	const renderMenuItem = (item: MenuItem, depth = 0) => {
+	const renderMenuItem = (item: MenuItem, depth = 0, index = 0) => {
 		const Icon = item.icon;
 		const isExpanded = expandedItems.includes(item.labelKey);
 		const hasChildren = item.children && item.children.length > 0;
 
-		// Check if this item or any of its children is active
 		const isActive = item.href
 			? pathname === item.href || pathname?.startsWith(item.href + "/")
-			: hasChildren && item.children?.some((child) => 
+			: hasChildren && item.children?.some((child) =>
 					child.href && (pathname === child.href || pathname?.startsWith(child.href + "/"))
 			  );
 
 		if (hasChildren) {
 			return (
-				<div key={item.labelKey}>
+				<div key={item.labelKey} className="admin-fade-in" style={{ animationDelay: `${index * 0.03}s` }}>
 					<button
 						onClick={() => toggleExpand(item.labelKey)}
 						className={cn(
-							"flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+							"group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
 							depth > 0 && "pr-6",
 							isActive
-								? "bg-blue-50 text-blue-700"
-								: "text-gray-700 hover:bg-gray-100"
+								? "bg-white/15 text-white shadow-sm"
+								: "text-indigo-100 hover:bg-white/10 hover:text-white"
 						)}
 					>
-						<Icon className="h-5 w-5" />
-						<span className="flex-1 text-right">{t(item.labelKey)}</span>
-						{isExpanded ? (
-							<ChevronDown className="h-4 w-4" />
-						) : (
-							<ChevronRight className="h-4 w-4" />
-						)}
-					</button>
-					{isExpanded && (
-						<div className="mr-2 space-y-1 border-r-2 border-gray-200 pr-2">
-							{item.children?.map((child) => renderMenuItem(child, depth + 1))}
+						<div className={cn(
+							"flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200",
+							isActive
+								? "bg-white/20 shadow-sm"
+								: "bg-white/5 group-hover:bg-white/10"
+						)}>
+							<Icon className="h-4.5 w-4.5" />
 						</div>
-					)}
+						<span className="flex-1 text-right">{t(item.labelKey)}</span>
+						<ChevronDown className={cn(
+							"h-4 w-4 transition-transform duration-200",
+							!isExpanded && "-rotate-90"
+						)} />
+					</button>
+					<div className={cn(
+						"overflow-hidden transition-all duration-300 ease-in-out",
+						isExpanded ? "max-h-100 opacity-100" : "max-h-0 opacity-0"
+					)}>
+						<div className="mr-4 mt-1 space-y-0.5 border-r-2 border-indigo-400/30 pr-2">
+							{item.children?.map((child, childIndex) => renderMenuItem(child, depth + 1, childIndex))}
+						</div>
+					</div>
 				</div>
 			);
 		}
@@ -154,45 +160,71 @@ export function AdminSidebar({ onNavigate }: { onNavigate?: () => void } = {}) {
 				href={item.href!}
 				onClick={onNavigate}
 				className={cn(
-					"flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-					depth > 0 && "pr-6 text-xs",
+					"group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
+					depth > 0 && "pr-5 text-[13px]",
 					isActive
-						? "bg-blue-50 text-blue-700"
-						: "text-gray-700 hover:bg-gray-100"
+						? "bg-white/15 text-white shadow-sm"
+						: "text-indigo-100/80 hover:bg-white/10 hover:text-white"
 				)}
+				style={{ animationDelay: `${index * 0.03}s` }}
 			>
-				<Icon className={cn("h-5 w-5", depth > 0 && "h-4 w-4")} />
+				{isActive && (
+					<div className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-l-full shadow-sm" />
+				)}
+				<div className={cn(
+					"flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-200",
+					depth > 0 && "h-7 w-7",
+					isActive
+						? "bg-white/20 shadow-sm"
+						: "bg-transparent group-hover:bg-white/10"
+				)}>
+					<Icon className={cn("h-4.5 w-4.5", depth > 0 && "h-3.5 w-3.5")} />
+				</div>
 				{t(item.labelKey)}
 			</Link>
 		);
 	};
 
 	return (
-		<div className="flex h-screen w-64 shrink-0 flex-col border-l border-gray-200 bg-white">
-			<div className="flex h-16 items-center border-b border-gray-200 px-6">
-				<h1 className="text-xl font-bold text-gray-900">{t("admin.title")}</h1>
+		<div
+			className="flex h-screen w-[272px] shrink-0 flex-col admin-scrollbar"
+			style={{ background: "linear-gradient(180deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%)" }}
+		>
+			{/* Brand Header */}
+			<div className="flex h-[72px] items-center gap-3 px-5 border-b border-white/10">
+				<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15 shadow-inner">
+					<Sparkles className="h-5 w-5 text-amber-300" />
+				</div>
+				<div>
+					<h1 className="text-lg font-bold text-white tracking-tight">{t("admin.title")}</h1>
+					<p className="text-[11px] text-indigo-200/70 font-medium">Management Panel</p>
+				</div>
 			</div>
-			<nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-				{visibleMenuItems.map((item) => renderMenuItem(item))}
+
+			{/* Navigation */}
+			<nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 admin-scrollbar">
+				{visibleMenuItems.map((item, index) => renderMenuItem(item, 0, index))}
 			</nav>
-			<div className="border-t border-gray-200 p-4">
+
+			{/* User Profile & Logout */}
+			<div className="border-t border-white/10 p-3">
 				<Link
 					href="/admin/profile"
-					className="mb-2 flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+					className="group mb-2 flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-white/10 transition-all duration-200"
 				>
-					<div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white text-sm font-medium">
+					<div className="flex h-9 w-9 items-center justify-center rounded-xl bg-linear-to-br from-indigo-400 to-purple-500 text-white text-sm font-bold shadow-md">
 						{user?.name?.charAt(0).toUpperCase() || "A"}
 					</div>
-					<div className="flex-1">
-						<p className="text-sm font-medium text-gray-900">{user?.name}</p>
-						<p className="text-xs text-gray-500">{user?.email}</p>
+					<div className="flex-1 min-w-0">
+						<p className="text-sm font-medium text-white truncate">{user?.name}</p>
+						<p className="text-[11px] text-indigo-200/60 truncate">{user?.email}</p>
 					</div>
 				</Link>
 				<button
 					onClick={logout}
-					className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
+					className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-indigo-200/70 hover:bg-red-500/15 hover:text-red-300 transition-all duration-200"
 				>
-					<LogOut className="h-5 w-5" />
+					<LogOut className="h-4.5 w-4.5" />
 					{t("admin.menu.logout")}
 				</button>
 			</div>

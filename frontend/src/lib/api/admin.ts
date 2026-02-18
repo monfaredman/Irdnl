@@ -367,6 +367,14 @@ export const categoriesApi = {
 	deleteChild: async (parentId: string, childId: string) => {
 		await adminApi.delete(`/categories/${parentId}/children/${childId}`);
 	},
+	/** Assign an existing standalone category as a child of parentId */
+	linkAsChild: async (parentId: string, existingCategoryId: string, sortOrder: number, isActive: boolean) => {
+		const response = await adminApi.post(`/categories/${parentId}/link/${existingCategoryId}`, {
+			sortOrder,
+			isActive,
+		});
+		return response.data;
+	},
 };
 
 // ========================================================================

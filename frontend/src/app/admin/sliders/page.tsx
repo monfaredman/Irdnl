@@ -30,7 +30,6 @@ import {
 	DialogContentText,
 	DialogActions,
 	Button as MuiButton,
-	TextField,
 	Switch,
 	FormControlLabel,
 	Select,
@@ -38,7 +37,9 @@ import {
 	InputLabel,
 	FormControl,
 	Chip,
+	TextField,
 } from "@mui/material";
+import { PersianDatePicker } from "@/components/admin/ui/persian-date-picker";
 import { slidersApi } from "@/lib/api/admin";
 
 interface SliderItem {
@@ -564,23 +565,19 @@ export default function SlidersPage() {
 							}
 							label="فقط کودکان"
 						/>
-						<TextField
+						<PersianDatePicker
 							label="تاریخ شروع"
-							type="date"
 							value={form.startDate}
-							onChange={(e) => setForm({ ...form, startDate: e.target.value })}
+							onChange={(value) => setForm({ ...form, startDate: value || "" })}
 							fullWidth
 							size="small"
-							InputLabelProps={{ shrink: true }}
 						/>
-						<TextField
+						<PersianDatePicker
 							label="تاریخ پایان"
-							type="date"
 							value={form.endDate}
-							onChange={(e) => setForm({ ...form, endDate: e.target.value })}
+							onChange={(value) => setForm({ ...form, endDate: value || "" })}
 							fullWidth
 							size="small"
-							InputLabelProps={{ shrink: true }}
 						/>
 					</div>
 				</DialogContent>
