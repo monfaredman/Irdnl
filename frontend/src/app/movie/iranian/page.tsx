@@ -3,15 +3,15 @@
 import { UnifiedCategoryPage } from "@/components/category";
 import { categoryConfigs, generateBreadcrumbs } from "@/config/categoryConfigs";
 
-export default function ForeignMoviesPage() {
-	const config = categoryConfigs["foreign"] || categoryConfigs["movies-foreign"];
-	const breadcrumbs = generateBreadcrumbs("foreign");
+export default function IranianMoviesPage() {
+	const config = categoryConfigs["iranian"] || categoryConfigs["movies-iranian"];
+	const breadcrumbs = generateBreadcrumbs("iranian");
 	
 	return (
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
-			basePath="/movies/foreign" 
+			basePath="/movie/iranian" 
 		/>
 	);
 }

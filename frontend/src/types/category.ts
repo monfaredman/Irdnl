@@ -40,7 +40,7 @@ export type CategoryType =
   | "series-iranian"
   | string; // Allow dynamic IDs from DB
 
-export type ContentType = "movie" | "series" | "mixed";
+export type ContentType = "movie" | "series" | "mixed" | "other";
 
 export interface CategoryConfig {
   /** Unique identifier for this category */

@@ -365,11 +365,11 @@ export default function ItemDetailPage() {
 			}}
 		>
 			{/* Breadcrumb - Floating on top */}
-			<Box
+			{/* <Box
 				sx={{
 					position: "absolute",
 					top: { xs: 80, md: 100 },
-					left: { xs: 16, md: 32 },
+					right: { xs: 16, md: 32 },
 					zIndex: 10,
 					display: "flex",
 					alignItems: "center",
@@ -409,7 +409,7 @@ export default function ItemDetailPage() {
 				>
 					خانه / {type === "movie" ? "فیلم" : "سریال"}
 				</Typography>
-			</Box>
+			</Box> */}
 
 			{/* Error State */}
 			{error && (

@@ -12,28 +12,28 @@ type RouteMetadata = {
 };
 
 export const routeMetadata: Record<string, RouteMetadata> = {
-	"/movies/foreign": {
+	"/movie/foreign": {
 		title: { en: "Foreign Movies", fa: "فیلم خارجی" },
 		description: {
 			en: "High-quality foreign films with Persian subtitles",
 			fa: "فیلم‌های خارجی با کیفیت بالا و زیرنویس فارسی",
 		},
 	},
-	"/movies/iranian": {
+	"/movie/iranian": {
 		title: { en: "Iranian Movies", fa: "فیلم ایرانی" },
 		description: {
 			en: "The best of Iranian cinema",
 			fa: "بهترین فیلم‌های سینمای ایران",
 		},
 	},
-	"/series/foreign": {
+	"/serie/foreign": {
 		title: { en: "Foreign Series", fa: "سریال خارجی" },
 		description: {
 			en: "High-quality foreign series with Persian subtitles",
 			fa: "سریال‌های خارجی با کیفیت بالا و زیرنویس فارسی",
 		},
 	},
-	"/series/iranian": {
+	"/serie/iranian": {
 		title: { en: "Iranian Series", fa: "سریال ایرانی" },
 		description: {
 			en: "The best of Iranian series",
@@ -110,7 +110,7 @@ export function generateMetadata(
 	language: "en" | "fa" = "fa"
 ): Metadata {
 	// Handle genre pages
-	if (path.includes("/movies/foreign/")) {
+	if (path.includes("/movie/foreign/")) {
 		const genre = path.split("/").pop() || "";
 		const genreInfo = genreMetadata[genre] || { en: genre, fa: genre };
 		return {
@@ -122,7 +122,7 @@ export function generateMetadata(
 		};
 	}
 
-	if (path.includes("/movies/iranian/")) {
+	if (path.includes("/movie/iranian/")) {
 		const genre = path.split("/").pop() || "";
 		const genreInfo = genreMetadata[genre] || { en: genre, fa: genre };
 		return {
@@ -134,7 +134,7 @@ export function generateMetadata(
 		};
 	}
 
-	if (path.includes("/series/foreign/")) {
+	if (path.includes("/serie/foreign/")) {
 		const genre = path.split("/").pop() || "";
 		const genreInfo = genreMetadata[genre] || { en: genre, fa: genre };
 		return {
@@ -146,7 +146,7 @@ export function generateMetadata(
 		};
 	}
 
-	if (path.includes("/series/iranian/")) {
+	if (path.includes("/serie/iranian/")) {
 		const genre = path.split("/").pop() || "";
 		const genreInfo = genreMetadata[genre] || { en: genre, fa: genre };
 		return {

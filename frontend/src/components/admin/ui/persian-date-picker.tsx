@@ -61,36 +61,47 @@ export const PersianDatePicker = React.forwardRef<
 					value={dateValue}
 					onChange={handleChange}
 					disabled={disabled}
+					enableAccessibleFieldDOMStructure={false}
 					slots={{
-						textField: (params) => (
-							<TextField
-								{...params}
-								fullWidth={fullWidth}
-								size={size}
-								error={error}
-								helperText={helperText}
-								placeholder={placeholder}
-								className={cn(className)}
-								sx={{
-									"& .MuiOutlinedInput-root": {
-										borderRadius: "12px",
-										"&:hover fieldset": {
-											borderColor: "var(--admin-primary)",
+						textField: (params) => {
+							// Filter out all MUI DatePicker internal props that shouldn't go to DOM
+							const {
+								sectionListRef,
+								areAllSectionsEmpty,
+								enableAccessibleFieldDOMStructure,
+								...textFieldProps
+							} = params as any;
+							
+							return (
+								<TextField
+									{...textFieldProps}
+									fullWidth={fullWidth}
+									size={size}
+									error={error}
+									helperText={helperText}
+									placeholder={placeholder}
+									className={cn(className)}
+									sx={{
+										"& .MuiOutlinedInput-root": {
+											borderRadius: "12px",
+											"&:hover fieldset": {
+												borderColor: "var(--admin-primary)",
+											},
+											"&.Mui-focused fieldset": {
+												borderColor: "var(--admin-primary)",
+												borderWidth: "2px",
+											},
 										},
-										"&.Mui-focused fieldset": {
-											borderColor: "var(--admin-primary)",
-											borderWidth: "2px",
+										"& .MuiInputLabel-root": {
+											fontFamily: "var(--font-vazirmatn)",
+											"&.Mui-focused": {
+												color: "var(--admin-primary)",
+											},
 										},
-									},
-									"& .MuiInputLabel-root": {
-										fontFamily: "var(--font-vazirmatn)",
-										"&.Mui-focused": {
-											color: "var(--admin-primary)",
-										},
-									},
-								}}
-							/>
-						),
+									}}
+								/>
+							);
+						},
 					}}
 					slotProps={{
 						popper: {

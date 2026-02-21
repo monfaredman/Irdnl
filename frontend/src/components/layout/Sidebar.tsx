@@ -148,7 +148,7 @@ export const Sidebar = () => {
 						<Card
 							key={episode.id}
 							component={Link}
-							href={`/series/${series[0]?.slug ?? "series"}`}
+							href={`/serie/${series[0]?.slug ?? "series"}`}
 							sx={{
 								...glassSubtleStyle,
 								borderRadius: 3,

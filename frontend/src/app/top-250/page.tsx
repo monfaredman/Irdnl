@@ -287,33 +287,31 @@ export default function Top250Page() {
 											justifyContent: "center",
 										}}
 									>
-										<StarIcon
-											sx={{
-												color: glassColors.persianGold,
-												fontSize: "1.25rem",
-											}}
-										/>
-										<Typography
-											sx={{
-												color: glassColors.text.primary,
-												fontWeight: 700,
-												fontSize: "1.25rem",
-											}}
-										>
-											{movie.rating?.toFixed(1)}
-										</Typography>
-									</Box>
+									<StarIcon
+										sx={{
+											color: glassColors.persianGold,
+											fontSize: "1.25rem",
+										}}
+									/>
 									<Typography
 										sx={{
-											color: glassColors.text.tertiary,
-											fontSize: "0.75rem",
+											color: glassColors.text.primary,
+											fontWeight: 700,
+											fontSize: "1.25rem",
 										}}
 									>
-										{t.votes}
+										{typeof movie.rating === 'number' ? movie.rating.toFixed(1) : parseFloat(String(movie.rating || 0)).toFixed(1)}
 									</Typography>
 								</Box>
-
-								{/* Mobile Rating */}
+								<Typography
+									sx={{
+										color: glassColors.text.tertiary,
+										fontSize: "0.75rem",
+									}}
+								>
+									{t.votes}
+								</Typography>
+							</Box>								{/* Mobile Rating */}
 								<Box
 									sx={{
 										display: { xs: "flex", md: "none" },
@@ -330,7 +328,7 @@ export default function Top250Page() {
 											fontWeight: 700,
 										}}
 									>
-										{movie.rating?.toFixed(1)}
+																	{typeof movie.rating === 'number' ? movie.rating.toFixed(1) : parseFloat(String(movie.rating || 0)).toFixed(1)}
 									</Typography>
 								</Box>
 							</Box>

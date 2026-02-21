@@ -24,7 +24,7 @@ export class Category {
   nameFa: string;
 
   @Column({ name: 'content_type', default: 'mixed' })
-  contentType: string; // 'movie' | 'series' | 'mixed'
+  contentType: string; // 'movie' | 'series' | 'mixed' | 'other'
 
   @Column({ name: 'description_en', type: 'text', nullable: true })
   descriptionEn: string | null;

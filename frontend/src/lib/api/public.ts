@@ -18,7 +18,7 @@ export interface Category {
 	slug: string;
 	nameEn: string;
 	nameFa: string;
-	contentType: "movie" | "series" | "mixed";
+	contentType: "movie" | "series" | "mixed" | "other";
 	descriptionEn?: string;
 	descriptionFa?: string;
 	gradientColors?: string[];

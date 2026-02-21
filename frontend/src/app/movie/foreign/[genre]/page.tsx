@@ -34,8 +34,8 @@ export default function ForeignMovieGenrePage() {
 			config={config} 
 			breadcrumbs={breadcrumbs} 
 			currentSubGenre={{ slug: genre, nameEn: subGenreInfo?.nameEn || genre, nameFa: subGenreInfo?.nameFa || genre }}
-			basePath={`/movies/foreign/${genre}`}
-			genreBasePath="/movies/foreign"
+			basePath={`/movie/foreign/${genre}`}
+			genreBasePath="/movie/foreign"
 		/>
 	);
 }

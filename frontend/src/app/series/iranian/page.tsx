@@ -11,7 +11,7 @@ export default function IranianSeriesPage() {
 		<UnifiedCategoryPage 
 			config={config} 
 			breadcrumbs={breadcrumbs} 
-			basePath="/series/iranian" 
+			basePath="/serie/iranian" 
 		/>
 	);
 }

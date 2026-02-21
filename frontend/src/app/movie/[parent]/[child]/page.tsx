@@ -1,22 +1,19 @@
 "use client";
 
 /**
- * Dynamic Parent Category Page
+ * Dynamic Child Category Page
  * 
  * Handles URLs like:
- * - /movies/foreign → فیلم خارجی (parent with children - shows all content)
- * - /movies/iranian → فیلم ایرانی (parent without children)
- * - /movies/animation → انیمیشن
- * - /movies/dubbed → دوبله فارسی
- * - /movies/anime → انیمه
- * - /movies/series → سریال
- * - /movies/other → سایر
+ * - /movies/foreign/action → فیلم خارجی > اکشن
+ * - /movies/foreign/horror → فیلم خارجی > ترسناک
+ * - /movies/series/turkish → سریال > سریال ترکی
+ * - /movies/other/top-250 → سایر > 250 فیلم برتر IMDb
  * 
- * When genre query param is present (e.g. /movies/iranian?genre=action),
- * it applies genre filters.
+ * The child is a sub-category of the parent, both stored in the DB
+ * with a parent-child relationship.
  */
 
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Box, CircularProgress, Typography } from "@mui/material";
 import { UnifiedCategoryPage } from "@/components/category";
@@ -28,7 +25,7 @@ function categoryToConfig(cat: Category): CategoryConfig {
 	return {
 		id: (cat.slug || "unknown") as CategoryType,
 		categoryId: cat.id,
-		contentType: (cat.contentType || "mixed") as "movie" | "series" | "mixed",
+		contentType: (cat.contentType || "mixed") as "movie" | "series" | "mixed" | "other",
 		titleFa: cat.nameFa,
 		titleEn: cat.nameEn,
 		descriptionFa: cat.descriptionFa || "",
@@ -39,15 +36,15 @@ function categoryToConfig(cat: Category): CategoryConfig {
 	};
 }
 
-export default function ParentCategoryPage() {
+export default function ChildCategoryPage() {
 	const params = useParams();
-	const searchParams = useSearchParams();
 	const { language } = useLanguage();
 
 	const parentSlug = params.parent as string;
-	const genreFilter = searchParams.get("genre");
+	const childSlug = params.child as string;
 
-	const [category, setCategory] = useState<Category | null>(null);
+	const [parentCategory, setParentCategory] = useState<Category | null>(null);
+	const [childCategory, setChildCategory] = useState<Category | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -58,9 +55,22 @@ export default function ParentCategoryPage() {
 
 		(async () => {
 			try {
-				const cat = await categoriesApi.getByPath(parentSlug);
+				// Fetch child category by parent/child path
+				const child = await categoriesApi.getByPath(parentSlug, childSlug);
 				if (!cancelled) {
-					setCategory(cat);
+					setChildCategory(child);
+					// The parent info may come from the child's parent relation
+					if (child.parent) {
+						setParentCategory(child.parent);
+					} else {
+						// Fetch parent separately if not included
+						try {
+							const parent = await categoriesApi.getByPath(parentSlug);
+							setParentCategory(parent);
+						} catch {
+							// Parent lookup optional
+						}
+					}
 				}
 			} catch (e: any) {
 				if (!cancelled) {
@@ -72,7 +82,7 @@ export default function ParentCategoryPage() {
 		})();
 
 		return () => { cancelled = true; };
-	}, [parentSlug]);
+	}, [parentSlug, childSlug]);
 
 	if (loading) {
 		return (
@@ -82,7 +92,7 @@ export default function ParentCategoryPage() {
 		);
 	}
 
-	if (error || !category) {
+	if (error || !childCategory) {
 		return (
 			<Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
 				<Typography sx={{ color: "rgba(255,255,255,0.7)" }}>
@@ -92,33 +102,28 @@ export default function ParentCategoryPage() {
 		);
 	}
 
-	const config = categoryToConfig(category);
+	const config = categoryToConfig(childCategory);
 	const breadcrumbs: BreadcrumbItem[] = [
 		{ label: "Home", labelFa: "خانه", href: "/", isActive: false },
 		{
-			label: category.nameEn,
-			labelFa: category.nameFa,
-			href: `/movies/${parentSlug}`,
-			isActive: !genreFilter,
+			label: parentCategory?.nameEn || parentSlug,
+			labelFa: parentCategory?.nameFa || parentSlug,
+			href: `/movie/${parentSlug}`,
+			isActive: false,
+		},
+		{
+			label: childCategory.nameEn,
+			labelFa: childCategory.nameFa,
+			href: `/movie/${parentSlug}/${childSlug}`,
+			isActive: true,
 		},
 	];
-
-	// If genre filter is present, add it to breadcrumbs and config
-	if (genreFilter) {
-		breadcrumbs.push({
-			label: genreFilter,
-			labelFa: genreFilter,
-			href: `/movies/${parentSlug}?genre=${genreFilter}`,
-			isActive: true,
-		});
-	}
 
 	return (
 		<UnifiedCategoryPage
 			config={config}
 			breadcrumbs={breadcrumbs}
-			basePath={`/movies/${parentSlug}`}
-			initialFilters={genreFilter ? { genres: [genreFilter] } : undefined}
+			basePath={`/movie/${parentSlug}/${childSlug}`}
 		/>
 	);
 }

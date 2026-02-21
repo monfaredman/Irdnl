@@ -664,13 +664,16 @@ function UpcomingLoadingSkeleton() {
 }
 
 function GenresLoadingSkeleton() {
+  // Use fixed widths instead of Math.random() to avoid hydration errors
+  const skeletonWidths = [85, 72, 93, 78, 88, 75];
+  
   return (
     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-      {[1, 2, 3, 4, 5, 6].map((i) => (
+      {skeletonWidths.map((width, i) => (
         <Skeleton
           key={i}
           variant="rectangular"
-          width={70 + Math.random() * 30}
+          width={width}
           height={28}
           sx={{ borderRadius: glassBorderRadius.pill, bgcolor: glassColors.glass.mid }}
         />

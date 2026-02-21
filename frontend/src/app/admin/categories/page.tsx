@@ -38,6 +38,9 @@ import {
 	InputLabel,
 	FormControl,
 	Chip,
+	Tabs,
+	Tab,
+	Box,
 } from "@mui/material";
 import { categoriesApi } from "@/lib/api/admin";
 import { useTranslation } from "@/i18n";
@@ -54,6 +57,8 @@ interface CategoryItem {
 	gradientColors?: string[];
 	icon?: string;
 	imageUrl?: string;
+	urlPath?: string;
+	parentId?: string | null;
 	tmdbParams?: Record<string, any>;
 	showEpisodes: boolean;
 	isActive: boolean;
@@ -72,6 +77,7 @@ const emptyForm: Omit<CategoryItem, "id"> = {
 	gradientColors: [],
 	icon: "",
 	imageUrl: "",
+	urlPath: "",
 	tmdbParams: {},
 	showEpisodes: false,
 	isActive: true,
@@ -105,6 +111,14 @@ export default function CategoriesPage() {
 	const [childManagerOpen, setChildManagerOpen] = useState(false);
 	const [selectedParentId, setSelectedParentId] = useState<string>("");
 	const [selectedParentName, setSelectedParentName] = useState<string>("");
+
+	// Tab state (0 = parent categories, 1 = child categories)
+	const [currentTab, setCurrentTab] = useState(0);
+
+	// Filter categories based on current tab
+	const displayedCategories = categories.filter(cat => 
+		currentTab === 0 ? !cat.parentId : !!cat.parentId
+	);
 
 	const fetchCategories = async () => {
 		setLoading(true);
@@ -410,19 +424,36 @@ export default function CategoriesPage() {
 
 			<Card>
 				<CardHeader>
-					<CardTitle>دسته‌بندی‌ها ({categories.length})</CardTitle>
+					<div className="flex items-center justify-between">
+						<CardTitle>دسته‌بندی‌ها ({categories.length})</CardTitle>
+					</div>
+					<Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 2 }}>
+						<Tabs 
+							value={currentTab} 
+							onChange={(_, newValue) => setCurrentTab(newValue)}
+							sx={{
+								'& .MuiTab-root': {
+									fontFamily: 'var(--font-vazirmatn)',
+									fontSize: '0.9rem',
+								}
+							}}
+						>
+							<Tab label={`دسته‌های اصلی (${categories.filter(c => !c.parentId).length})`} />
+							<Tab label={`زیردسته‌ها (${categories.filter(c => !!c.parentId).length})`} />
+						</Tabs>
+					</Box>
 				</CardHeader>
 				<CardContent>
 					{loading ? (
 						<p className="text-center py-8 text-gray-500">در حال بارگذاری...</p>
-					) : categories.length === 0 ? (
+					) : displayedCategories.length === 0 ? (
 						<p className="text-center py-8 text-gray-500">
-							دسته‌بندی یافت نشد
+							{currentTab === 0 ? "دسته‌بندی اصلی یافت نشد" : "زیردسته یافت نشد"}
 						</p>
 					) : (
 						<div className="ag-theme-alpine overflow-x-auto" style={{ height: "min(600px, 70vh)", width: "100%" }} dir="rtl">
 							<AgGridReact
-								rowData={categories}
+								rowData={displayedCategories}
 								columnDefs={columnDefs}
 								pagination={true}
 								paginationPageSize={20}
@@ -464,6 +495,14 @@ export default function CategoriesPage() {
 							size="small"
 							placeholder="movies-foreign"
 						/>
+						<TextField
+							label="مسیر URL"
+							value={form.urlPath}
+							onChange={(e) => setForm({ ...form, urlPath: e.target.value })}
+							fullWidth
+							size="small"
+							placeholder="/category/movies"
+						/>
 						<FormControl fullWidth size="small">
 							<InputLabel>نوع محتوا</InputLabel>
 							<Select
@@ -476,6 +515,7 @@ export default function CategoriesPage() {
 								<MenuItem value="movie">فیلم</MenuItem>
 								<MenuItem value="series">سریال</MenuItem>
 								<MenuItem value="mixed">ترکیبی</MenuItem>
+								<MenuItem value="other">سایر</MenuItem>
 							</Select>
 						</FormControl>
 						<TextField

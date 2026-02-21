@@ -22,7 +22,7 @@ function categoryToConfig(cat: Category, subGenres?: SubGenre[]): CategoryConfig
 	return {
 		id: (cat.slug || "unknown") as CategoryType,
 		categoryId: cat.id,
-		contentType: (cat.contentType || "mixed") as "movie" | "series" | "mixed",
+		contentType: (cat.contentType || "mixed") as "movie" | "series" | "mixed" | "other",
 		titleFa: cat.nameFa,
 		titleEn: cat.nameEn,
 		descriptionFa: cat.descriptionFa || "",

@@ -54,6 +54,7 @@ export const LiquidGlassSlider = ({
 
 	// Featured items (first 5)
 	const featuredItems = items.slice(0, 5);
+	console.log(featuredItems);
 	const totalSlides = featuredItems.length;
 
 	// Autoplay logic
@@ -197,32 +198,41 @@ export const LiquidGlassSlider = ({
 								sx={{
 									position: "absolute",
 									inset: 0,
+									width: "100%",
+									height: "100%",
+									overflow: "hidden",
 									transform: isActive ? "scale(1.05)" : "scale(1)",
 									transition: "transform 0.7s ease-out",
-									"&::after": {
-										content: '""',
+								}}
+							>
+								{(item.backdrop || item.poster) && (
+									<Image
+										src={item.backdrop || item.poster}
+										alt={item.title}
+										fill
+										style={{
+											objectFit: "cover",
+											objectPosition: "center center",
+										}}
+										sizes="100vw"
+										priority={index === 0}
+										loading={index === 0 ? "eager" : "lazy"}
+										quality={90}
+									/>
+								)}
+								{/* Gradient Overlay */}
+								<Box
+									sx={{
 										position: "absolute",
 										inset: 0,
 										background:
-											"linear-gradient(to top, rgba(10,10,10,0.95) 0%, transparent 60%)",
-								zIndex: 1,
-							},
-						}}
-					>
-						{(item.backdrop || item.poster) && (
-							<Image
-								src={item.backdrop || item.poster}
-								alt={item.title}
-								fill
-								style={{
-									objectFit: "cover",
-								}}
-								sizes="100vw"
-								priority={index === 0}
-								loading={index === 0 ? "eager" : "lazy"}
-							/>
-						)}
-					</Box>							{/* Content Overlay */}
+											"linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.6) 40%, transparent 70%)",
+										zIndex: 1,
+									}}
+								/>
+							</Box>
+							
+							{/* Content Overlay */}
 							<Container
 								maxWidth="xl"
 								sx={{

@@ -34,8 +34,8 @@ export default function ForeignSeriesGenrePage() {
 			config={config} 
 			breadcrumbs={breadcrumbs} 
 			currentSubGenre={{ slug: genre, nameEn: subGenreInfo?.nameEn || genre, nameFa: subGenreInfo?.nameFa || genre }}
-			basePath={`/series/foreign/${genre}`}
-			genreBasePath="/series/foreign"
+			basePath={`/serie/foreign/${genre}`}
+			genreBasePath="/serie/foreign"
 		/>
 	);
 }

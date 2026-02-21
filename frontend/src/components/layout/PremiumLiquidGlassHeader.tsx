@@ -74,10 +74,16 @@ interface SubMenuItem {
 
 // Menu structure configuration - defines order and which items have submenus
 // Only static items that don't come from the admin categories panel
-const STATIC_MENU_ITEMS = [
-	// { slug: "top-250", icon: <Movie />, labelEn: "Top 250", labelFa: "250 فیلم برتر IMDb", href: "/top-250" },
-	// { slug: "collections", icon: <Category />, labelEn: "Collections", labelFa: "کالکشن", href: "/collections" },
-];
+const STATIC_MENU_ITEMS: Array<{
+	slug: string;
+	icon: React.ReactNode;
+	labelEn: string;
+	labelFa: string;
+	href: string;
+}> = [
+		// { slug: "top-250", icon: <Movie />, labelEn: "Top 250", labelFa: "250 فیلم برتر IMDb", href: "/top-250" },
+		// { slug: "collections", icon: <Category />, labelEn: "Collections", labelFa: "کالکشن", href: "/collections" },
+	];
 
 /**
  * Determine icon for a category based on its contentType or slug.
@@ -97,18 +103,28 @@ function getCategoryIcon(category: PublicCategory): React.ReactNode {
  * For child categories: /movies/{parent.urlPath}/{child.urlPath}
  */
 function categoryToPath(category: PublicCategory, parent?: PublicCategory): string {
+	const contentType = category.contentType==='series'?'serie':category.contentType;
+	const parentContentType = parent?.contentType;
+
+
 	if (parent && parent.urlPath && category.urlPath) {
-		return `/movies/${parent.urlPath}/${category.urlPath}`;
+		if (parentContentType === "other" && ['animation', 'dubbed', 'anime', 'other', 'coming-soon', 'collections', 'top-250'].includes(category.urlPath)) return `/${category.urlPath}`;
+		if (parentContentType === "other") return `/${parent.urlPath==='series'?'serie':parent.urlPath}/${category.urlPath==='series'?'serie':category.urlPath}`;
+		return `/${contentType}/${parent.urlPath==='series'?'serie':parent.urlPath}/${category.urlPath==='series'?'serie':category.urlPath}`;
 	}
 	if (category.urlPath) {
-		return `/movies/${category.urlPath}`;
+		if (['animation', 'dubbed', 'anime', 'other'].includes(category.urlPath)) {
+			return `/${category.urlPath || category.slug}`;
+		}
+		if (parentContentType === "other") return `/${category.urlPath}`;
+		return `/${contentType}/${category.urlPath}`;
 	}
 	// Fallback for legacy slugs
 	const slugMap: Record<string, string> = {
-		"movies-foreign": "/movies/foreign",
-		"movies-iranian": "/movies/iranian",
-		"series-foreign": "/series/foreign",
-		"series-iranian": "/series/iranian",
+		"movies-foreign": "/movie/foreign",
+		"movies-iranian": "/movie/iranian",
+		"series-foreign": "/serie/foreign",
+		"series-iranian": "/serie/iranian",
 	};
 	return slugMap[category.slug] || `/category/${category.slug}`;
 }
@@ -120,7 +136,7 @@ export function PremiumLiquidGlassHeader() {
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 	const [mounted, setMounted] = useState(false);
-	
+
 	// Dynamic navigation state
 	const [navItems, setNavItems] = useState<NavItem[]>([]);
 	const [navLoading, setNavLoading] = useState(true);
@@ -304,7 +320,7 @@ export function PremiumLiquidGlassHeader() {
           ${glassColors.glass.base} 100%)`,
 		backdropFilter: `blur(${glassBlur.medium}px) saturate(180%)`,
 		WebkitBackdropFilter: `blur(${glassBlur.medium}px) saturate(180%)`,
-		borderBottom: scrolled ? `1px solid ${glassColors.glass.border}` : "none",
+		borderBottom: "none",
 		boxShadow: scrolled
 			? `inset 0 1px 0 0 rgba(255, 255, 255, 0.05),
          0 4px 24px -2px rgba(0, 0, 0, 0.2)`
@@ -370,7 +386,7 @@ export function PremiumLiquidGlassHeader() {
         ${glassColors.glass.strong}, 
         ${glassColors.glass.mid})`,
 			border: `1px solid ${glassColors.glass.border}`,
-			transform: "translateY(-2px)",
+			transform: "translateY(5px)",
 			boxShadow: `0 8px 16px -4px rgba(0, 0, 0, 0.3),
                   inset 0 1px 0 0 rgba(255, 255, 255, 0.1)`,
 			"&::before": {
@@ -418,7 +434,7 @@ export function PremiumLiquidGlassHeader() {
 				transition: glassAnimations.transition.springFast,
 				"&:hover": {
 					background: glassColors.deepMidnight,
-					transform: "translateX(4px)",
+					color: glassColors.persianGold,
 				},
 			},
 		},
@@ -454,7 +470,7 @@ export function PremiumLiquidGlassHeader() {
 							display: "flex",
 							alignItems: "center",
 							justifyContent: "space-between",
-							minHeight: 52,
+							minHeight: 48,
 							gap: 2,
 						}}
 					>
@@ -537,6 +553,7 @@ export function PremiumLiquidGlassHeader() {
 												onMouseEnter={(e) =>
 													item.submenu && handleSubmenuOpen(e, item.href)
 												}
+
 											>
 												<Box
 													component="button"
@@ -571,7 +588,7 @@ export function PremiumLiquidGlassHeader() {
 													MenuListProps={{
 														onMouseLeave: () => handleSubmenuClose(item.href),
 													}}
-													sx={menuStyle}
+													sx={{ ...menuStyle, zIndex: '1300' }}
 													transformOrigin={{
 														horizontal: "center",
 														vertical: "top",
@@ -667,65 +684,65 @@ export function PremiumLiquidGlassHeader() {
 
 				{!isAuthenticated
 					? [
-							<MenuItem
-								key="login"
-								onClick={() =>
-									handleUserMenuAction({ type: "open-auth", mode: "login" })
-								}
-								disabled={userMenuBusy}
-							>
-								<Login sx={{ mr: 1, fontSize: "1.25rem" }} />
-								{language === "fa" ? "ورود" : "Login"}
-								{userMenuBusy && <CircularProgress size={16} sx={{ ml: 1 }} />}
-							</MenuItem>,
-							<MenuItem
-								key="register"
-								onClick={() =>
-									handleUserMenuAction({ type: "open-auth", mode: "register" })
-								}
-								disabled={userMenuBusy}
-							>
-								<Person sx={{ mr: 1, fontSize: "1.25rem" }} />
-								{language === "fa" ? "ثبت نام" : "Register"}
-							</MenuItem>,
-						]
+						<MenuItem
+							key="login"
+							onClick={() =>
+								handleUserMenuAction({ type: "open-auth", mode: "login" })
+							}
+							disabled={userMenuBusy}
+						>
+							<Login sx={{ ml: 2, fontSize: "1.25rem" }} />
+							{language === "fa" ? "ورود" : "Login"}
+							{userMenuBusy && <CircularProgress size={16} sx={{ ml: 1 }} />}
+						</MenuItem>,
+						<MenuItem
+							key="register"
+							onClick={() =>
+								handleUserMenuAction({ type: "open-auth", mode: "register" })
+							}
+							disabled={userMenuBusy}
+						>
+							<Person sx={{ ml: 2, fontSize: "1.25rem" }} />
+							{language === "fa" ? "ثبت نام" : "Register"}
+						</MenuItem>,
+					]
 					: [
-							<MenuItem
-								key="profile"
-								onClick={() =>
-									handleUserMenuAction({
-										type: "navigate",
-										href: routes.user.profile,
-									})
-								}
-								disabled={userMenuBusy}
-							>
-								<Person sx={{ mr: 1, fontSize: "1.25rem" }} />
-								{language === "fa" ? "پروفایل" : "Profile"}
-								{userMenuBusy && <CircularProgress size={16} sx={{ ml: 1 }} />}
-							</MenuItem>,
-							<MenuItem
-								key="settings"
-								onClick={() =>
-									handleUserMenuAction({
-										type: "navigate",
-										href: routes.user.settings,
-									})
-								}
-								disabled={userMenuBusy}
-							>
-								<Settings sx={{ mr: 1, fontSize: "1.25rem" }} />
-								{language === "fa" ? "تنظیمات" : "Settings"}
-							</MenuItem>,
-							<MenuItem
-								key="logout"
-								onClick={() => handleUserMenuAction({ type: "logout" })}
-								disabled={userMenuBusy}
-							>
-								<Logout sx={{ mr: 1, fontSize: "1.25rem" }} />
-								{language === "fa" ? "خروج" : "Logout"}
-							</MenuItem>,
-						]}
+						<MenuItem
+							key="profile"
+							onClick={() =>
+								handleUserMenuAction({
+									type: "navigate",
+									href: routes.user.profile,
+								})
+							}
+							disabled={userMenuBusy}
+						>
+							<Person sx={{ ml: 2, fontSize: "1.25rem" }} />
+							{language === "fa" ? "پروفایل" : "Profile"}
+							{userMenuBusy && <CircularProgress size={16} sx={{ ml: 1 }} />}
+						</MenuItem>,
+						<MenuItem
+							key="settings"
+							onClick={() =>
+								handleUserMenuAction({
+									type: "navigate",
+									href: routes.user.settings,
+								})
+							}
+							disabled={userMenuBusy}
+						>
+							<Settings sx={{ ml: 2, fontSize: "1.25rem" }} />
+							{language === "fa" ? "تنظیمات" : "Settings"}
+						</MenuItem>,
+						<MenuItem
+							key="logout"
+							onClick={() => handleUserMenuAction({ type: "logout" })}
+							disabled={userMenuBusy}
+						>
+							<Logout sx={{ ml: 2, fontSize: "1.25rem" }} />
+							{language === "fa" ? "خروج" : "Logout"}
+						</MenuItem>,
+					]}
 			</Menu>
 
 			{/* Mobile Drawer - Glass Sidebar */}

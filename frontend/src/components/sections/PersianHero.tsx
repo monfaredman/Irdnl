@@ -185,7 +185,7 @@ export const PersianHero = () => {
 						<Stack direction="column" spacing={2}>
 							<Button
 								component={Link}
-								href={`/movies/${heroMovie.slug}`}
+								href={`/movie/${heroMovie.slug}`}
 								variant="contained"
 								startIcon={<PlayArrowIcon />}
 								sx={{

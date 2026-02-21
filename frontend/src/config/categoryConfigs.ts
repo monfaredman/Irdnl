@@ -436,13 +436,13 @@ export function generateBreadcrumbs(
     breadcrumbs.push({
       label: parentConfig.titleEn,
       labelFa: parentConfig.titleFa,
-      href: `/movies/${parentId}`,
+      href: `/movie/${parentId}`,
       isActive: false,
     });
     breadcrumbs.push({
       label: config.titleEn,
       labelFa: config.titleFa,
-      href: `/movies/${parentId}/${parts.slice(1).join("-")}`,
+      href: `/movie/${parentId}/${parts.slice(1).join("-")}`,
       isActive: !subGenre,
     });
   } else if (categoryId.startsWith("movies")) {
@@ -452,14 +452,14 @@ export function generateBreadcrumbs(
       breadcrumbs.push({
         label: "Foreign",
         labelFa: "خارجی",
-        href: "/movies/foreign",
+        href: "/movie/foreign",
         isActive: !subGenre,
       });
     } else if (categoryId === "movies-iranian") {
       breadcrumbs.push({
         label: "Iranian",
         labelFa: "ایرانی",
-        href: "/movies/iranian",
+        href: "/movie/iranian",
         isActive: !subGenre,
       });
     }
@@ -468,7 +468,7 @@ export function generateBreadcrumbs(
     breadcrumbs.push({
       label: config.titleEn,
       labelFa: config.titleFa,
-      href: `/movies/${categoryId}`,
+      href: `/movie/${categoryId}`,
       isActive: !subGenre,
     });
   }

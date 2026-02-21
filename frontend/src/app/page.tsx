@@ -40,7 +40,7 @@ export default function Home() {
 					categoriesApi.listLanding().catch(() => ({ data: [] })),
 				]);
 				if (cancelled) return;
-
+console.log(11,slidersRes.data);
 				setSliders(slidersRes.data || []);
 				setOffers(offersRes.data || []);
 
@@ -95,7 +95,7 @@ export default function Home() {
 					items={sliders.map((s) => ({
 						id: s.contentId || s.id,
 						title: language === "fa" ? s.titleFa || s.title : s.title,
-						backdrop: s.imageUrl || "",
+						backdrop: s.content.backdropUrl || "",
 						poster: s.imageUrl || "",
 						rating: 0,
 						year: new Date().getFullYear(),

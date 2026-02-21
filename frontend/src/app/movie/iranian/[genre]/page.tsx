@@ -34,8 +34,8 @@ export default function IranianMovieGenrePage() {
 			config={config} 
 			breadcrumbs={breadcrumbs} 
 			currentSubGenre={{ slug: genre, nameEn: subGenreInfo?.nameEn || genre, nameFa: subGenreInfo?.nameFa || genre }}
-			basePath={`/movies/iranian/${genre}`}
-			genreBasePath="/movies/iranian"
+			basePath={`/movie/iranian/${genre}`}
+			genreBasePath="/movie/iranian"
 		/>
 	);
 }

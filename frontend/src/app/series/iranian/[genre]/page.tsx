@@ -34,8 +34,8 @@ export default function IranianSeriesGenrePage() {
 			config={config} 
 			breadcrumbs={breadcrumbs} 
 			currentSubGenre={{ slug: genre, nameEn: subGenreInfo?.nameEn || genre, nameFa: subGenreInfo?.nameFa || genre }}
-			basePath={`/series/iranian/${genre}`}
-			genreBasePath="/series/iranian"
+			basePath={`/serie/iranian/${genre}`}
+			genreBasePath="/serie/iranian"
 		/>
 	);
 }

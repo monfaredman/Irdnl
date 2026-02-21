@@ -44,7 +44,7 @@ export default function SeriesGenrePage() {
 			config={config} 
 			breadcrumbs={breadcrumbs} 
 			currentSubGenre={{ slug: genre, nameEn: subGenreInfo.nameEn, nameFa: subGenreInfo.nameFa }}
-			basePath={`/series/${genre}`}
+			basePath={`/serie/${genre}`}
 			genreBasePath="/series"
 		/>
 	);

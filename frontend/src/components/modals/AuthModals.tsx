@@ -373,7 +373,7 @@ export const AuthModals = ({
 				<Button
 					fullWidth
 					variant="outlined"
-					startIcon={<GoogleIcon />}
+					startIcon={<GoogleIcon className="ml-2"/>}
 				href={`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api"}/auth/google`}
 					sx={{
 						py: 1.5,
@@ -569,7 +569,7 @@ export const AuthModals = ({
 			<Button
 				startIcon={
 					<ArrowBackIcon
-						sx={{ transform: isRTL ? "rotate(180deg)" : "none" }}
+						sx={{ transform: isRTL ? "rotate(180deg)" : "none" ,marginLeft:2}}
 					/>
 				}
 				onClick={() => setMode("login")}
@@ -648,7 +648,7 @@ export const AuthModals = ({
 			<Button
 				startIcon={
 					<ArrowBackIcon
-						sx={{ transform: isRTL ? "rotate(180deg)" : "none" }}
+						sx={{ transform: isRTL ? "rotate(180deg)" : "none" ,marginLeft:2}}
 					/>
 				}
 				onClick={() => setMode("login")}
