@@ -22,10 +22,11 @@ interface CastMember {
 
 interface CastGalleryProps {
 	cast: CastMember[];
+	title?: string;
 	onMemberClick?: (member: CastMember) => void;
 }
 
-export function CastGallery({ cast, onMemberClick }: CastGalleryProps) {
+export function CastGallery({ cast, title, onMemberClick }: CastGalleryProps) {
 	const [hoveredId, setHoveredId] = useState<number | null>(null);
 
 	if (!cast.length) return null;
@@ -51,7 +52,7 @@ export function CastGallery({ cast, onMemberClick }: CastGalleryProps) {
 				}}
 				dir="rtl"
 			>
-				بازیگران و عوامل
+				{title || "بازیگران و عوامل"}
 			</Typography>
 
 			{/* Cast Grid */}

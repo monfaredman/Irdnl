@@ -4,11 +4,12 @@ import { Alert, Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import { EmblaCarousel } from "@/components/sections/EmblaCarousel";
 import { IOSWidgetGridSection } from "@/components/sections/IOSWidgetGridSection";
+import { PlayTableWidgetSection } from "@/components/sections/PlayTableWidgetSection";
 import { LiquidGlassSlider } from "@/components/sections/LiquidGlassSlider";
 import { MainPageSkeleton } from "@/components/layout/SkeletonLoader";
 import { useLanguage } from "@/providers/language-provider";
 import { contentApi } from "@/lib/api/content";
-import { slidersApi, offersApi, categoriesApi, pinsApi, type Slider, type Offer, type Category, type Pin } from "@/lib/api/public";
+import { slidersApi, offersApi, categoriesApi, pinsApi, playTablesApi, type Slider, type Offer, type Category, type Pin, type PlayTablePublic } from "@/lib/api/public";
 import type { Movie, Series } from "@/types/media";
 
 /**
@@ -28,6 +29,7 @@ export default function Home() {
 	const [sliders, setSliders] = useState<Slider[]>([]);
 	const [pins, setPins] = useState<Pin[]>([]);
 	const [offers, setOffers] = useState<Offer[]>([]);
+	const [playTables, setPlayTables] = useState<PlayTablePublic[]>([]);
 	const [loading, setLoading] = useState(true);
 
 	// Fetch sliders, pins, offers, and landing categories in one effect
@@ -35,17 +37,19 @@ export default function Home() {
 		let cancelled = false;
 		(async () => {
 			try {
-				const [slidersRes, pinsRes, offersRes, landingRes] = await Promise.all([
+				const [slidersRes, pinsRes, offersRes, landingRes, playTablesRes] = await Promise.all([
 					slidersApi.list().catch(() => ({ data: [] })),
 					pinsApi.list().catch(() => ({ data: [] })),
 					offersApi.list().catch(() => ({ data: [] })),
 					categoriesApi.listLanding().catch(() => ({ data: [] })),
+					playTablesApi.list().catch(() => ({ data: [] })),
 				]);
 				if (cancelled) return;
 
 				setSliders(slidersRes.data || []);
 				setPins(pinsRes.data || []);
 				setOffers(offersRes.data || []);
+				setPlayTables(playTablesRes.data || []);
 
 				const cats = landingRes.data || [];
 				setLandingCategories(cats);
@@ -144,6 +148,11 @@ export default function Home() {
 			{/* iOS-Style Widget Grid - Shows offers from admin panel */}
 			{offers.length > 0 && (
 				<IOSWidgetGridSection offers={offers} />
+			)}
+
+			{/* Play Table Schedule Section */}
+			{playTables.length > 0 && (
+				<PlayTableWidgetSection playTables={playTables} />
 			)}
 
 			{/* Pinned Content Sections - Organized by section */}

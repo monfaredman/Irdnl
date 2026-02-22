@@ -545,6 +545,10 @@ export const notificationsApi = {
 		const response = await adminApi.post("/notifications", data);
 		return response.data;
 	},
+	delete: async (id: string) => {
+		const response = await adminApi.delete(`/notifications/${id}`);
+		return response.data;
+	},
 };
 
 // Collections API
@@ -1327,6 +1331,43 @@ export const ticketsApi = {
 	delete: async (id: string) => {
 		const response = await adminApi.delete(`/tickets/${id}`);
 		return response.data;
+	},
+};
+
+// ========================================================================
+// PLAY TABLES API
+// ========================================================================
+export const playTablesApi = {
+	list: async () => {
+		const response = await adminApi.get("/play-tables");
+		return response.data;
+	},
+	get: async (id: string) => {
+		const response = await adminApi.get(`/play-tables/${id}`);
+		return response.data;
+	},
+	create: async (data: {
+		title: string;
+		titleFa?: string;
+		description?: string;
+		descriptionFa?: string;
+		contentIds: string[];
+		startTime: string;
+		endTime: string;
+		status?: string;
+		imageUrl?: string;
+		isActive?: boolean;
+		sortOrder?: number;
+	}) => {
+		const response = await adminApi.post("/play-tables", data);
+		return response.data;
+	},
+	update: async (id: string, data: any) => {
+		const response = await adminApi.put(`/play-tables/${id}`, data);
+		return response.data;
+	},
+	delete: async (id: string) => {
+		await adminApi.delete(`/play-tables/${id}`);
 	},
 };
 

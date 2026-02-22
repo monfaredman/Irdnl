@@ -88,6 +88,16 @@ export class Content {
   @Column({ type: 'numeric', precision: 3, scale: 1, nullable: true })
   rating: number | null;
 
+  @Column({ type: 'jsonb', nullable: true, default: '{}' })
+  ratings: {
+    imdb?: { score: number; votes?: number };
+    rottenTomatoes?: { tomatometer: number; audience?: number };
+    metacritic?: { score: number };
+    fandango?: { score: number };
+    letterboxd?: { score: number };
+    myAnimeList?: { score: number };
+  } | null;
+
   @Column({ type: 'jsonb', nullable: true, default: '[]' })
   genres: string[];
 
@@ -112,6 +122,14 @@ export class Content {
 
   @Column({ type: 'jsonb', nullable: true, default: '[]' })
   crew: Array<{ name: string; role: string; department?: string }>;
+
+  // Dubbing cast (voice actors for dubbed versions)
+  @Column({ name: 'dubbing_cast', type: 'jsonb', nullable: true, default: '[]' })
+  dubbingCast: Array<{ name: string; character?: string; language?: string; imageUrl?: string }>;
+
+  // Production team / Builders' agents
+  @Column({ name: 'production_team', type: 'jsonb', nullable: true, default: '[]' })
+  productionTeam: Array<{ name: string; role: string; department?: string; imageUrl?: string }>;
 
   @Column({ nullable: true })
   director: string | null;

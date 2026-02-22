@@ -115,7 +115,7 @@ export const EmblaCarousel = ({
 					>
 						{language === "fa" ? "مشاهده همه" : "Show All"}
 						<Box component="span" sx={{ fontSize: "18px" }}>
-							→
+							{isRTL ? <NextIcon  sx={{ fontSize: 14 }}/> : <PrevIcon sx={{ fontSize: 14 }}/>}
 						</Box>
 					</Box>
 				)}

@@ -9,10 +9,11 @@ import { Genre } from '../content/entities/genre.entity';
 import { Slider } from '../content/entities/slider.entity';
 import { Offer } from '../content/entities/offer.entity';
 import { Pin } from '../content/entities/pin.entity';
+import { PlayTable } from '../content/entities/play-table.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Category, Collection, Content, Genre, Slider, Offer, Pin]),
+    TypeOrmModule.forFeature([Category, Collection, Content, Genre, Slider, Offer, Pin, PlayTable]),
   ],
   controllers: [PublicController],
   providers: [PublicService],

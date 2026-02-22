@@ -9,7 +9,7 @@ import { TMDBFieldButton } from "../TMDBFieldButton";
 import { useState, useEffect } from "react";
 import { FormControl, InputLabel, Select, MenuItem, Checkbox, ListItemText, OutlinedInput, Chip, Box, TextField as MuiTextField } from "@mui/material";
 import { genresApi } from "@/lib/api/admin";
-import type { ContentFormData } from "../types";
+import type { ContentFormData, CastMember, DubbingCastMember, ProductionTeamMember } from "../types";
 
 interface MetadataStepProps {
   formData: ContentFormData;
@@ -108,6 +108,85 @@ export function MetadataStep({ formData, updateFormData }: MetadataStepProps) {
             <option value="R">R - محدود</option>
             <option value="NC-17">NC-17 - بزرگسال</option>
           </select>
+        </div>
+      </div>
+
+      {/* Multi-source Ratings */}
+      <div className="space-y-3">
+        <Label className="text-base font-semibold">🎬 امتیازات چندگانه</Label>
+        <div className="grid gap-3 md:grid-cols-3 lg:grid-cols-4">
+          <div className="space-y-1">
+            <Label className="text-sm">🎬 IMDb Score (0-10)</Label>
+            <Input
+              type="number" step="0.1" min="0" max="10"
+              value={formData.ratings?.imdb?.score || ""}
+              onChange={(e) => updateFormData({ ratings: { ...formData.ratings, imdb: { ...formData.ratings?.imdb, score: e.target.value ? parseFloat(e.target.value) : undefined } } })}
+              placeholder="8.5"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-sm">🎬 IMDb Votes</Label>
+            <Input
+              type="number" min="0"
+              value={formData.ratings?.imdb?.votes || ""}
+              onChange={(e) => updateFormData({ ratings: { ...formData.ratings, imdb: { ...formData.ratings?.imdb, votes: e.target.value ? parseInt(e.target.value) : undefined } } })}
+              placeholder="120000"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-sm">🍅 Tomatometer (0-100)</Label>
+            <Input
+              type="number" step="1" min="0" max="100"
+              value={formData.ratings?.rottenTomatoes?.tomatometer || ""}
+              onChange={(e) => updateFormData({ ratings: { ...formData.ratings, rottenTomatoes: { ...formData.ratings?.rottenTomatoes, tomatometer: e.target.value ? parseInt(e.target.value) : undefined } } })}
+              placeholder="92"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-sm">🍅 RT Audience (0-100)</Label>
+            <Input
+              type="number" step="1" min="0" max="100"
+              value={formData.ratings?.rottenTomatoes?.audience || ""}
+              onChange={(e) => updateFormData({ ratings: { ...formData.ratings, rottenTomatoes: { ...formData.ratings?.rottenTomatoes, audience: e.target.value ? parseInt(e.target.value) : undefined } } })}
+              placeholder="88"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-sm">Ⓜ️ Metacritic (0-100)</Label>
+            <Input
+              type="number" step="1" min="0" max="100"
+              value={formData.ratings?.metacritic?.score || ""}
+              onChange={(e) => updateFormData({ ratings: { ...formData.ratings, metacritic: { score: e.target.value ? parseInt(e.target.value) : undefined } } })}
+              placeholder="78"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-sm">⭐ Fandango (0-5)</Label>
+            <Input
+              type="number" step="0.1" min="0" max="5"
+              value={formData.ratings?.fandango?.score || ""}
+              onChange={(e) => updateFormData({ ratings: { ...formData.ratings, fandango: { score: e.target.value ? parseFloat(e.target.value) : undefined } } })}
+              placeholder="4.2"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-sm">📝 Letterboxd (0-5)</Label>
+            <Input
+              type="number" step="0.1" min="0" max="5"
+              value={formData.ratings?.letterboxd?.score || ""}
+              onChange={(e) => updateFormData({ ratings: { ...formData.ratings, letterboxd: { score: e.target.value ? parseFloat(e.target.value) : undefined } } })}
+              placeholder="3.8"
+            />
+          </div>
+          <div className="space-y-1">
+            <Label className="text-sm">📺 MyAnimeList (0-10)</Label>
+            <Input
+              type="number" step="0.1" min="0" max="10"
+              value={formData.ratings?.myAnimeList?.score || ""}
+              onChange={(e) => updateFormData({ ratings: { ...formData.ratings, myAnimeList: { score: e.target.value ? parseFloat(e.target.value) : undefined } } })}
+              placeholder="8.1"
+            />
+          </div>
         </div>
       </div>
 
@@ -267,6 +346,215 @@ export function MetadataStep({ formData, updateFormData }: MetadataStepProps) {
             />
           </div>
         </div>
+      </div>
+
+      {/* ── Cast Members (بازیگران) ── */}
+      <div className="space-y-3 rounded-lg border border-gray-700 p-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-base font-semibold">🎭 بازیگران</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const current = formData.cast || [];
+              updateFormData({ cast: [...current, { name: "", character: "", imageUrl: "" }] });
+            }}
+          >
+            <Plus className="h-4 w-4 mr-1" /> افزودن بازیگر
+          </Button>
+        </div>
+        {(formData.cast || []).map((member, idx) => (
+          <div key={idx} className="flex gap-2 items-start">
+            <Input
+              placeholder="نام بازیگر"
+              value={member.name}
+              onChange={(e) => {
+                const cast = [...(formData.cast || [])];
+                cast[idx] = { ...cast[idx], name: e.target.value };
+                updateFormData({ cast });
+              }}
+              className="flex-1"
+            />
+            <Input
+              placeholder="نقش"
+              value={member.character || ""}
+              onChange={(e) => {
+                const cast = [...(formData.cast || [])];
+                cast[idx] = { ...cast[idx], character: e.target.value };
+                updateFormData({ cast });
+              }}
+              className="flex-1"
+            />
+            <Input
+              placeholder="لینک تصویر"
+              value={member.imageUrl || ""}
+              onChange={(e) => {
+                const cast = [...(formData.cast || [])];
+                cast[idx] = { ...cast[idx], imageUrl: e.target.value };
+                updateFormData({ cast });
+              }}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const cast = (formData.cast || []).filter((_, i) => i !== idx);
+                updateFormData({ cast });
+              }}
+            >
+              <X className="h-4 w-4 text-red-400" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Dubbing Cast (گویندگان دوبله) ── */}
+      <div className="space-y-3 rounded-lg border border-gray-700 p-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-base font-semibold">🎙️ گویندگان دوبله</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const current = formData.dubbingCast || [];
+              updateFormData({ dubbingCast: [...current, { name: "", character: "", language: "", imageUrl: "" }] });
+            }}
+          >
+            <Plus className="h-4 w-4 mr-1" /> افزودن گوینده
+          </Button>
+        </div>
+        {(formData.dubbingCast || []).map((member, idx) => (
+          <div key={idx} className="flex gap-2 items-start">
+            <Input
+              placeholder="نام گوینده"
+              value={member.name}
+              onChange={(e) => {
+                const dubbingCast = [...(formData.dubbingCast || [])];
+                dubbingCast[idx] = { ...dubbingCast[idx], name: e.target.value };
+                updateFormData({ dubbingCast });
+              }}
+              className="flex-1"
+            />
+            <Input
+              placeholder="شخصیت"
+              value={member.character || ""}
+              onChange={(e) => {
+                const dubbingCast = [...(formData.dubbingCast || [])];
+                dubbingCast[idx] = { ...dubbingCast[idx], character: e.target.value };
+                updateFormData({ dubbingCast });
+              }}
+              className="flex-1"
+            />
+            <Input
+              placeholder="زبان"
+              value={member.language || ""}
+              onChange={(e) => {
+                const dubbingCast = [...(formData.dubbingCast || [])];
+                dubbingCast[idx] = { ...dubbingCast[idx], language: e.target.value };
+                updateFormData({ dubbingCast });
+              }}
+              className="w-24"
+            />
+            <Input
+              placeholder="لینک تصویر"
+              value={member.imageUrl || ""}
+              onChange={(e) => {
+                const dubbingCast = [...(formData.dubbingCast || [])];
+                dubbingCast[idx] = { ...dubbingCast[idx], imageUrl: e.target.value };
+                updateFormData({ dubbingCast });
+              }}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const dubbingCast = (formData.dubbingCast || []).filter((_, i) => i !== idx);
+                updateFormData({ dubbingCast });
+              }}
+            >
+              <X className="h-4 w-4 text-red-400" />
+            </Button>
+          </div>
+        ))}
+      </div>
+
+      {/* ── Production Team (عوامل سازنده) ── */}
+      <div className="space-y-3 rounded-lg border border-gray-700 p-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-base font-semibold">🎬 عوامل سازنده</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const current = formData.productionTeam || [];
+              updateFormData({ productionTeam: [...current, { name: "", role: "", department: "", imageUrl: "" }] });
+            }}
+          >
+            <Plus className="h-4 w-4 mr-1" /> افزودن عضو
+          </Button>
+        </div>
+        {(formData.productionTeam || []).map((member, idx) => (
+          <div key={idx} className="flex gap-2 items-start">
+            <Input
+              placeholder="نام"
+              value={member.name}
+              onChange={(e) => {
+                const productionTeam = [...(formData.productionTeam || [])];
+                productionTeam[idx] = { ...productionTeam[idx], name: e.target.value };
+                updateFormData({ productionTeam });
+              }}
+              className="flex-1"
+            />
+            <Input
+              placeholder="نقش (مثلاً تهیه‌کننده)"
+              value={member.role}
+              onChange={(e) => {
+                const productionTeam = [...(formData.productionTeam || [])];
+                productionTeam[idx] = { ...productionTeam[idx], role: e.target.value };
+                updateFormData({ productionTeam });
+              }}
+              className="flex-1"
+            />
+            <Input
+              placeholder="بخش"
+              value={member.department || ""}
+              onChange={(e) => {
+                const productionTeam = [...(formData.productionTeam || [])];
+                productionTeam[idx] = { ...productionTeam[idx], department: e.target.value };
+                updateFormData({ productionTeam });
+              }}
+              className="w-28"
+            />
+            <Input
+              placeholder="لینک تصویر"
+              value={member.imageUrl || ""}
+              onChange={(e) => {
+                const productionTeam = [...(formData.productionTeam || [])];
+                productionTeam[idx] = { ...productionTeam[idx], imageUrl: e.target.value };
+                updateFormData({ productionTeam });
+              }}
+              className="flex-1"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                const productionTeam = (formData.productionTeam || []).filter((_, i) => i !== idx);
+                updateFormData({ productionTeam });
+              }}
+            >
+              <X className="h-4 w-4 text-red-400" />
+            </Button>
+          </div>
+        ))}
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">

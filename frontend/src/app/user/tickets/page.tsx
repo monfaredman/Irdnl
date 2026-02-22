@@ -35,6 +35,7 @@ import {
 } from "@/theme/glass-design-system";
 import { userApi, type TicketData, type CreateTicketInput } from "@/lib/api/user";
 import { useIsAuthenticated } from "@/store/auth";
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
 
 const translations = {
 	en: {
@@ -388,6 +389,12 @@ export default function TicketsPage() {
 							rows={4}
 							sx={glassInputSx}
 						/>
+						<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+							<EmojiPicker onEmojiSelect={(emoji) => setForm((prev) => ({ ...prev, message: prev.message + emoji }))} />
+							<Typography sx={{ color: glassColors.text.muted, fontSize: "0.75rem" }}>
+								افزودن ایموجی به پیام
+							</Typography>
+						</Box>
 						<Box sx={{ display: "flex", gap: 2 }}>
 							<FormControl fullWidth sx={glassInputSx}>
 								<InputLabel>{t.priority}</InputLabel>

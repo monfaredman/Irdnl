@@ -67,6 +67,7 @@ export function ContentUploadWizard() {
 
     // Metadata
     rating: 0,
+    ratings: {},
     genres: [],
     tags: [],
     languages: [],
@@ -75,6 +76,8 @@ export function ContentUploadWizard() {
     contentWarnings: [],
     cast: [],
     crew: [],
+    dubbingCast: [],
+    productionTeam: [],
     director: "",
     writer: "",
     producer: "",

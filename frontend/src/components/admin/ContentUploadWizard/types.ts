@@ -11,6 +11,20 @@ export interface CrewMember {
   department?: string;
 }
 
+export interface DubbingCastMember {
+  name: string;
+  character?: string;
+  language?: string;
+  imageUrl?: string;
+}
+
+export interface ProductionTeamMember {
+  name: string;
+  role: string;
+  department?: string;
+  imageUrl?: string;
+}
+
 export interface VideoQuality {
   url: string;
   bitrate?: string;
@@ -106,6 +120,14 @@ export interface ContentFormData {
 
   // Metadata
   rating?: number;
+  ratings?: {
+    imdb?: { score?: number; votes?: number };
+    rottenTomatoes?: { tomatometer?: number; audience?: number };
+    metacritic?: { score?: number };
+    fandango?: { score?: number };
+    letterboxd?: { score?: number };
+    myAnimeList?: { score?: number };
+  };
   genres?: string[];
   tags?: string[];
   languages?: string[];
@@ -114,6 +136,8 @@ export interface ContentFormData {
   contentWarnings?: string[];
   cast?: CastMember[];
   crew?: CrewMember[];
+  dubbingCast?: DubbingCastMember[];
+  productionTeam?: ProductionTeamMember[];
   director?: string;
   writer?: string;
   producer?: string;

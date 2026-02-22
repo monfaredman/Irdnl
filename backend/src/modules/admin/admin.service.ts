@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Like } from 'typeorm';
+import { In, Repository, Like } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Content, ContentType, ContentStatus } from '../content/entities/content.entity';
 import { Series } from '../content/entities/series.entity';
@@ -15,6 +15,7 @@ import { Slider } from '../content/entities/slider.entity';
 import { Offer } from '../content/entities/offer.entity';
 import { Pin } from '../content/entities/pin.entity';
 import { Collection } from '../content/entities/collection.entity';
+import { PlayTable } from '../content/entities/play-table.entity';
 import { ContentService } from '../content/content.service';
 import { CreateContentDto } from './dto/create-content.dto';
 import { UpdateContentDto } from './dto/update-content.dto';
@@ -30,6 +31,7 @@ import { CreateSliderDto, UpdateSliderDto } from './dto/slider.dto';
 import { CreateOfferDto, UpdateOfferDto } from './dto/offer.dto';
 import { CreatePinDto, UpdatePinDto } from './dto/pin.dto';
 import { CreateCollectionDto, UpdateCollectionDto } from './dto/collection.dto';
+import { CreatePlayTableDto, UpdatePlayTableDto } from './dto/play-table.dto';
 import { StorageService } from '../video-assets/storage.service';
 import { ElasticsearchService } from '../search/elasticsearch.service';
 
@@ -62,6 +64,8 @@ export class AdminService {
     private pinRepository: Repository<Pin>,
     @InjectRepository(Collection)
     private collectionRepository: Repository<Collection>,
+    @InjectRepository(PlayTable)
+    private playTableRepository: Repository<PlayTable>,
     private contentService: ContentService,
     private storageService: StorageService,
     private elasticsearchService: ElasticsearchService,
@@ -825,5 +829,97 @@ export class AdminService {
     if (!collection)
       throw new NotFoundException(`Collection with ID ${id} not found`);
     await this.collectionRepository.remove(collection);
+  }
+
+  // ========================================================================
+  // PLAY TABLES CRUD
+  // ========================================================================
+
+  async listPlayTables() {
+    const data = await this.playTableRepository.find({
+      order: { sortOrder: 'ASC', startTime: 'ASC', createdAt: 'DESC' },
+    });
+
+    // Resolve content details for each play table
+    const enriched = await Promise.all(
+      data.map(async (pt) => {
+        const contents = pt.contentIds.length
+          ? await this.contentRepository.find({
+              where: { id: In(pt.contentIds) },
+              select: ['id', 'title', 'originalTitle', 'posterUrl', 'backdropUrl', 'rating', 'year', 'type'],
+            })
+          : [];
+        return { ...pt, contents };
+      }),
+    );
+
+    return { data: enriched, total: enriched.length };
+  }
+
+  async getPlayTable(id: string): Promise<any> {
+    const pt = await this.playTableRepository.findOne({ where: { id } });
+    if (!pt) throw new NotFoundException(`PlayTable with ID ${id} not found`);
+
+    const contents = pt.contentIds.length
+      ? await this.contentRepository.find({
+          where: { id: In(pt.contentIds) },
+          select: ['id', 'title', 'originalTitle', 'posterUrl', 'backdropUrl', 'bannerUrl', 'rating', 'year', 'type'],
+        })
+      : [];
+
+    return { ...pt, contents };
+  }
+
+  async createPlayTable(dto: CreatePlayTableDto): Promise<PlayTable> {
+    const pt = this.playTableRepository.create(dto);
+    return this.playTableRepository.save(pt);
+  }
+
+  async updatePlayTable(id: string, dto: UpdatePlayTableDto): Promise<PlayTable> {
+    const pt = await this.playTableRepository.findOne({ where: { id } });
+    if (!pt) throw new NotFoundException(`PlayTable with ID ${id} not found`);
+    Object.assign(pt, dto);
+    return this.playTableRepository.save(pt);
+  }
+
+  async deletePlayTable(id: string): Promise<void> {
+    const pt = await this.playTableRepository.findOne({ where: { id } });
+    if (!pt) throw new NotFoundException(`PlayTable with ID ${id} not found`);
+    await this.playTableRepository.remove(pt);
+  }
+
+  /** Public: get currently active play tables (within time range, active, not draft) */
+  async listActivePlayTables() {
+    const now = new Date();
+    const qb = this.playTableRepository.createQueryBuilder('pt')
+      .where('pt.is_active = :active', { active: true })
+      .andWhere('pt.status = :status', { status: 'active' })
+      .andWhere(
+        '(pt.start_time IS NULL OR pt.start_time <= :now)',
+        { now },
+      )
+      .andWhere(
+        '(pt.end_time IS NULL OR pt.end_time >= :now)',
+        { now },
+      )
+      .orderBy('pt.sort_order', 'ASC')
+      .addOrderBy('pt.start_time', 'ASC');
+
+    const data = await qb.getMany();
+
+    // Resolve content for each active play table
+    const enriched = await Promise.all(
+      data.map(async (pt) => {
+        const contents = pt.contentIds.length
+          ? await this.contentRepository.find({
+              where: { id: In(pt.contentIds) },
+              select: ['id', 'title', 'originalTitle', 'posterUrl', 'backdropUrl', 'bannerUrl', 'rating', 'year', 'type', 'genres'],
+            })
+          : [];
+        return { ...pt, contents };
+      }),
+    );
+
+    return { data: enriched, total: enriched.length };
   }
 }

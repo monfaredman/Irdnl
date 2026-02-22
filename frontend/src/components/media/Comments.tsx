@@ -13,6 +13,7 @@ import {
 	TextField,
 	Typography,
 } from "@mui/material";
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
 import {
 	glassAnimations,
 	glassBorderRadius,
@@ -205,9 +206,10 @@ export function Comments({ itemId }: CommentsProps) {
 							dir="rtl"
 						/>
 
-						<Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
+						<Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5, gap: 1, alignItems: "center" }}>
+							<EmojiPicker onEmojiSelect={(emoji) => setNewComment((prev) => prev + emoji)} />
 							<Button
-								endIcon={submitting ? <CircularProgress size={16} sx={{ color: "inherit" }} /> : <Send />}
+								startIcon={submitting ? <CircularProgress size={16} sx={{ color: "inherit" }} /> : <Send className="ml-2"/>}
 								onClick={handleSubmit}
 								disabled={!newComment.trim() || submitting}
 								sx={{
@@ -515,6 +517,7 @@ function CommentItem({ comment, isReply, itemId, onRefresh }: CommentItemProps) 
 								}}
 								dir="rtl"
 							/>
+							<EmojiPicker onEmojiSelect={(emoji) => setReplyText((prev) => prev + emoji)} />
 							<IconButton
 								onClick={handleSubmitReply}
 								disabled={!replyText.trim() || submittingReply}

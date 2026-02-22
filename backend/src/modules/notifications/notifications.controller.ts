@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Delete,
   Body,
   Param,
   Query,
@@ -53,6 +54,16 @@ export class NotificationsController {
   @ApiResponse({ status: 200, description: 'Notification details' })
   async findOne(@Param('id') id: string) {
     return this.notificationsService.findOne(id);
+  }
+
+  @Delete(':id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Delete notification (admin only) - removes from all users' })
+  @ApiResponse({ status: 200, description: 'Notification deleted' })
+  async delete(@Param('id') id: string) {
+    await this.notificationsService.delete(id);
+    return { success: true, message: 'Notification deleted successfully' };
   }
 }
 

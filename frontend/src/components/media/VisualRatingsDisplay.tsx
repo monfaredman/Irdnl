@@ -17,12 +17,31 @@ interface VisualRatingsDisplayProps {
 	userScore: number; // 0-10
 	voteCount: number;
 	criticsScore?: number; // 0-100
+	ratings?: {
+		imdb?: { score: number; votes?: number };
+		rottenTomatoes?: { tomatometer: number; audience?: number };
+		metacritic?: { score: number };
+		fandango?: { score: number };
+		letterboxd?: { score: number };
+		myAnimeList?: { score: number };
+	} | null;
 }
+
+// Rating source config for rendering
+const RATING_SOURCES = [
+	{ key: 'imdb', label: 'IMDb', emoji: '🎬', maxScore: 10, color: '#F5C518', bgColor: 'rgba(245,197,24,0.1)' },
+	{ key: 'rottenTomatoes', label: 'Rotten Tomatoes', emoji: '🍅', maxScore: 100, suffix: '%', color: '#FA320A', bgColor: 'rgba(250,50,10,0.1)' },
+	{ key: 'metacritic', label: 'Metacritic', emoji: 'Ⓜ️', maxScore: 100, color: '#FFCC34', bgColor: 'rgba(255,204,52,0.1)' },
+	{ key: 'fandango', label: 'Fandango', emoji: '⭐', maxScore: 5, color: '#FF7800', bgColor: 'rgba(255,120,0,0.1)' },
+	{ key: 'letterboxd', label: 'Letterboxd', emoji: '📝', maxScore: 5, color: '#00E054', bgColor: 'rgba(0,224,84,0.1)' },
+	{ key: 'myAnimeList', label: 'MyAnimeList', emoji: '📺', maxScore: 10, color: '#2E51A2', bgColor: 'rgba(46,81,162,0.1)' },
+] as const;
 
 export function VisualRatingsDisplay({
 	userScore,
 	voteCount,
 	criticsScore,
+	ratings,
 }: VisualRatingsDisplayProps) {
 	const [animatedScore, setAnimatedScore] = useState(0);
 	const [animatedCriticsScore, setAnimatedCriticsScore] = useState(0);
@@ -276,6 +295,134 @@ export function VisualRatingsDisplay({
 					</Box>
 				)}
 			</Box>
+
+			{/* Multi-Source Ratings Row */}
+			{ratings && Object.keys(ratings).some((k) => {
+				const val = (ratings as any)[k];
+				return val && (val.score != null || val.tomatometer != null);
+			}) && (
+				<Box sx={{ mt: 3 }}>
+					<Typography
+						sx={{
+							color: glassColors.text.secondary,
+							fontSize: "0.9rem",
+							fontWeight: 600,
+							mb: 2,
+						}}
+						dir="rtl"
+					>
+						امتیاز سایت‌های معتبر
+					</Typography>
+					<Box
+						sx={{
+							display: "flex",
+							flexWrap: "wrap",
+							gap: 2,
+						}}
+					>
+						{RATING_SOURCES.map((src) => {
+							const data = (ratings as any)?.[src.key];
+							if (!data) return null;
+							const score = src.key === 'rottenTomatoes' ? data.tomatometer : data.score;
+							if (score == null) return null;
+							const percentage = (score / src.maxScore) * 100;
+
+							return (
+								<Box
+									key={src.key}
+									sx={{
+										display: "flex",
+										alignItems: "center",
+										gap: 1.5,
+										p: 1.5,
+										px: 2.5,
+										background: src.bgColor,
+										border: `1px solid ${src.color}30`,
+										borderRadius: glassBorderRadius.lg,
+										minWidth: 140,
+									}}
+								>
+									<Typography sx={{ fontSize: "1.5rem" }}>{src.emoji}</Typography>
+									<Box>
+										<Typography
+											sx={{
+												color: glassColors.text.primary,
+												fontSize: "0.75rem",
+												fontWeight: 600,
+												opacity: 0.8,
+											}}
+										>
+											{src.label}
+										</Typography>
+										<Box sx={{ display: "flex", alignItems: "baseline", gap: 0.5 }}>
+											<Typography
+												sx={{
+													color: src.color,
+													fontSize: "1.25rem",
+													fontWeight: 800,
+												}}
+											>
+												{score}
+											</Typography>
+											<Typography
+												sx={{
+													color: glassColors.text.tertiary,
+													fontSize: "0.7rem",
+												}}
+											>
+												{src.suffix || `/${src.maxScore}`}
+											</Typography>
+										</Box>
+										{/* Mini progress bar */}
+										<Box
+											sx={{
+												height: 3,
+												width: 60,
+												background: `${src.color}20`,
+												borderRadius: 2,
+												overflow: "hidden",
+												mt: 0.5,
+											}}
+										>
+											<Box
+												sx={{
+													height: "100%",
+													width: `${Math.min(percentage, 100)}%`,
+													background: src.color,
+													borderRadius: 2,
+													transition: "width 1s ease",
+												}}
+											/>
+										</Box>
+										{src.key === 'imdb' && data.votes && (
+											<Typography
+												sx={{
+													color: glassColors.text.tertiary,
+													fontSize: "0.65rem",
+													mt: 0.3,
+												}}
+											>
+												{data.votes.toLocaleString()} رأی
+											</Typography>
+										)}
+										{src.key === 'rottenTomatoes' && data.audience != null && (
+											<Typography
+												sx={{
+													color: glassColors.text.tertiary,
+													fontSize: "0.65rem",
+													mt: 0.3,
+												}}
+											>
+												مخاطبان: {data.audience}%
+											</Typography>
+										)}
+									</Box>
+								</Box>
+							);
+						})}
+					</Box>
+				</Box>
+			)}
 		</Box>
 	);
 }

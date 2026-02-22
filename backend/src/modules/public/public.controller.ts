@@ -138,4 +138,15 @@ export class PublicController {
   async getCollection(@Param('slug') slug: string) {
     return this.publicService.getCollectionBySlug(slug);
   }
+
+  // ========================================================================
+  // PLAY TABLES
+  // ========================================================================
+
+  @Get('play-tables')
+  @ApiOperation({ summary: 'List active play tables (public)' })
+  @ApiResponse({ status: 200, description: 'Active play tables list with content' })
+  async listPlayTables() {
+    return this.publicService.listActivePlayTables();
+  }
 }

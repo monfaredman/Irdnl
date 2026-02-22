@@ -43,6 +43,7 @@ import { CreateSliderDto, UpdateSliderDto } from './dto/slider.dto';
 import { CreateOfferDto, UpdateOfferDto } from './dto/offer.dto';
 import { CreatePinDto, UpdatePinDto } from './dto/pin.dto';
 import { CreateCollectionDto, UpdateCollectionDto } from './dto/collection.dto';
+import { CreatePlayTableDto, UpdatePlayTableDto } from './dto/play-table.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -670,6 +671,51 @@ export class AdminController {
   @ApiResponse({ status: 204, description: 'Collection deleted' })
   async deleteCollection(@Param('id') id: string) {
     await this.adminService.deleteCollection(id);
+  }
+
+  // ========================================================================
+  // PLAY TABLES CRUD
+  // ========================================================================
+
+  @Get('play-tables')
+  @ApiOperation({ summary: 'List all play tables (admin only)' })
+  @ApiResponse({ status: 200, description: 'Play tables list' })
+  async listPlayTables() {
+    return this.adminService.listPlayTables();
+  }
+
+  @Get('play-tables/:id')
+  @ApiOperation({ summary: 'Get play table by ID (admin only)' })
+  @ApiResponse({ status: 200, description: 'Play table details' })
+  async getPlayTable(@Param('id') id: string) {
+    return this.adminService.getPlayTable(id);
+  }
+
+  @Post('play-tables')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create play table (admin only)' })
+  @ApiResponse({ status: 201, description: 'Play table created' })
+  async createPlayTable(@Body() dto: CreatePlayTableDto) {
+    return this.adminService.createPlayTable(dto);
+  }
+
+  @Put('play-tables/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Update play table (admin only)' })
+  @ApiResponse({ status: 200, description: 'Play table updated' })
+  async updatePlayTable(@Param('id') id: string, @Body() dto: UpdatePlayTableDto) {
+    return this.adminService.updatePlayTable(id, dto);
+  }
+
+  @Delete('play-tables/:id')
+  @Roles(UserRole.ADMIN, UserRole.CONTENT_MANAGER)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Delete play table (admin only)' })
+  @ApiResponse({ status: 204, description: 'Play table deleted' })
+  async deletePlayTable(@Param('id') id: string) {
+    await this.adminService.deletePlayTable(id);
   }
 
   // ========================================================================

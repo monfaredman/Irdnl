@@ -76,6 +76,9 @@ describe('ContentService', () => {
     collectionId: null,
     categoryIds: [],
     accessType: AccessType.FREE,
+    ratings: null,
+    dubbingCast: [],
+    productionTeam: [],
   };
 
   beforeEach(async () => {

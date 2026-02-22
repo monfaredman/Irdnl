@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Mail, Send } from "lucide-react";
+import { Bell, Mail, Send, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/admin/ui/button";
 import {
@@ -38,6 +38,7 @@ export default function NotificationsPage() {
 		type: "success" | "error";
 		message: string;
 	} | null>(null);
+	const [deletingId, setDeletingId] = useState<string | null>(null);
 
 	const fetchNotifications = async () => {
 		setLoading(true);
@@ -81,6 +82,21 @@ export default function NotificationsPage() {
 			showFeedback("error", t("admin.notifications.sendFailed"));
 		} finally {
 			setSending(false);
+		}
+	};
+
+	const handleDelete = async (id: string) => {
+		if (deletingId) return;
+		setDeletingId(id);
+		try {
+			await notificationsApi.delete(id);
+			showFeedback("success", "اعلان با موفقیت حذف شد");
+			fetchNotifications();
+		} catch (error) {
+			console.error("Failed to delete notification:", error);
+			showFeedback("error", "خطا در حذف اعلان");
+		} finally {
+			setDeletingId(null);
 		}
 	};
 
@@ -194,6 +210,14 @@ export default function NotificationsPage() {
 													{t("admin.notifications.sentTo")}: {notification.userId || t("admin.notifications.allUsers")}
 												</p>
 											</div>
+											<button
+												onClick={() => handleDelete(notification.id)}
+												disabled={deletingId === notification.id}
+												className="shrink-0 rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600 transition-colors disabled:opacity-50"
+												title="حذف اعلان"
+											>
+												<Trash2 className="h-4 w-4" />
+											</button>
 										</div>
 									))
 								)}

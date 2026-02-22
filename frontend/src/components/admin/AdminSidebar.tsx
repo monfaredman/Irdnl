@@ -3,6 +3,7 @@
 import {
 	BarChart3,
 	Bell,
+	CalendarClock,
 	Film,
 	FolderTree,
 	Gift,
@@ -55,6 +56,7 @@ const menuItems: MenuItem[] = [
 			{ href: "/admin/genres", labelKey: "admin.menu.genres", icon: Tags },
 			{ href: "/admin/offers", labelKey: "admin.menu.offers", icon: Gift },
 			{ href: "/admin/pins", labelKey: "admin.menu.pins", icon: MapPin },
+			{ href: "/admin/play-tables", labelKey: "admin.menu.playTables", icon: CalendarClock },
 			{ href: "/admin/videos", labelKey: "admin.menu.videos", icon: Video },
 		],
 	},

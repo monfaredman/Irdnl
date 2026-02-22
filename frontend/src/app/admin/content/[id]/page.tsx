@@ -32,6 +32,7 @@ import { Label } from "@/components/admin/ui/label";
 import { contentApi, episodesApi, seasonsApi, videosApi, tmdbApi, categoriesApi as adminCategoriesApi } from "@/lib/api/admin";
 import type { TMDBSeasonSummary, TMDBEpisode } from "@/lib/api/admin";
 import { useTranslation } from "@/i18n";
+import { getCountryFlag } from "@/lib/country-flags";
 import {
 	Snackbar,
 	Alert,
@@ -193,6 +194,7 @@ export default function ContentDetailPage() {
 			year: content?.year || "",
 			duration: content?.duration || "",
 			rating: content?.rating || "",
+			ratings: content?.ratings || {},
 			genres: (content?.genres || []).join(", "),
 			tags: (content?.tags || []).join(", "),
 			languages: (content?.languages || []).join(", "),
@@ -216,6 +218,9 @@ export default function ContentDetailPage() {
 			featured: content?.featured || false,
 			accessType: content?.accessType || "free",
 			priority: content?.priority || 0,
+			cast: content?.cast || [],
+			dubbingCast: (content as any)?.dubbingCast || [],
+			productionTeam: (content as any)?.productionTeam || [],
 		});
 		setEditMode(true);
 	};
@@ -230,6 +235,7 @@ export default function ContentDetailPage() {
 				year: editForm.year ? parseInt(editForm.year) : undefined,
 				duration: editForm.duration ? parseInt(editForm.duration) : undefined,
 				rating: editForm.rating ? parseFloat(editForm.rating) : undefined,
+				ratings: editForm.ratings && Object.keys(editForm.ratings).length > 0 ? editForm.ratings : undefined,
 				genres: editForm.genres ? editForm.genres.split(",").map((g: string) => g.trim()).filter(Boolean) : undefined,
 				tags: editForm.tags ? editForm.tags.split(",").map((t: string) => t.trim()).filter(Boolean) : undefined,
 				languages: editForm.languages ? editForm.languages.split(",").map((l: string) => l.trim()).filter(Boolean) : undefined,
@@ -252,6 +258,9 @@ export default function ContentDetailPage() {
 				featured: editForm.featured ?? false,
 				accessType: editForm.accessType || "free",
 				priority: editForm.priority != null ? Number(editForm.priority) : 0,
+				cast: editForm.cast?.length > 0 ? editForm.cast : undefined,
+				dubbingCast: editForm.dubbingCast?.length > 0 ? editForm.dubbingCast : undefined,
+				productionTeam: editForm.productionTeam?.length > 0 ? editForm.productionTeam : undefined,
 			};
 			if (content?.type === "series") {
 				payload.externalPlayerUrl = editForm.externalPlayerUrl || undefined;
@@ -963,6 +972,39 @@ export default function ContentDetailPage() {
 								<Label className="text-sm">امتیاز (0-10)</Label>
 								<Input type="number" step="0.1" min="0" max="10" value={editForm.rating} onChange={(e) => setEditForm({ ...editForm, rating: e.target.value })} />
 							</div>
+							{/* Multi-source Ratings */}
+							<div className="space-y-1">
+								<Label className="text-sm">🎬 IMDb Score (0-10)</Label>
+								<Input type="number" step="0.1" min="0" max="10" value={editForm.ratings?.imdb?.score || ""} onChange={(e) => setEditForm({ ...editForm, ratings: { ...editForm.ratings, imdb: { ...editForm.ratings?.imdb, score: e.target.value ? parseFloat(e.target.value) : undefined } } })} placeholder="8.5" />
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm">🎬 IMDb Votes</Label>
+								<Input type="number" min="0" value={editForm.ratings?.imdb?.votes || ""} onChange={(e) => setEditForm({ ...editForm, ratings: { ...editForm.ratings, imdb: { ...editForm.ratings?.imdb, votes: e.target.value ? parseInt(e.target.value) : undefined } } })} placeholder="120000" />
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm">🍅 Rotten Tomatoes (0-100)</Label>
+								<Input type="number" min="0" max="100" value={editForm.ratings?.rottenTomatoes?.tomatometer || ""} onChange={(e) => setEditForm({ ...editForm, ratings: { ...editForm.ratings, rottenTomatoes: { ...editForm.ratings?.rottenTomatoes, tomatometer: e.target.value ? parseInt(e.target.value) : undefined } } })} placeholder="92" />
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm">🍅 RT Audience (0-100)</Label>
+								<Input type="number" min="0" max="100" value={editForm.ratings?.rottenTomatoes?.audience || ""} onChange={(e) => setEditForm({ ...editForm, ratings: { ...editForm.ratings, rottenTomatoes: { ...editForm.ratings?.rottenTomatoes, audience: e.target.value ? parseInt(e.target.value) : undefined } } })} placeholder="88" />
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm">Ⓜ️ Metacritic (0-100)</Label>
+								<Input type="number" min="0" max="100" value={editForm.ratings?.metacritic?.score || ""} onChange={(e) => setEditForm({ ...editForm, ratings: { ...editForm.ratings, metacritic: { score: e.target.value ? parseInt(e.target.value) : undefined } } })} placeholder="78" />
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm">⭐ Fandango (0-5)</Label>
+								<Input type="number" step="0.1" min="0" max="5" value={editForm.ratings?.fandango?.score || ""} onChange={(e) => setEditForm({ ...editForm, ratings: { ...editForm.ratings, fandango: { score: e.target.value ? parseFloat(e.target.value) : undefined } } })} placeholder="4.2" />
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm">📝 Letterboxd (0-5)</Label>
+								<Input type="number" step="0.1" min="0" max="5" value={editForm.ratings?.letterboxd?.score || ""} onChange={(e) => setEditForm({ ...editForm, ratings: { ...editForm.ratings, letterboxd: { score: e.target.value ? parseFloat(e.target.value) : undefined } } })} placeholder="3.8" />
+							</div>
+							<div className="space-y-1">
+								<Label className="text-sm">📺 MyAnimeList (0-10)</Label>
+								<Input type="number" step="0.1" min="0" max="10" value={editForm.ratings?.myAnimeList?.score || ""} onChange={(e) => setEditForm({ ...editForm, ratings: { ...editForm.ratings, myAnimeList: { score: e.target.value ? parseFloat(e.target.value) : undefined } } })} placeholder="8.1" />
+							</div>
 							<div className="space-y-1 sm:col-span-2 lg:col-span-3">
 								<Label className="text-sm">توضیحات</Label>
 								<textarea value={editForm.description} onChange={(e) => setEditForm({ ...editForm, description: e.target.value })} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm" rows={3} />
@@ -1005,7 +1047,12 @@ export default function ContentDetailPage() {
 							</div>
 							<div className="space-y-1">
 								<Label className="text-sm">کشور</Label>
-								<Input value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} placeholder="IR" />
+								<div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+									<Input value={editForm.country} onChange={(e) => setEditForm({ ...editForm, country: e.target.value })} placeholder="IR" style={{ flex: 1 }} />
+									{editForm.country && getCountryFlag(editForm.country) && (
+										<span style={{ fontSize: "1.6rem", lineHeight: 1 }}>{getCountryFlag(editForm.country)}</span>
+									)}
+								</div>
 							</div>
 							<div className="space-y-1">
 								<Label className="text-sm">لینک پوستر</Label>
@@ -1100,6 +1147,79 @@ export default function ContentDetailPage() {
 									<Input value={editForm.externalPlayerUrl} onChange={(e) => setEditForm({ ...editForm, externalPlayerUrl: e.target.value })} placeholder="https://player.example.com/..." />
 								</div>
 							)}
+
+							{/* ──── Cast (بازیگران) ──── */}
+							<div className="sm:col-span-2 lg:col-span-3 border-t pt-4 mt-2">
+								<div className="flex items-center justify-between mb-3">
+									<Label className="text-base font-bold">🎭 بازیگران (Cast)</Label>
+									<button type="button" className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+										onClick={() => setEditForm({ ...editForm, cast: [...(editForm.cast || []), { name: "", character: "", role: "Actor", imageUrl: "" }] })}>
+										+ افزودن بازیگر
+									</button>
+								</div>
+								{(editForm.cast || []).map((member: any, idx: number) => (
+									<div key={idx} className="flex gap-2 items-center mb-2">
+										<Input placeholder="نام" value={member.name} className="flex-1"
+											onChange={(e) => { const arr = [...(editForm.cast || [])]; arr[idx] = { ...arr[idx], name: e.target.value }; setEditForm({ ...editForm, cast: arr }); }} />
+										<Input placeholder="نقش (کاراکتر)" value={member.character || ""} className="flex-1"
+											onChange={(e) => { const arr = [...(editForm.cast || [])]; arr[idx] = { ...arr[idx], character: e.target.value }; setEditForm({ ...editForm, cast: arr }); }} />
+										<Input placeholder="URL تصویر" value={member.imageUrl || ""} className="w-48"
+											onChange={(e) => { const arr = [...(editForm.cast || [])]; arr[idx] = { ...arr[idx], imageUrl: e.target.value }; setEditForm({ ...editForm, cast: arr }); }} />
+										<button type="button" className="text-red-500 hover:text-red-700 px-2"
+											onClick={() => { const arr = [...(editForm.cast || [])]; arr.splice(idx, 1); setEditForm({ ...editForm, cast: arr }); }}>✕</button>
+									</div>
+								))}
+							</div>
+
+							{/* ──── Dubbing Cast (گویندگان دوبله) ──── */}
+							<div className="sm:col-span-2 lg:col-span-3 border-t pt-4 mt-2">
+								<div className="flex items-center justify-between mb-3">
+									<Label className="text-base font-bold">🎙️ گویندگان دوبله (Dubbing Cast)</Label>
+									<button type="button" className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+										onClick={() => setEditForm({ ...editForm, dubbingCast: [...(editForm.dubbingCast || []), { name: "", character: "", language: "فارسی", imageUrl: "" }] })}>
+										+ افزودن گوینده
+									</button>
+								</div>
+								{(editForm.dubbingCast || []).map((member: any, idx: number) => (
+									<div key={idx} className="flex gap-2 items-center mb-2">
+										<Input placeholder="نام گوینده" value={member.name} className="flex-1"
+											onChange={(e) => { const arr = [...(editForm.dubbingCast || [])]; arr[idx] = { ...arr[idx], name: e.target.value }; setEditForm({ ...editForm, dubbingCast: arr }); }} />
+										<Input placeholder="نقش (کاراکتر)" value={member.character || ""} className="flex-1"
+											onChange={(e) => { const arr = [...(editForm.dubbingCast || [])]; arr[idx] = { ...arr[idx], character: e.target.value }; setEditForm({ ...editForm, dubbingCast: arr }); }} />
+										<Input placeholder="زبان" value={member.language || ""} className="w-28"
+											onChange={(e) => { const arr = [...(editForm.dubbingCast || [])]; arr[idx] = { ...arr[idx], language: e.target.value }; setEditForm({ ...editForm, dubbingCast: arr }); }} />
+										<Input placeholder="URL تصویر" value={member.imageUrl || ""} className="w-40"
+											onChange={(e) => { const arr = [...(editForm.dubbingCast || [])]; arr[idx] = { ...arr[idx], imageUrl: e.target.value }; setEditForm({ ...editForm, dubbingCast: arr }); }} />
+										<button type="button" className="text-red-500 hover:text-red-700 px-2"
+											onClick={() => { const arr = [...(editForm.dubbingCast || [])]; arr.splice(idx, 1); setEditForm({ ...editForm, dubbingCast: arr }); }}>✕</button>
+									</div>
+								))}
+							</div>
+
+							{/* ──── Production Team (عوامل سازنده) ──── */}
+							<div className="sm:col-span-2 lg:col-span-3 border-t pt-4 mt-2">
+								<div className="flex items-center justify-between mb-3">
+									<Label className="text-base font-bold">🎬 عوامل سازنده (Production Team)</Label>
+									<button type="button" className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+										onClick={() => setEditForm({ ...editForm, productionTeam: [...(editForm.productionTeam || []), { name: "", role: "", department: "", imageUrl: "" }] })}>
+										+ افزودن عضو
+									</button>
+								</div>
+								{(editForm.productionTeam || []).map((member: any, idx: number) => (
+									<div key={idx} className="flex gap-2 items-center mb-2">
+										<Input placeholder="نام" value={member.name} className="flex-1"
+											onChange={(e) => { const arr = [...(editForm.productionTeam || [])]; arr[idx] = { ...arr[idx], name: e.target.value }; setEditForm({ ...editForm, productionTeam: arr }); }} />
+										<Input placeholder="سِمَت (مثلاً: مدیر فیلمبرداری)" value={member.role || ""} className="flex-1"
+											onChange={(e) => { const arr = [...(editForm.productionTeam || [])]; arr[idx] = { ...arr[idx], role: e.target.value }; setEditForm({ ...editForm, productionTeam: arr }); }} />
+										<Input placeholder="بخش" value={member.department || ""} className="w-32"
+											onChange={(e) => { const arr = [...(editForm.productionTeam || [])]; arr[idx] = { ...arr[idx], department: e.target.value }; setEditForm({ ...editForm, productionTeam: arr }); }} />
+										<Input placeholder="URL تصویر" value={member.imageUrl || ""} className="w-40"
+											onChange={(e) => { const arr = [...(editForm.productionTeam || [])]; arr[idx] = { ...arr[idx], imageUrl: e.target.value }; setEditForm({ ...editForm, productionTeam: arr }); }} />
+										<button type="button" className="text-red-500 hover:text-red-700 px-2"
+											onClick={() => { const arr = [...(editForm.productionTeam || [])]; arr.splice(idx, 1); setEditForm({ ...editForm, productionTeam: arr }); }}>✕</button>
+									</div>
+								))}
+							</div>
 						</div>
 					) : (
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1153,6 +1273,45 @@ export default function ContentDetailPage() {
 								<p className="mt-1 text-gray-900">⭐ {content.rating}/10</p>
 							</div>
 						)}
+						{content.ratings && Object.keys(content.ratings).length > 0 && (
+							<div className="sm:col-span-2 lg:col-span-3">
+								<span className="text-sm font-medium text-gray-500">امتیازات سایت‌ها</span>
+								<div className="mt-1 flex flex-wrap gap-3">
+									{content.ratings.imdb?.score != null && (
+										<span className="inline-flex items-center gap-1 rounded-lg bg-yellow-50 border border-yellow-200 px-3 py-1 text-sm font-medium text-yellow-800">
+											🎬 IMDb: {content.ratings.imdb.score}/10
+											{content.ratings.imdb.votes ? ` (${content.ratings.imdb.votes.toLocaleString()} votes)` : ''}
+										</span>
+									)}
+									{content.ratings.rottenTomatoes?.tomatometer != null && (
+										<span className="inline-flex items-center gap-1 rounded-lg bg-red-50 border border-red-200 px-3 py-1 text-sm font-medium text-red-800">
+											🍅 RT: {content.ratings.rottenTomatoes.tomatometer}%
+											{content.ratings.rottenTomatoes.audience ? ` | Audience: ${content.ratings.rottenTomatoes.audience}%` : ''}
+										</span>
+									)}
+									{content.ratings.metacritic?.score != null && (
+										<span className="inline-flex items-center gap-1 rounded-lg bg-blue-50 border border-blue-200 px-3 py-1 text-sm font-medium text-blue-800">
+											Ⓜ️ Metacritic: {content.ratings.metacritic.score}/100
+										</span>
+									)}
+									{content.ratings.fandango?.score != null && (
+										<span className="inline-flex items-center gap-1 rounded-lg bg-purple-50 border border-purple-200 px-3 py-1 text-sm font-medium text-purple-800">
+											⭐ Fandango: {content.ratings.fandango.score}/5
+										</span>
+									)}
+									{content.ratings.letterboxd?.score != null && (
+										<span className="inline-flex items-center gap-1 rounded-lg bg-green-50 border border-green-200 px-3 py-1 text-sm font-medium text-green-800">
+											📝 Letterboxd: {content.ratings.letterboxd.score}/5
+										</span>
+									)}
+									{content.ratings.myAnimeList?.score != null && (
+										<span className="inline-flex items-center gap-1 rounded-lg bg-indigo-50 border border-indigo-200 px-3 py-1 text-sm font-medium text-indigo-800">
+											📺 MAL: {content.ratings.myAnimeList.score}/10
+										</span>
+									)}
+								</div>
+							</div>
+						)}
 						{content.duration && (
 							<div>
 								<span className="text-sm font-medium text-gray-500">مدت زمان</span>
@@ -1178,7 +1337,12 @@ export default function ContentDetailPage() {
 						{content.country && (
 							<div>
 								<span className="text-sm font-medium text-gray-500">کشور</span>
-								<p className="mt-1 text-gray-900">{content.country}</p>
+								<p className="mt-1 text-gray-900" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+									{getCountryFlag(content.country) && (
+										<span style={{ fontSize: "1.4rem", lineHeight: 1 }}>{getCountryFlag(content.country)}</span>
+									)}
+									{content.country}
+								</p>
 							</div>
 						)}
 						{content.originalLanguage && (

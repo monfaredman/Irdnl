@@ -15,6 +15,7 @@ import { Slider } from '../content/entities/slider.entity';
 import { Offer } from '../content/entities/offer.entity';
 import { Pin } from '../content/entities/pin.entity';
 import { Collection } from '../content/entities/collection.entity';
+import { PlayTable } from '../content/entities/play-table.entity';
 import { ContentModule } from '../content/content.module';
 import { VideoAssetsModule } from '../video-assets/video-assets.module';
 import { SearchModule } from '../search/search.module';
@@ -23,7 +24,7 @@ import { SearchModule } from '../search/search.module';
   imports: [
     TypeOrmModule.forFeature([
       Content, Series, Season, Episode, VideoAsset, Job, User,
-      Category, Genre, Slider, Offer, Pin, Collection,
+      Category, Genre, Slider, Offer, Pin, Collection, PlayTable,
     ]),
     ContentModule,
     VideoAssetsModule,

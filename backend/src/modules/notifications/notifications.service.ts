@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Notification } from './entities/notification.entity';
@@ -120,5 +120,18 @@ export class NotificationsService {
       .set({ isRead: true })
       .where('(user_id = :userId OR user_id IS NULL)', { userId })
       .execute();
+  }
+
+  /**
+   * Delete a notification (admin only).
+   * This removes the notification from the database,
+   * so it will no longer appear in any user's notification list.
+   */
+  async delete(id: string): Promise<void> {
+    const notification = await this.notificationRepository.findOne({ where: { id } });
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+    await this.notificationRepository.remove(notification);
   }
 }

@@ -70,6 +70,47 @@ class CrewMemberDto {
   department?: string;
 }
 
+class DubbingCastMemberDto {
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  character?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  language?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+}
+
+class ProductionTeamMemberDto {
+  @ApiProperty()
+  @IsString()
+  name: string;
+
+  @ApiProperty()
+  @IsString()
+  role: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  department?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  imageUrl?: string;
+}
+
 class VideoQualityDto {
   @ApiProperty()
   @IsUrl()
@@ -351,6 +392,28 @@ export class CreateContentDto {
   @Max(10)
   rating?: number;
 
+  @ApiPropertyOptional({
+    example: {
+      imdb: { score: 8.5, votes: 120000 },
+      rottenTomatoes: { tomatometer: 92, audience: 88 },
+      metacritic: { score: 78 },
+      fandango: { score: 4.2 },
+      letterboxd: { score: 3.8 },
+      myAnimeList: { score: 8.1 },
+    },
+    description: 'Multi-source ratings object',
+  })
+  @IsOptional()
+  @IsObject()
+  ratings?: {
+    imdb?: { score: number; votes?: number };
+    rottenTomatoes?: { tomatometer: number; audience?: number };
+    metacritic?: { score: number };
+    fandango?: { score: number };
+    letterboxd?: { score: number };
+    myAnimeList?: { score: number };
+  };
+
   @ApiPropertyOptional({ type: [String], example: ['Drama', 'Romance'] })
   @IsOptional()
   @IsArray()
@@ -395,6 +458,20 @@ export class CreateContentDto {
   @ValidateNested({ each: true })
   @Type(() => CrewMemberDto)
   crew?: CrewMemberDto[];
+
+  @ApiPropertyOptional({ type: [DubbingCastMemberDto], description: 'Voice actors for dubbed versions' })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DubbingCastMemberDto)
+  dubbingCast?: DubbingCastMemberDto[];
+
+  @ApiPropertyOptional({ type: [ProductionTeamMemberDto], description: 'Production team / builders agents' })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductionTeamMemberDto)
+  productionTeam?: ProductionTeamMemberDto[];
 
   @ApiPropertyOptional({ example: 'John Director' })
   @IsOptional()

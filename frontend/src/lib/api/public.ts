@@ -378,3 +378,40 @@ export const publicCommentsApi = {
 		return response.data;
 	},
 };
+
+// ========================================================================
+// PLAY TABLES API (PUBLIC)
+// ========================================================================
+export interface PlayTablePublic {
+	id: string;
+	title: string;
+	titleFa: string | null;
+	description: string | null;
+	descriptionFa: string | null;
+	contentIds: string[];
+	startTime: string;
+	endTime: string;
+	status: string;
+	imageUrl: string | null;
+	isActive: boolean;
+	sortOrder: number;
+	contents: Array<{
+		id: string;
+		title: string;
+		originalTitle?: string;
+		posterUrl?: string;
+		backdropUrl?: string;
+		bannerUrl?: string;
+		rating?: number;
+		year?: number;
+		type?: string;
+		genres?: string[];
+	}>;
+}
+
+export const playTablesApi = {
+	list: async (): Promise<{ data: PlayTablePublic[]; total: number }> => {
+		const response = await publicApi.get("/play-tables");
+		return response.data;
+	},
+};

@@ -45,6 +45,8 @@ import { VisualRatingsDisplay } from "@/components/media/VisualRatingsDisplay";
 import { VisualSynopsisCard } from "@/components/media/VisualSynopsisCard";
 import { VisualContentGrid } from "@/components/media/VisualContentGrid";
 import { ShareDialog } from "@/components/modals/ShareDialog";
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
+import { getCountryFlag } from "@/lib/country-flags";
 import { contentApi } from "@/lib/api/content";
 import { userApi, type PlaylistData } from "@/lib/api/user";
 import { useIsAuthenticated } from "@/store/auth";
@@ -298,7 +300,31 @@ export default function ItemDetailPage() {
 			id: member.id || idx,
 			name: member.name || member,
 			character: member.character || "",
-			profileUrl: member.profileUrl || member.profile_path || "/images/placeholder.jpg",
+			profileUrl: member.imageUrl || member.profileUrl || member.profile_path || "/images/placeholder.jpg",
+		}));
+	}, [data]);
+
+	const dubbingCastMembers = useMemo(() => {
+		if (!data) return [];
+		const dubbingCast = (data as any).dubbingCast;
+		if (!Array.isArray(dubbingCast) || dubbingCast.length === 0) return [];
+		return dubbingCast.slice(0, 15).map((member: any, idx: number) => ({
+			id: member.id || idx + 1000,
+			name: member.name || "",
+			character: member.character ? `${member.character}${member.language ? ` (${member.language})` : ""}` : member.language || "دوبله",
+			profileUrl: member.imageUrl || "/images/placeholder.jpg",
+		}));
+	}, [data]);
+
+	const productionTeamMembers = useMemo(() => {
+		if (!data) return [];
+		const team = (data as any).productionTeam;
+		if (!Array.isArray(team) || team.length === 0) return [];
+		return team.slice(0, 15).map((member: any, idx: number) => ({
+			id: member.id || idx + 2000,
+			name: member.name || "",
+			character: member.role ? `${member.role}${member.department ? ` - ${member.department}` : ""}` : member.department || "",
+			profileUrl: member.imageUrl || "/images/placeholder.jpg",
 		}));
 	}, [data]);
 
@@ -529,7 +555,28 @@ export default function ItemDetailPage() {
 								{(data as any).country && (
 									<Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
 										<Typography sx={{ color: glassColors.text.muted, fontSize: "0.85rem" }}>کشور:</Typography>
-										<Typography sx={{ color: glassColors.text.primary, fontSize: "0.85rem", fontWeight: 600 }}>
+										<Typography
+											sx={{
+												color: glassColors.text.primary,
+												fontSize: "0.85rem",
+												fontWeight: 600,
+												display: "flex",
+												alignItems: "center",
+												gap: 0.75,
+											}}
+										>
+											{getCountryFlag((data as any).country) && (
+												<Box
+													component="span"
+													sx={{
+														fontSize: "1.35rem",
+														lineHeight: 1,
+														filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))",
+													}}
+												>
+													{getCountryFlag((data as any).country)}
+												</Box>
+											)}
 											{(data as any).country}
 										</Typography>
 									</Box>
@@ -584,16 +631,27 @@ export default function ItemDetailPage() {
 						)}
 
 						{/* D. Visual Ratings Display */}
-						{data.rating > 0 && (
+						{(data.rating > 0 || (data as any).ratings) && (
 							<VisualRatingsDisplay
 								userScore={data.rating}
 								voteCount={(data as any).voteCount || 1000}
-								criticsScore={Math.round((data.rating / 10) * 100)}
+								criticsScore={data.rating > 0 ? Math.round((data.rating / 10) * 100) : undefined}
+								ratings={(data as any).ratings}
 							/>
 						)}
 
 						{/* E. Cast & Crew Gallery */}
 						{castMembers.length > 0 && <CastGallery cast={castMembers} />}
+
+						{/* E2. Dubbing Cast Gallery */}
+						{dubbingCastMembers.length > 0 && (
+							<CastGallery cast={dubbingCastMembers} title="گویندگان دوبله" />
+						)}
+
+						{/* E3. Production Team Gallery */}
+						{productionTeamMembers.length > 0 && (
+							<CastGallery cast={productionTeamMembers} title="عوامل سازنده" />
+						)}
 
 						{/* F. Season & Episodes (Series Only) */}
 						{type === "series" && <SeasonsEpisodes series={data as Series} />}
@@ -718,6 +776,7 @@ export default function ItemDetailPage() {
 												},
 											}}
 										/>
+										<EmojiPicker onEmojiSelect={(emoji) => setNewPlaylistTitle((prev) => prev + emoji)} />
 										<IconButton
 											onClick={handleCreateAndAdd}
 											disabled={!newPlaylistTitle.trim()}

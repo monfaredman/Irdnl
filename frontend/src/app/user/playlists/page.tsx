@@ -32,6 +32,7 @@ import {
 import Link from "next/link";
 import { useState, useEffect, useCallback } from "react";
 import { useLanguage } from "@/providers/language-provider";
+import { EmojiPicker } from "@/components/ui/EmojiPicker";
 import {
 	glassAnimations,
 	glassBlur,
@@ -630,7 +631,7 @@ export default function PlaylistsPage() {
 						onChange={(e) => setFormTitle(e.target.value)}
 						sx={{
 							mt: 1,
-							mb: 2,
+							mb: 1,
 							"& .MuiInputBase-root": { color: glassColors.text.primary },
 							"& .MuiInputLabel-root": { color: glassColors.text.muted },
 							"& .MuiOutlinedInput-notchedOutline": {
@@ -638,6 +639,9 @@ export default function PlaylistsPage() {
 							},
 						}}
 					/>
+					<Box sx={{ mb: 2 }}>
+						<EmojiPicker onEmojiSelect={(emoji) => setFormTitle((prev) => prev + emoji)} />
+					</Box>
 					<TextField
 						fullWidth
 						multiline

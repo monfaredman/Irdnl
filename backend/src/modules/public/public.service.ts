@@ -8,6 +8,7 @@ import { Genre } from '../content/entities/genre.entity';
 import { Slider } from '../content/entities/slider.entity';
 import { Offer } from '../content/entities/offer.entity';
 import { Pin } from '../content/entities/pin.entity';
+import { PlayTable } from '../content/entities/play-table.entity';
 
 @Injectable()
 export class PublicService {
@@ -26,6 +27,8 @@ export class PublicService {
     private readonly offerRepository: Repository<Offer>,
     @InjectRepository(Pin)
     private readonly pinRepository: Repository<Pin>,
+    @InjectRepository(PlayTable)
+    private readonly playTableRepository: Repository<PlayTable>,
   ) {}
 
   // ========================================================================
@@ -344,5 +347,43 @@ export class PublicService {
     }
 
     return { ...collection, contents };
+  }
+
+  // ========================================================================
+  // PLAY TABLES
+  // ========================================================================
+
+  async listActivePlayTables() {
+    const now = new Date();
+    const qb = this.playTableRepository.createQueryBuilder('pt')
+      .where('pt.is_active = :active', { active: true })
+      .andWhere('pt.status = :status', { status: 'active' })
+      .andWhere(
+        '(pt.start_time IS NULL OR pt.start_time <= :now)',
+        { now },
+      )
+      .andWhere(
+        '(pt.end_time IS NULL OR pt.end_time >= :now)',
+        { now },
+      )
+      .orderBy('pt.sort_order', 'ASC')
+      .addOrderBy('pt.start_time', 'ASC');
+
+    const data = await qb.getMany();
+
+    // Resolve content for each active play table
+    const enriched = await Promise.all(
+      data.map(async (pt) => {
+        const contents = pt.contentIds.length
+          ? await this.contentRepository.find({
+              where: { id: In(pt.contentIds) },
+              select: ['id', 'title', 'originalTitle', 'posterUrl', 'backdropUrl', 'bannerUrl', 'rating', 'year', 'type', 'genres'],
+            })
+          : [];
+        return { ...pt, contents };
+      }),
+    );
+
+    return { data: enriched, total: enriched.length };
   }
 }

@@ -26,6 +26,7 @@ import { Comment } from '../modules/comments/entities/comment.entity';
 import { BlogPost } from '../modules/blog/entities/blog-post.entity';
 import { Playlist, PlaylistItem, PlaylistLike } from '../modules/playlists/entities/playlist.entity';
 import { Ticket } from '../modules/tickets/entities/ticket.entity';
+import { PlayTable } from '../modules/content/entities/play-table.entity';
 
 loadEnvConfig();
 loadEnvConfig({ path: '.env.local', override: true });
@@ -56,6 +57,7 @@ const ENTITIES = [
   PlaylistItem,
   PlaylistLike,
   Ticket,
+  PlayTable,
 ];
 
 type ConfigLike = {
