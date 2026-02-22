@@ -30,7 +30,7 @@ export function PremiumLiquidGlassLayout({
 		<ThemeProvider theme={liquidGlassTheme}>
 			<CssBaseline />
 			<PremiumLiquidGlassHeader />
-			<Box sx={{ mt: "52px", pb: { xs: "56px", md: 0 } }}>{children}</Box>
+			<Box sx={{ mt: "30px", pb: { xs: "56px", md: 0 } }}>{children}</Box>
 			<PremiumLiquidGlassFooter />
 			<MobileBottomNav />
 		</ThemeProvider>

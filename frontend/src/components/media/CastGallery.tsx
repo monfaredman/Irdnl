@@ -73,6 +73,7 @@ export function CastGallery({ cast, onMemberClick }: CastGalleryProps) {
 						background: glassColors.glass.strong,
 						borderRadius: glassBorderRadius.sm,
 					},
+					padding:"8px 0"
 				}}
 			>
 				{cast.map((member) => (

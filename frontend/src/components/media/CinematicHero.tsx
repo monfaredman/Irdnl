@@ -284,7 +284,7 @@ export function CinematicHero({
 						<Button
 							variant="contained"
 							size="large"
-							startIcon={<PlayArrow />}
+							startIcon={<PlayArrow sx={{marginLeft:1}}/>}
 							endIcon={playConfig.icon}
 							component={hasExternalLink ? "a" : "button"}
 							href={hasExternalLink ? externalPlayerUrl : undefined}
