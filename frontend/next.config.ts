@@ -1,21 +1,8 @@
 import type { NextConfig } from "next";
 
-const isGitHubPages = process.env.DEPLOY_TARGET === 'github-pages';
-const repoName = 'Irdnl';
-
 const nextConfig: NextConfig = {
 	reactStrictMode: false,
-	// Enable static export for GitHub Pages
-	...(isGitHubPages && {
-		output: 'export',
-		// basePath: `/${repoName}`,
-		// assetPrefix: `/${repoName}/`,
-		
-		trailingSlash: true,
-	}),
-
-
-
+	output: 'standalone',
 
 	images: {
 		remotePatterns: [
@@ -26,22 +13,19 @@ const nextConfig: NextConfig = {
 				pathname: "/t/p/**",
 			},
 		],
-		unoptimized: true, // Required for static export
+		unoptimized: true,
 	},
-	// Rewrites only work in non-static mode
-	...(!isGitHubPages && {
-		async rewrites() {
-			return [
-				{
-					source: "/storage/:path*",
-					destination: "http://localhost:3001/storage/:path*",
-				},
-			];
-		},
-	}),
-	...(!isGitHubPages && {
 
-		async redirects() {
+	async rewrites() {
+		return [
+			{
+				source: "/storage/:path*",
+				destination: `${process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:3001'}/storage/:path*`,
+			},
+		];
+	},
+
+	async redirects() {
 			return [
 				// Old genre-based routes to new structure
 				{
@@ -231,7 +215,6 @@ const nextConfig: NextConfig = {
 				},
 			];
 		},
-	}),
 
 };
 

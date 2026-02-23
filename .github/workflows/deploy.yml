@@ -1,0 +1,202 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+env:
+  REGISTRY: ghcr.io
+  BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/irdnl-backend
+  FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/irdnl-frontend
+
+jobs:
+  # ── Test Backend ──
+  test-backend:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: irdnl
+          POSTGRES_PASSWORD: irdnl123
+          POSTGRES_DB: irdnl_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./backend
+        run: npm ci
+
+      - name: Lint
+        working-directory: ./backend
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://irdnl:irdnl123@localhost:5432/irdnl_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-jwt-secret-key-min-32-characters-long
+          JWT_REFRESH_SECRET: test-refresh-secret-key-min-32-characters
+          NODE_ENV: test
+        run: npm run test
+
+      - name: Build
+        working-directory: ./backend
+        run: npm run build
+
+  # ── Test Frontend ──
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      - name: Lint
+        working-directory: ./frontend
+        run: npm run lint 2>/dev/null || true
+
+      - name: Build
+        working-directory: ./frontend
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:3001/api
+          NEXT_PUBLIC_CDN_URL: https://placeholder.cdn.com
+        run: npm run build
+
+  # ── Build & Push Docker Images ──
+  build-and-push:
+    needs: [test-backend, test-frontend]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # ── Build Backend Image ──
+      - name: Build and push backend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:sha-${{ github.sha }}
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,mode=max,scope=backend
+
+      # ── Build Frontend Image ──
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:sha-${{ github.sha }}
+          build-args: |
+            NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL || 'https://irdnl.ir/api' }}
+            NEXT_PUBLIC_CDN_URL=${{ vars.NEXT_PUBLIC_CDN_URL || '' }}
+            NEXT_PUBLIC_SENTRY_DSN=${{ vars.NEXT_PUBLIC_SENTRY_DSN || '' }}
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  # ── Deploy to Droplet ──
+  deploy:
+    needs: [build-and-push]
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            set -e
+
+            cd /opt/irdnl
+
+            # Login to GHCR
+            echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            # Pull latest images
+            docker compose -f docker-compose.prod.yml pull frontend backend
+
+            # Restart app containers (DB + Redis stay running)
+            docker compose -f docker-compose.prod.yml up -d --no-deps frontend backend
+
+            # Wait for services to start
+            sleep 15
+
+            # Verify health
+            curl -sf http://localhost:3001/api/health || exit 1
+            curl -sf http://localhost:3000 || exit 1
+
+            # Run migrations (idempotent)
+            docker exec irdnl-backend npm run migration:run 2>/dev/null || true
+
+            # Clean up old images
+            docker image prune -f
+
+            echo "✅ Deployment successful!"
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Deployment to production failed! Check the logs above."
+          echo "To rollback, SSH into the droplet and run:"
+          echo "  docker compose -f docker-compose.prod.yml pull frontend@sha-PREVIOUS_SHA backend@sha-PREVIOUS_SHA"
+          echo "  docker compose -f docker-compose.prod.yml up -d --no-deps frontend backend"
