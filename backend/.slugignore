@@ -1,0 +1,12 @@
+# Files excluded from the Heroku slug to reduce build size.
+# https://devcenter.heroku.com/articles/slug-compiler#ignoring-files-with-slugignore
+
+*.md
+test/
+.env*
+.vscode/
+docker-compose.yml
+scripts/
+storage/
+biome.json
+nest-cli.json

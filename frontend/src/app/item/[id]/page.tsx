@@ -54,7 +54,18 @@ import { useRouter } from "next/navigation";
 
 // Mock data for development
 import { movies, series } from "@/data/mockContent";
-
+export async function generateStaticParams() {
+  // Fetch all content IDs from your API at build time
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api'}/public/content?limit=1000`
+    );
+    const data = await res.json();
+    return data.items?.map((item: any) => ({ id: item.id })) || [];
+  } catch {
+    return [];
+  }
+}
 export default function ItemDetailPage() {
 	const { id } = useParams<{ id: string }>();
 	const router = useRouter();
@@ -79,6 +90,8 @@ export default function ItemDetailPage() {
 	const [playlistsLoading, setPlaylistsLoading] = useState(false);
 	const [newPlaylistTitle, setNewPlaylistTitle] = useState("");
 
+
+	
 	// Load saved states from localStorage and backend
 	useEffect(() => {
 		if (!id) return;
